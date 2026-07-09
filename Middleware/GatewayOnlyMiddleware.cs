@@ -16,6 +16,8 @@ public class GatewayOnlyMiddleware(RequestDelegate next, ILogger<GatewayOnlyMidd
 
         if (signedHeader.FirstOrDefault() != _options.Signature)
         {
+            logger.LogWarning("A request was received that did not originate from the API Gateway.");
+
             context.Response.StatusCode = StatusCodes.Status403Forbidden;
             await context.Response.WriteAsync("Requests must originate from the API Gateway.");
 
