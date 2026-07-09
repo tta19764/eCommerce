@@ -1,0 +1,3 @@
+﻿namespace eCommerce.SharedLibrary.Exceptions;
+
+public sealed record ValidationError(string PropertyName, string ErrorMessage);
