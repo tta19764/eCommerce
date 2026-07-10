@@ -1,4 +1,4 @@
-﻿namespace eCommerce.SharedLibrary.Exceptions;
+﻿namespace SharedLibrary.Application.Exceptions;
 
 public sealed class ValidationException(IEnumerable<ValidationError> errors) : Exception
 {

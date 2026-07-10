@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 
-namespace eCommerce.SharedLibrary.Options;
+namespace SharedLibrary.Infrastructure.Options;
 
 public sealed class JwtBearerOptionsSetup(IOptions<AuthenticationOptions> options)
     : IConfigureNamedOptions<JwtBearerOptions>

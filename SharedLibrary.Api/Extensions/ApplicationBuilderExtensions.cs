@@ -1,11 +1,11 @@
-﻿using eCommerce.SharedLibrary.Middleware;
+﻿using SharedLibrary.Api.Middleware;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 
-namespace eCommerce.SharedLibrary.Extensions;
+namespace SharedLibrary.Api.Extensions;
 
 public static class ApplicationBuilderExtensions
 {

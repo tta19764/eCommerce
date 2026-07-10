@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 
-namespace eCommerce.SharedLibrary.Options;
+namespace SharedLibrary.Infrastructure.Options;
 
 public class GatewayOptionsSetup(IOptions<GatewayOptions> options) : IConfigureOptions<GatewayOptions>
 {

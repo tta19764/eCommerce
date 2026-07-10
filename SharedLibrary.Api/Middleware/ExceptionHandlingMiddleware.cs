@@ -1,9 +1,9 @@
-﻿using eCommerce.SharedLibrary.Exceptions;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SharedLibrary.Application.Exceptions;
 using Microsoft.Extensions.Logging;
 
-namespace eCommerce.SharedLibrary.Middleware;
+namespace SharedLibrary.Api.Middleware;
 
 public class ExceptionHandlingMiddleware(
     RequestDelegate next,

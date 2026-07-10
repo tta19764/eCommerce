@@ -1,4 +1,4 @@
-﻿namespace eCommerce.SharedLibrary.Options;
+﻿namespace SharedLibrary.Infrastructure.Options;
 
 public sealed class GatewayOptions
 {

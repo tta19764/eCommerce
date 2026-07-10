@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Serilog.Context;
 
-namespace eCommerce.SharedLibrary.Middleware;
+namespace SharedLibrary.Api.Middleware;
 
 public class RequestContextLoggingMiddleware(RequestDelegate next)
 {

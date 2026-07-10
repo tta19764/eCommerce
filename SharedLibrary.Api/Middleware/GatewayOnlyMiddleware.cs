@@ -1,10 +1,9 @@
-﻿using eCommerce.SharedLibrary.Options;
+﻿using SharedLibrary.Infrastructure.Options;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace eCommerce.SharedLibrary.Middleware;
+namespace SharedLibrary.Api.Middleware;
 
 public class GatewayOnlyMiddleware(RequestDelegate next, ILogger<GatewayOnlyMiddleware> logger, IOptions<GatewayOptions> options)
 {
