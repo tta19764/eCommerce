@@ -1,0 +1,16 @@
+using SharedLibrary.Application.Abstractions.Messaging;
+
+namespace ProductApi.Application.Products.CreateProduct;
+
+/// <summary>
+/// Command for creating a product.
+/// </summary>
+/// <param name="Name">The product display name.</param>
+/// <param name="Price">The product price amount.</param>
+/// <param name="CurrencyCode">The ISO currency code for the product price.</param>
+/// <param name="Quantity">The available product quantity.</param>
+public sealed record CreateProductCommand(
+    string Name,
+    decimal Price,
+    string CurrencyCode,
+    int Quantity) : ICommand<Guid>;
