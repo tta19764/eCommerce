@@ -12,6 +12,8 @@ public static class DependencyInjection
     /// <summary>
     /// Adds the application layer to the dependency injection container.
     /// </summary>
+    /// <param name="services">The service collection to register application services into.</param>
+    /// <returns>The same service collection so calls can be chained.</returns>
     public static IServiceCollection AddSharedApplication(this IServiceCollection services)
     {
         services.AddMediatR(configuration =>

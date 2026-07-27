@@ -6,8 +6,18 @@ using SharedLibrary.Infrastructure.Options;
 
 namespace SharedLibrary.Infrastructure;
 
+/// <summary>
+/// Registers shared infrastructure services.
+/// </summary>
 public static class DependencyInjection
 {
+    /// <summary>
+    /// Adds shared infrastructure services, including authentication, persistence, and gateway options.
+    /// </summary>
+    /// <param name="services">The service collection to register infrastructure services into.</param>
+    /// <param name="configuration">The application configuration source.</param>
+    /// <typeparam name="TContext">The database context type used for persistence.</typeparam>
+    /// <returns>The same service collection so calls can be chained.</returns>
     public static IServiceCollection AddSharedInfrastructure<TContext>(this IServiceCollection services, IConfiguration configuration) where TContext: DbContext
     {
         AddJwtAuthentication(services, configuration);

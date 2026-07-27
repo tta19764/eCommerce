@@ -1,14 +1,24 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using SharedLibrary.Application.Exceptions;
 using Microsoft.Extensions.Logging;
+using SharedLibrary.Application.Exceptions;
 
 namespace SharedLibrary.Api.Middleware;
 
+/// <summary>
+/// Converts known exceptions and selected status codes into RFC 7807 problem detail responses.
+/// </summary>
+/// <param name="next">The next middleware in the request pipeline.</param>
+/// <param name="logger">The logger used to record unhandled exceptions.</param>
 public class ExceptionHandlingMiddleware(
     RequestDelegate next,
     ILogger<ExceptionHandlingMiddleware> logger)
 {
+    /// <summary>
+    /// Invokes the middleware for the current HTTP request.
+    /// </summary>
+    /// <param name="context">The current HTTP context.</param>
+    /// <returns>A task that represents the asynchronous middleware operation.</returns>
     public async Task InvokeAsync(HttpContext context)
     {
         try
@@ -112,7 +122,7 @@ public class ExceptionHandlingMiddleware(
                 "Resource Not Found",
                 "The requested resource was not found.",
                 null),
-            
+
             TaskCanceledException => new ExceptionDetails(
                 StatusCodes.Status408RequestTimeout,
                 "RequestTimeout",
