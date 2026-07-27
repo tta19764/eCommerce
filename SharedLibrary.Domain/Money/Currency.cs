@@ -5,7 +5,8 @@ public record Currency
     internal static readonly Currency None = new("");
     public static readonly Currency Usd = new("USD");
     public static readonly Currency Eur = new("EUR");
-
+    public static readonly Currency Uah = new("UAH");
+    
     private Currency(string code) => Code = code;
 
     public string Code { get; init; }
@@ -19,6 +20,7 @@ public record Currency
     public static readonly IReadOnlyCollection<Currency> All =
     [
         Usd,
-        Eur
+        Eur,
+        Uah
     ];
 }
