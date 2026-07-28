@@ -2,11 +2,9 @@ using AuthenticationApi.Application.Abstractions;
 using AuthenticationApi.Application.Accounts.Register;
 using AuthenticationApi.Domain.Accounts;
 using FluentAssertions;
-using MassTransit;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using SharedLibrary.Domain.Abstractions;
-using UserApi.Messages.Users;
 using Xunit;
 
 namespace AuthenticationApi.Application.UnitTests.Accounts;
@@ -17,11 +15,9 @@ public class RegisterCommandHandlerTests
     private readonly IRoleRepository _roleRepositoryMock = Substitute.For<IRoleRepository>();
     private readonly IUnitOfWork _unitOfWorkMock = Substitute.For<IUnitOfWork>();
     private readonly IIdentityProvider _identityProviderMock = Substitute.For<IIdentityProvider>();
-    private readonly IRequestClient<CreateUserProfileRequest> _userProfileClientMock =
-        Substitute.For<IRequestClient<CreateUserProfileRequest>>();
 
     [Fact]
-    public async Task Handle_Should_RegisterIdentityCreateAccountAndRequestProfileCreation()
+    public async Task Handle_Should_RegisterIdentityAndCreateAccount()
     {
         // Arrange
         CancellationToken cancellationToken = TestContext.Current.CancellationToken;
@@ -36,26 +32,13 @@ public class RegisterCommandHandlerTests
                 "John",
                 "Smith",
                 cancellationToken)
-            .Returns(Result.Success());
-
-        _userProfileClientMock
-            .GetResponse<CreateUserProfileResponse>(
-                Arg.Any<CreateUserProfileRequest>(),
-                cancellationToken)
-            .Returns(callInfo =>
-            {
-                var request = callInfo.Arg<CreateUserProfileRequest>();
-
-                return new TestResponse<CreateUserProfileResponse>(
-                    new CreateUserProfileResponse(request.UserId, true, null, null));
-            });
+            .Returns(callInfo => Result.Success(callInfo.Arg<Guid>().ToString()));
 
         var handler = new RegisterCommandHandler(
             _accountRepositoryMock,
             _roleRepositoryMock,
             _unitOfWorkMock,
             _identityProviderMock,
-            _userProfileClientMock,
             NullLogger<RegisterCommandHandler>.Instance);
 
         var command = new RegisterCommand(
@@ -81,18 +64,13 @@ public class RegisterCommandHandlerTests
 
         _accountRepositoryMock.Received(1).Add(Arg.Is<Account>(account =>
             account.Id == result.Value &&
+            account.FirstName.Value == "John" &&
+            account.LastName.Value == "Smith" &&
             account.Email.Value == "JOHN.SMITH@EXAMPLE.COM" &&
+            account.IdentityId == result.Value.ToString() &&
             account.Roles.Any(accountRole => accountRole.RoleId == customerRole.Id)));
 
         await _unitOfWorkMock.Received(1).SaveChangesAsync(cancellationToken);
-
-        await _userProfileClientMock.Received(1).GetResponse<CreateUserProfileResponse>(
-            Arg.Is<CreateUserProfileRequest>(request =>
-                request.UserId == result.Value &&
-                request.FirstName == "John" &&
-                request.LastName == "Smith" &&
-                request.Email == "john.smith@example.com"),
-            cancellationToken);
     }
 
     [Fact]
@@ -102,8 +80,9 @@ public class RegisterCommandHandlerTests
         CancellationToken cancellationToken = TestContext.Current.CancellationToken;
         var existingAccount = Account.Create(
             Guid.NewGuid(),
-            new Email("JOHN.SMITH@EXAMPLE.COM"),
-            new PasswordHash("EXTERNAL_IDENTITY_PROVIDER")).Value;
+            new FirstName("John"),
+            new LastName("Smith"),
+            new Email("JOHN.SMITH@EXAMPLE.COM")).Value;
 
         _accountRepositoryMock
             .GetByEmailAsync("JOHN.SMITH@EXAMPLE.COM", cancellationToken)
@@ -114,7 +93,6 @@ public class RegisterCommandHandlerTests
             _roleRepositoryMock,
             _unitOfWorkMock,
             _identityProviderMock,
-            _userProfileClientMock,
             NullLogger<RegisterCommandHandler>.Instance);
 
         // Act

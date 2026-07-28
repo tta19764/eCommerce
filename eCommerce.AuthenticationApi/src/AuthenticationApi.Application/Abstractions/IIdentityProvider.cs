@@ -7,7 +7,7 @@ namespace AuthenticationApi.Application.Abstractions;
 /// </summary>
 public interface IIdentityProvider
 {
-    Task<Result> RegisterAsync(
+    Task<Result<string>> RegisterAsync(
         Guid accountId,
         string email,
         string password,

@@ -21,7 +21,7 @@ public sealed class KeycloakIdentityProvider(
 
     private readonly KeycloakOptions _options = options.Value;
 
-    public async Task<Result> RegisterAsync(
+    public async Task<Result<string>> RegisterAsync(
         Guid accountId,
         string email,
         string password,
@@ -31,6 +31,7 @@ public sealed class KeycloakIdentityProvider(
     {
         var user = new UserRepresentationModel
         {
+            // Supplying the account id keeps the Keycloak subject aligned with local account/profile ids.
             Id = accountId.ToString(),
             Username = email,
             Email = email,
@@ -55,12 +56,12 @@ public sealed class KeycloakIdentityProvider(
             var response = await adminClient.PostAsJsonAsync("users", user, cancellationToken);
 
             return response.IsSuccessStatusCode
-                ? Result.Success()
-                : Result.Failure(AccountErrors.IdentityRegistrationFailed);
+                ? Result.Success(accountId.ToString())
+                : Result.Failure<string>(AccountErrors.IdentityRegistrationFailed);
         }
         catch (HttpRequestException)
         {
-            return Result.Failure(AccountErrors.IdentityRegistrationFailed);
+            return Result.Failure<string>(AccountErrors.IdentityRegistrationFailed);
         }
     }
 
@@ -73,6 +74,7 @@ public sealed class KeycloakIdentityProvider(
         {
             new("client_id", _options.AuthClientId),
             new("client_secret", _options.AuthClientSecret),
+            // Roles are requested for future resource-api authorization once Keycloak mappers are configured.
             new("scope", "openid email roles"),
             new("grant_type", PasswordCredentialType),
             new("username", email),
@@ -115,6 +117,7 @@ public sealed class KeycloakIdentityProvider(
         {
             var response = await adminClient.DeleteAsync($"users/{accountId}", cancellationToken);
 
+            // Deleting an already-missing Keycloak user is idempotent from the service's perspective.
             return response.IsSuccessStatusCode || response.StatusCode == System.Net.HttpStatusCode.NotFound
                 ? Result.Success()
                 : Result.Failure(AccountErrors.IdentityDeletionFailed);

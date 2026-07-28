@@ -4,10 +4,11 @@
     <Project Path="src/AuthenticationApi.Application/AuthenticationApi.Application.csproj" />
     <Project Path="src/AuthenticationApi.Domain/AuthenticationApi.Domain.csproj" />
     <Project Path="src/AuthenticationApi.Infrastructure/AuthenticationApi.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/test/">
     <Project Path="test/AuthenticationApi.Application.UnitTests/AuthenticationApi.Application.UnitTests.csproj" />
   </Folder>
   <Project Path="../eCommerce.SharedLibrary/SharedLibrary.Application/SharedLibrary.Application.csproj" />
   <Project Path="../eCommerce.SharedLibrary/SharedLibrary.Domain/SharedLibrary.Domain.csproj" />
   <Project Path="../eCommerce.SharedLibrary/SharedLibrary.Infrastructure/SharedLibrary.Infrastructure.csproj" />
-  <Project Path="../eCommerce.UserApi/src/UserApi.Messages/UserApi.Messages.csproj" />
 </Solution>

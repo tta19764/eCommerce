@@ -33,10 +33,18 @@ namespace AuthenticationApi.Infrastructure.Migrations
                     b.Property<DateTime?>("DeletedAtUtc")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("IdentityId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("IdentityId")
+                        .IsUnique();
 
                     b.ToTable("Accounts");
                 });
@@ -268,15 +276,35 @@ namespace AuthenticationApi.Infrastructure.Migrations
                                 .HasForeignKey("AccountId");
                         });
 
-                    b.OwnsOne("AuthenticationApi.Domain.Accounts.PasswordHash", "PasswordHash", b1 =>
+                    b.OwnsOne("AuthenticationApi.Domain.Accounts.FirstName", "FirstName", b1 =>
                         {
                             b1.Property<Guid>("AccountId")
                                 .HasColumnType("uuid");
 
                             b1.Property<string>("Value")
                                 .IsRequired()
-                                .HasColumnType("text")
-                                .HasColumnName("PasswordHash");
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("FirstName");
+
+                            b1.HasKey("AccountId");
+
+                            b1.ToTable("Accounts");
+
+                            b1.WithOwner()
+                                .HasForeignKey("AccountId");
+                        });
+
+                    b.OwnsOne("AuthenticationApi.Domain.Accounts.LastName", "LastName", b1 =>
+                        {
+                            b1.Property<Guid>("AccountId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("character varying(100)")
+                                .HasColumnName("LastName");
 
                             b1.HasKey("AccountId");
 
@@ -289,7 +317,10 @@ namespace AuthenticationApi.Infrastructure.Migrations
                     b.Navigation("Email")
                         .IsRequired();
 
-                    b.Navigation("PasswordHash")
+                    b.Navigation("FirstName")
+                        .IsRequired();
+
+                    b.Navigation("LastName")
                         .IsRequired();
                 });
 

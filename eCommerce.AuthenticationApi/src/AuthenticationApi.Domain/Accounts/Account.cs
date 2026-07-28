@@ -11,22 +11,42 @@ public sealed class Account : Entity
 
     private Account()
     {
+        FirstName = null!;
+        LastName = null!;
         Email = null!;
-        PasswordHash = null!;
+        IdentityId = string.Empty;
     }
 
-    private Account(Guid id, Email email, PasswordHash passwordHash)
+    private Account(Guid id, FirstName firstName, LastName lastName, Email email)
         : base(id)
     {
+        FirstName = firstName;
+        LastName = lastName;
         Email = email;
-        PasswordHash = passwordHash;
+        IdentityId = string.Empty;
         IsActive = true;
         CreatedAtUtc = DateTime.UtcNow;
     }
 
+    /// <summary>
+    /// User first name.
+    /// </summary>
+    public FirstName FirstName { get; private set; }
+
+    /// <summary>
+    /// User last name.
+    /// </summary>
+    public LastName LastName { get; private set; }
+
+    /// <summary>
+    /// User email address.
+    /// </summary>
     public Email Email { get; private set; }
 
-    public PasswordHash PasswordHash { get; private set; }
+    /// <summary>
+    /// External Keycloak subject for this local account.
+    /// </summary>
+    public string IdentityId { get; private set; }
 
     public bool IsActive { get; private set; }
 
@@ -36,11 +56,21 @@ public sealed class Account : Entity
 
     public IReadOnlyCollection<AccountRole> Roles => _roles;
 
-    public static Result<Account> Create(Guid id, Email email, PasswordHash passwordHash)
+    public static Result<Account> Create(Guid id, FirstName firstName, LastName lastName, Email email)
     {
         if (id == Guid.Empty)
         {
             return Result.Failure<Account>(AccountErrors.InvalidId);
+        }
+
+        if (string.IsNullOrWhiteSpace(firstName.Value))
+        {
+            return Result.Failure<Account>(AccountErrors.EmptyFirstName);
+        }
+
+        if (string.IsNullOrWhiteSpace(lastName.Value))
+        {
+            return Result.Failure<Account>(AccountErrors.EmptyLastName);
         }
 
         if (string.IsNullOrWhiteSpace(email.Value))
@@ -48,12 +78,19 @@ public sealed class Account : Entity
             return Result.Failure<Account>(AccountErrors.EmptyEmail);
         }
 
-        if (string.IsNullOrWhiteSpace(passwordHash.Value))
+        return new Account(id, firstName, lastName, email);
+    }
+
+    public Result SetIdentityId(string identityId)
+    {
+        if (string.IsNullOrWhiteSpace(identityId))
         {
-            return Result.Failure<Account>(AccountErrors.EmptyPasswordHash);
+            return Result.Failure(AccountErrors.EmptyIdentityId);
         }
 
-        return new Account(id, email, passwordHash);
+        IdentityId = identityId;
+
+        return Result.Success();
     }
 
     public void AssignRole(Role role)
@@ -79,4 +116,3 @@ public sealed class Account : Entity
         return Result.Success();
     }
 }
-

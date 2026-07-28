@@ -20,8 +20,9 @@ public class LoginCommandHandlerTests
         CancellationToken cancellationToken = TestContext.Current.CancellationToken;
         var account = Account.Create(
             Guid.NewGuid(),
-            new Email("JOHN.SMITH@EXAMPLE.COM"),
-            new PasswordHash("EXTERNAL_IDENTITY_PROVIDER")).Value;
+            new FirstName("John"),
+            new LastName("Smith"),
+            new Email("JOHN.SMITH@EXAMPLE.COM")).Value;
 
         var tokenResponse = new TokenResponse("access-token", DateTime.UtcNow.AddMinutes(5));
 

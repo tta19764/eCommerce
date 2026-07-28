@@ -16,6 +16,22 @@ public sealed class AccountConfiguration : IEntityTypeConfiguration<Account>
         builder.Property(account => account.Id)
             .ValueGeneratedNever();
 
+        builder.OwnsOne(account => account.FirstName, firstNameBuilder =>
+        {
+            firstNameBuilder.Property(firstName => firstName.Value)
+                .HasColumnName("FirstName")
+                .HasMaxLength(100)
+                .IsRequired();
+        });
+
+        builder.OwnsOne(account => account.LastName, lastNameBuilder =>
+        {
+            lastNameBuilder.Property(lastName => lastName.Value)
+                .HasColumnName("LastName")
+                .HasMaxLength(100)
+                .IsRequired();
+        });
+
         builder.OwnsOne(account => account.Email, emailBuilder =>
         {
             emailBuilder.Property(email => email.Value)
@@ -27,12 +43,12 @@ public sealed class AccountConfiguration : IEntityTypeConfiguration<Account>
                 .IsUnique();
         });
 
-        builder.OwnsOne(account => account.PasswordHash, hashBuilder =>
-        {
-            hashBuilder.Property(hash => hash.Value)
-                .HasColumnName("PasswordHash")
-                .IsRequired();
-        });
+        builder.Property(account => account.IdentityId)
+            .HasMaxLength(100)
+            .IsRequired();
+
+        builder.HasIndex(account => account.IdentityId)
+            .IsUnique();
 
         builder.Property(account => account.IsActive)
             .IsRequired();
@@ -51,4 +67,3 @@ public sealed class AccountConfiguration : IEntityTypeConfiguration<Account>
             .UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }
-

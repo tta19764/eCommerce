@@ -1,26 +1,21 @@
 using AuthenticationApi.Application.Abstractions;
 using AuthenticationApi.Domain.Accounts;
-using MassTransit;
 using Microsoft.Extensions.Logging;
 using SharedLibrary.Application.Abstractions.Messaging;
 using SharedLibrary.Domain.Abstractions;
-using UserApi.Messages.Users;
 
 namespace AuthenticationApi.Application.Accounts.Register;
 
 /// <summary>
-/// Handles account registration and profile creation.
+/// Handles account registration in Keycloak and the local auth store.
 /// </summary>
 public sealed class RegisterCommandHandler(
     IAccountRepository accountRepository,
     IRoleRepository roleRepository,
     IUnitOfWork unitOfWork,
     IIdentityProvider identityProvider,
-    IRequestClient<CreateUserProfileRequest> userProfileClient,
     ILogger<RegisterCommandHandler> logger) : ICommandHandler<RegisterCommand, Guid>
 {
-    private const string ExternalPasswordHashMarker = "EXTERNAL_IDENTITY_PROVIDER";
-
     public async Task<Result<Guid>> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
         var normalizedEmail = request.Email.Trim().ToUpperInvariant();
@@ -34,14 +29,16 @@ public sealed class RegisterCommandHandler(
         var accountId = Guid.NewGuid();
         var accountResult = Account.Create(
             accountId,
-            new Email(normalizedEmail),
-            new PasswordHash(ExternalPasswordHashMarker));
+            new FirstName(request.FirstName),
+            new LastName(request.LastName),
+            new Email(normalizedEmail));
 
         if (accountResult.IsFailure)
         {
             return Result.Failure<Guid>(accountResult.Error);
         }
 
+        // Keycloak owns credentials and returns the identity subject that resource services can trust in tokens.
         var identityResult = await identityProvider.RegisterAsync(
             accountId,
             request.Email.Trim(),
@@ -60,6 +57,14 @@ public sealed class RegisterCommandHandler(
             return Result.Failure<Guid>(identityResult.Error);
         }
 
+        var identityLinkResult = accountResult.Value.SetIdentityId(identityResult.Value);
+
+        if (identityLinkResult.IsFailure)
+        {
+            await identityProvider.DeleteAsync(accountId, cancellationToken);
+            return Result.Failure<Guid>(identityLinkResult.Error);
+        }
+
         var customerRole = await roleRepository.GetByNameAsync("Customer", cancellationToken);
 
         if (customerRole is not null)
@@ -69,28 +74,6 @@ public sealed class RegisterCommandHandler(
 
         accountRepository.Add(accountResult.Value);
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
-        var profile = await userProfileClient.GetResponse<CreateUserProfileResponse>(
-            new CreateUserProfileRequest(
-                accountId,
-                request.FirstName,
-                request.LastName,
-                request.Email.Trim()),
-            cancellationToken);
-
-        if (!profile.Message.Created)
-        {
-            accountRepository.Delete(accountResult.Value);
-            await unitOfWork.SaveChangesAsync(cancellationToken);
-            await identityProvider.DeleteAsync(accountId, cancellationToken);
-
-            logger.LogWarning(
-                "Profile creation failed for account {AccountId}: {ErrorCode}",
-                accountId,
-                profile.Message.ErrorCode);
-
-            return Result.Failure<Guid>(AccountErrors.ProfileCreationFailed);
-        }
 
         logger.LogInformation("Registered account {AccountId}", accountId);
 

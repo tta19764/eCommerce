@@ -18,8 +18,10 @@ namespace AuthenticationApi.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    FirstName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    LastName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     Email = table.Column<string>(type: "character varying(320)", maxLength: 320, nullable: false),
-                    PasswordHash = table.Column<string>(type: "text", nullable: false),
+                    IdentityId = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     IsActive = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedAtUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     DeletedAtUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
@@ -163,6 +165,12 @@ namespace AuthenticationApi.Infrastructure.Migrations
                 name: "IX_Accounts_Email",
                 table: "Accounts",
                 column: "Email",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Accounts_IdentityId",
+                table: "Accounts",
+                column: "IdentityId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
