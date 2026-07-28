@@ -32,7 +32,8 @@ public class UpdateUserCommandHandlerTests
             _unitOfWorkMock,
             NullLogger<UpdateUserCommandHandler>.Instance);
 
-        var command = new UpdateUserCommand(user.Id, "  Jane  ", "  Doe  ", "  image-123  ");
+        var imageId = Guid.NewGuid();
+        var command = new UpdateUserCommand(user.Id, "  Jane  ", "  Doe  ", imageId);
 
         // Act
         Result result = await handler.Handle(command, cancellationToken);
@@ -42,7 +43,7 @@ public class UpdateUserCommandHandlerTests
         user.FirstName.Value.Should().Be("Jane");
         user.LastName.Value.Should().Be("Doe");
         user.Email.Value.Should().Be("john.smith@example.com");
-        user.ImageId.Should().Be("image-123");
+        user.ImageId.Should().Be(imageId);
 
         _userRepositoryMock.Received(1).Update(user);
         await _unitOfWorkMock.Received(1).SaveChangesAsync(cancellationToken);
@@ -66,7 +67,7 @@ public class UpdateUserCommandHandlerTests
 
         // Act
         Result result = await handler.Handle(
-            new UpdateUserCommand(userId, "Jane", "Doe", "image-123"),
+            new UpdateUserCommand(userId, "Jane", "Doe", Guid.NewGuid()),
             cancellationToken);
 
         // Assert

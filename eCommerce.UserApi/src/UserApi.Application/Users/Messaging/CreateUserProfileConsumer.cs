@@ -16,20 +16,6 @@ public sealed class CreateUserProfileConsumer(
 {
     public async Task Consume(ConsumeContext<CreateUserProfileRequest> context)
     {
-        var identityId = context.Message.IdentityId.ToString();
-        var existingUser = await userRepository.GetByIdentityIdAsync(identityId, context.CancellationToken);
-
-        if (existingUser is not null)
-        {
-            await context.RespondAsync(new CreateUserProfileResponse(
-                existingUser.Id,
-                false,
-                UserErrors.AlreadyExists.Code,
-                UserErrors.AlreadyExists.Name));
-
-            return;
-        }
-
         var userResult = User.Create(
             new FirstName(context.Message.FirstName.Trim()),
             new LastName(context.Message.LastName.Trim()),
@@ -46,26 +32,12 @@ public sealed class CreateUserProfileConsumer(
             return;
         }
 
-        var identityResult = userResult.Value.SetIdentityId(identityId);
-
-        if (identityResult.IsFailure)
-        {
-            await context.RespondAsync(new CreateUserProfileResponse(
-                userResult.Value.Id,
-                false,
-                identityResult.Error.Code,
-                identityResult.Error.Name));
-
-            return;
-        }
-
         userRepository.Add(userResult.Value);
         await unitOfWork.SaveChangesAsync(context.CancellationToken);
 
         logger.LogInformation(
-            "Created user profile {UserId} for identity {IdentityId}",
-            userResult.Value.Id,
-            identityId);
+            "Created user profile {UserId}",
+            userResult.Value.Id);
 
         await context.RespondAsync(new CreateUserProfileResponse(
             userResult.Value.Id,

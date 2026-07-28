@@ -15,4 +15,4 @@ public sealed record UserResponse(
     string LastName,
     string FullName,
     string Email,
-    string? ImageId);
+    Guid? ImageId);

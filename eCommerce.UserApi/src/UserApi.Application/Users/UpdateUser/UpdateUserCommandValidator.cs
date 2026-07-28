@@ -15,6 +15,5 @@ public sealed class UpdateUserCommandValidator : AbstractValidator<UpdateUserCom
         RuleFor(command => command.UserId).NotEmpty();
         RuleFor(command => command.FirstName).NotEmpty().MaximumLength(100);
         RuleFor(command => command.LastName).NotEmpty().MaximumLength(100);
-        RuleFor(command => command.ImageId).MaximumLength(100);
     }
 }

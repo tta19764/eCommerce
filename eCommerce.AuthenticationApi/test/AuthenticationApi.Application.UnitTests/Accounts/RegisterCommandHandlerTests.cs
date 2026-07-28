@@ -43,7 +43,7 @@ public class RegisterCommandHandlerTests
                 Arg.Any<CreateUserProfileRequest>(),
                 cancellationToken)
             .Returns(new TestResponse<CreateUserProfileResponse>(
-                new CreateUserProfileResponse(Guid.NewGuid(), true, null, null)));
+                new CreateUserProfileResponse(Guid.Parse("11111111-1111-1111-1111-111111111111"), true, null, null)));
 
         var handler = new RegisterCommandHandler(
             _accountRepositoryMock,
@@ -78,13 +78,13 @@ public class RegisterCommandHandlerTests
             account.Id == result.Value &&
             account.Email.Value == "JOHN.SMITH@EXAMPLE.COM" &&
             account.IdentityId == result.Value.ToString() &&
+            account.UserId == Guid.Parse("11111111-1111-1111-1111-111111111111") &&
             account.Roles.Any(accountRole => accountRole.RoleId == customerRole.Id)));
 
-        await _unitOfWorkMock.Received(1).SaveChangesAsync(cancellationToken);
+        await _unitOfWorkMock.Received(2).SaveChangesAsync(cancellationToken);
 
         await _userProfileClientMock.Received(1).GetResponse<CreateUserProfileResponse>(
             Arg.Is<CreateUserProfileRequest>(request =>
-                request.IdentityId == result.Value &&
                 request.FirstName == "John" &&
                 request.LastName == "Smith" &&
                 request.Email == "john.smith@example.com"),

@@ -40,12 +40,7 @@ public sealed class User : Entity
     /// <summary>
     /// Optional image asset identifier used by profile UIs.
     /// </summary>
-    public string? ImageId { get; private set; }
-
-    /// <summary>
-    /// External identity-provider identifier associated with this profile.
-    /// </summary>
-    public string? IdentityId { get; private set; }
+    public Guid? ImageId { get; private set; }
 
     /// <summary>
     /// Displayable full name composed from first and last name.
@@ -80,30 +75,13 @@ public sealed class User : Entity
     }
 
     /// <summary>
-    /// Links the profile to the identity-provider subject.
-    /// </summary>
-    /// <param name="identityId">The external identity-provider identifier.</param>
-    /// <returns>A success result, or a validation failure.</returns>
-    public Result SetIdentityId(string identityId)
-    {
-        if (string.IsNullOrWhiteSpace(identityId))
-        {
-            return Result.Failure(UserErrors.EmptyIdentityId);
-        }
-
-        IdentityId = identityId;
-
-        return Result.Success();
-    }
-
-    /// <summary>
     /// Updates profile details when required fields are provided.
     /// </summary>
     /// <param name="firstName">The user's first name.</param>
     /// <param name="lastName">The user's last name.</param>
     /// <param name="imageId">The optional image asset identifier.</param>
     /// <returns>A success result, or a validation failure.</returns>
-    public Result Update(FirstName firstName, LastName lastName, string? imageId)
+    public Result Update(FirstName firstName, LastName lastName, Guid? imageId)
     {
         if (string.IsNullOrWhiteSpace(firstName.Value))
         {
@@ -117,7 +95,7 @@ public sealed class User : Entity
 
         FirstName = firstName;
         LastName = lastName;
-        ImageId = string.IsNullOrWhiteSpace(imageId) ? null : imageId.Trim();
+        ImageId = imageId;
 
         return Result.Success();
     }

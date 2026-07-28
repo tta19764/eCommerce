@@ -27,8 +27,14 @@ public sealed class DeleteAccountCommandHandler(
             return Result.Failure(AccountErrors.NotFound);
         }
 
+        if (account.UserId is null)
+        {
+            logger.LogWarning("Account {AccountId} is not linked to a user profile", request.AccountId);
+            return Result.Failure(AccountErrors.ProfileNotLinked);
+        }
+
         var profile = await userProfileClient.GetResponse<DeleteUserProfileResponse>(
-            new DeleteUserProfileRequest(request.AccountId),
+            new DeleteUserProfileRequest(account.UserId.Value),
             cancellationToken);
 
         if (!profile.Message.Deleted)

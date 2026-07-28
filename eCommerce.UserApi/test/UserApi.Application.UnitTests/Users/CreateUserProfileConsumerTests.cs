@@ -16,15 +16,14 @@ public class CreateUserProfileConsumerTests
     private readonly IUnitOfWork _unitOfWorkMock = Substitute.For<IUnitOfWork>();
 
     [Fact]
-    public async Task Consume_Should_CreateProfileLinkedToIdentity()
+    public async Task Consume_Should_CreateProfile()
     {
         // Arrange
         CancellationToken cancellationToken = TestContext.Current.CancellationToken;
-        var identityId = Guid.NewGuid();
         CreateUserProfileResponse? response = null;
 
         var context = Substitute.For<ConsumeContext<CreateUserProfileRequest>>();
-        context.Message.Returns(new CreateUserProfileRequest(identityId, "John", "Smith", "john.smith@example.com"));
+        context.Message.Returns(new CreateUserProfileRequest("John", "Smith", "john.smith@example.com"));
         context.CancellationToken.Returns(cancellationToken);
         context
             .RespondAsync(Arg.Do<CreateUserProfileResponse>(message => response = message))
@@ -45,7 +44,6 @@ public class CreateUserProfileConsumerTests
 
         _userRepositoryMock.Received(1).Add(Arg.Is<User>(user =>
             user.Id == response.UserId &&
-            user.IdentityId == identityId.ToString() &&
             user.FirstName.Value == "John" &&
             user.LastName.Value == "Smith" &&
             user.Email.Value == "john.smith@example.com"));

@@ -34,6 +34,12 @@ public sealed class AccountConfiguration : IEntityTypeConfiguration<Account>
         builder.HasIndex(account => account.IdentityId)
             .IsUnique();
 
+        builder.Property(account => account.UserId);
+
+        builder.HasIndex(account => account.UserId)
+            .IsUnique()
+            .HasFilter("\"UserId\" IS NOT NULL");
+
         builder.Property(account => account.IsActive)
             .IsRequired();
 

@@ -9,4 +9,4 @@ namespace UserApi.Application.Users.UpdateUser;
 public sealed record UpdateUserRequest(
     string FirstName,
     string LastName,
-    string? ImageId);
+    Guid? ImageId);

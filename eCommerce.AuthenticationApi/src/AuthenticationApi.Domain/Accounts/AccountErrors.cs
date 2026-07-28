@@ -10,6 +10,8 @@ public static class AccountErrors
     public static readonly Error InvalidId = new("Account.InvalidId", "Account id must not be empty");
     public static readonly Error EmptyEmail = new("Account.EmptyEmail", "Email is required");
     public static readonly Error EmptyIdentityId = new("Account.EmptyIdentityId", "Identity id is required");
+    public static readonly Error EmptyUserId = new("Account.EmptyUserId", "User id is required");
+    public static readonly Error ProfileNotLinked = new("Account.ProfileNotLinked", "Account is not linked to a user profile");
     public static readonly Error DuplicateEmail = new("Account.DuplicateEmail", "An account with this email already exists");
     public static readonly Error InvalidCredentials = new("Account.InvalidCredentials", "Invalid email or password");
     public static readonly Error NotFound = new("Account.NotFound", "Account was not found");

@@ -11,8 +11,6 @@ public interface IUserRepository
 
     public Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
-    public Task<User?> GetByIdentityIdAsync(string identityId, CancellationToken cancellationToken = default);
-
     public Task<IEnumerable<User>> GetAllAsync(CancellationToken cancellationToken = default);
 
     public Task<IEnumerable<User>> GetPageAsync(int page = 1, int pageSize = 10, CancellationToken cancellationToken = default);

@@ -13,4 +13,4 @@ public sealed record UpdateUserCommand(
     Guid UserId,
     string FirstName,
     string LastName,
-    string? ImageId) : ICommand;
+    Guid? ImageId) : ICommand;

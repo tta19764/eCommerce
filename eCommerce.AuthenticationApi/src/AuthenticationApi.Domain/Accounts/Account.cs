@@ -34,6 +34,11 @@ public sealed class Account : Entity
     /// </summary>
     public string IdentityId { get; private set; }
 
+    /// <summary>
+    /// User profile identifier created by UserApi for this account.
+    /// </summary>
+    public Guid? UserId { get; private set; }
+
     public bool IsActive { get; private set; }
 
     public DateTime CreatedAtUtc { get; private set; }
@@ -65,6 +70,18 @@ public sealed class Account : Entity
         }
 
         IdentityId = identityId;
+
+        return Result.Success();
+    }
+
+    public Result SetUserId(Guid userId)
+    {
+        if (userId == Guid.Empty)
+        {
+            return Result.Failure(AccountErrors.EmptyUserId);
+        }
+
+        UserId = userId;
 
         return Result.Success();
     }

@@ -79,7 +79,6 @@ public sealed class RegisterCommandHandler(
         // UserApi owns profile data; AuthenticationApi is the only service that starts profile creation.
         var profile = await userProfileClient.GetResponse<CreateUserProfileResponse>(
             new CreateUserProfileRequest(
-                accountId,
                 request.FirstName,
                 request.LastName,
                 request.Email.Trim()),
@@ -98,6 +97,19 @@ public sealed class RegisterCommandHandler(
 
             return Result.Failure<Guid>(AccountErrors.ProfileCreationFailed);
         }
+
+        var profileLinkResult = accountResult.Value.SetUserId(profile.Message.UserId);
+
+        if (profileLinkResult.IsFailure)
+        {
+            accountRepository.Delete(accountResult.Value);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+            await identityProvider.DeleteAsync(accountId, cancellationToken);
+
+            return Result.Failure<Guid>(profileLinkResult.Error);
+        }
+
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         logger.LogInformation("Registered account {AccountId}", accountId);
 

@@ -47,11 +47,12 @@ public class UserCommandTests(IntegrationTestWebAppFactory factory) : BaseIntegr
         createResult.IsSuccess.Should().BeTrue();
         DbContext.ChangeTracker.Clear();
 
+        var imageId = Guid.NewGuid();
         var command = new UpdateUserCommand(
             createResult.Value,
             "Jane",
             "Doe",
-            "image-123");
+            imageId);
 
         // Act
         Result result = await Sender.Send(command, cancellationToken);
@@ -68,6 +69,6 @@ public class UserCommandTests(IntegrationTestWebAppFactory factory) : BaseIntegr
         user.LastName.Value.Should().Be(command.LastName);
         user.Email.Value.Should().Be(email);
         user.FullName.Should().Be("Jane Doe");
-        user.ImageId.Should().Be("image-123");
+        user.ImageId.Should().Be(imageId);
     }
 }
