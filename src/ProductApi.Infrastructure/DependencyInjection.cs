@@ -23,6 +23,7 @@ public static class DependencyInjection
         services.AddSharedInfrastructure<ProductDbContext>(configuration);
 
         AddPersistence(services);
+        services.AddSharedMessaging(configuration, typeof(ProductApi.Application.DependencyInjection).Assembly);
 
         return services;
     }
