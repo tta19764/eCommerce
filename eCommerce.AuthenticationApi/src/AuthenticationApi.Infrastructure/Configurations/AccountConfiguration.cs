@@ -1,0 +1,54 @@
+using AuthenticationApi.Domain.Accounts;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace AuthenticationApi.Infrastructure.Configurations;
+
+/// <summary>
+/// EF Core mapping for authentication accounts.
+/// </summary>
+public sealed class AccountConfiguration : IEntityTypeConfiguration<Account>
+{
+    public void Configure(EntityTypeBuilder<Account> builder)
+    {
+        builder.HasKey(account => account.Id);
+
+        builder.Property(account => account.Id)
+            .ValueGeneratedNever();
+
+        builder.OwnsOne(account => account.Email, emailBuilder =>
+        {
+            emailBuilder.Property(email => email.Value)
+                .HasColumnName("Email")
+                .HasMaxLength(320)
+                .IsRequired();
+
+            emailBuilder.HasIndex(email => email.Value)
+                .IsUnique();
+        });
+
+        builder.OwnsOne(account => account.PasswordHash, hashBuilder =>
+        {
+            hashBuilder.Property(hash => hash.Value)
+                .HasColumnName("PasswordHash")
+                .IsRequired();
+        });
+
+        builder.Property(account => account.IsActive)
+            .IsRequired();
+
+        builder.Property(account => account.CreatedAtUtc)
+            .IsRequired();
+
+        builder.Property(account => account.DeletedAtUtc);
+
+        builder.HasMany(account => account.Roles)
+            .WithOne()
+            .HasForeignKey(accountRole => accountRole.AccountId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Navigation(account => account.Roles)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+    }
+}
+

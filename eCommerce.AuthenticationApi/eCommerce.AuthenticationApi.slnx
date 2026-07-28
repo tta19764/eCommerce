@@ -1,5 +1,13 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/AuthenticationApi.Api/AuthenticationApi.Api.csproj" />
+    <Project Path="src/AuthenticationApi.Application/AuthenticationApi.Application.csproj" />
+    <Project Path="src/AuthenticationApi.Domain/AuthenticationApi.Domain.csproj" />
+    <Project Path="src/AuthenticationApi.Infrastructure/AuthenticationApi.Infrastructure.csproj" />
+    <Project Path="test/AuthenticationApi.Application.UnitTests/AuthenticationApi.Application.UnitTests.csproj" />
   </Folder>
+  <Project Path="../eCommerce.SharedLibrary/SharedLibrary.Application/SharedLibrary.Application.csproj" />
+  <Project Path="../eCommerce.SharedLibrary/SharedLibrary.Domain/SharedLibrary.Domain.csproj" />
+  <Project Path="../eCommerce.SharedLibrary/SharedLibrary.Infrastructure/SharedLibrary.Infrastructure.csproj" />
+  <Project Path="../eCommerce.UserApi/src/UserApi.Messages/UserApi.Messages.csproj" />
 </Solution>
