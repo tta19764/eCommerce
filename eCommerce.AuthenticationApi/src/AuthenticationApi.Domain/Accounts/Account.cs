@@ -11,17 +11,13 @@ public sealed class Account : Entity
 
     private Account()
     {
-        FirstName = null!;
-        LastName = null!;
         Email = null!;
         IdentityId = string.Empty;
     }
 
-    private Account(Guid id, FirstName firstName, LastName lastName, Email email)
+    private Account(Guid id, Email email)
         : base(id)
     {
-        FirstName = firstName;
-        LastName = lastName;
         Email = email;
         IdentityId = string.Empty;
         IsActive = true;
@@ -29,17 +25,7 @@ public sealed class Account : Entity
     }
 
     /// <summary>
-    /// User first name.
-    /// </summary>
-    public FirstName FirstName { get; private set; }
-
-    /// <summary>
-    /// User last name.
-    /// </summary>
-    public LastName LastName { get; private set; }
-
-    /// <summary>
-    /// User email address.
+    /// Normalized email used to find the local account before Keycloak credential validation.
     /// </summary>
     public Email Email { get; private set; }
 
@@ -56,21 +42,11 @@ public sealed class Account : Entity
 
     public IReadOnlyCollection<AccountRole> Roles => _roles;
 
-    public static Result<Account> Create(Guid id, FirstName firstName, LastName lastName, Email email)
+    public static Result<Account> Create(Guid id, Email email)
     {
         if (id == Guid.Empty)
         {
             return Result.Failure<Account>(AccountErrors.InvalidId);
-        }
-
-        if (string.IsNullOrWhiteSpace(firstName.Value))
-        {
-            return Result.Failure<Account>(AccountErrors.EmptyFirstName);
-        }
-
-        if (string.IsNullOrWhiteSpace(lastName.Value))
-        {
-            return Result.Failure<Account>(AccountErrors.EmptyLastName);
         }
 
         if (string.IsNullOrWhiteSpace(email.Value))
@@ -78,7 +54,7 @@ public sealed class Account : Entity
             return Result.Failure<Account>(AccountErrors.EmptyEmail);
         }
 
-        return new Account(id, firstName, lastName, email);
+        return new Account(id, email);
     }
 
     public Result SetIdentityId(string identityId)

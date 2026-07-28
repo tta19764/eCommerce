@@ -38,6 +38,16 @@ public sealed class User : Entity
     public Email Email { get; private set; }
 
     /// <summary>
+    /// Optional image asset identifier used by profile UIs.
+    /// </summary>
+    public string? ImageId { get; private set; }
+
+    /// <summary>
+    /// External identity-provider identifier associated with this profile.
+    /// </summary>
+    public string? IdentityId { get; private set; }
+
+    /// <summary>
     /// Displayable full name composed from first and last name.
     /// </summary>
     public string FullName => $"{FirstName.Value} {LastName.Value}";
@@ -47,7 +57,7 @@ public sealed class User : Entity
     /// </summary>
     /// <param name="firstName">The user's first name.</param>
     /// <param name="lastName">The user's last name.</param>
-    /// <param name="email">The user's email address.</param>
+    /// <param name="email">The user's email address captured from authentication registration.</param>
     /// <returns>The created user, or a validation failure.</returns>
     public static Result<User> Create(FirstName firstName, LastName lastName, Email email)
     {
@@ -67,5 +77,48 @@ public sealed class User : Entity
         }
 
         return new User(Guid.NewGuid(), firstName, lastName, email);
+    }
+
+    /// <summary>
+    /// Links the profile to the identity-provider subject.
+    /// </summary>
+    /// <param name="identityId">The external identity-provider identifier.</param>
+    /// <returns>A success result, or a validation failure.</returns>
+    public Result SetIdentityId(string identityId)
+    {
+        if (string.IsNullOrWhiteSpace(identityId))
+        {
+            return Result.Failure(UserErrors.EmptyIdentityId);
+        }
+
+        IdentityId = identityId;
+
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// Updates profile details when required fields are provided.
+    /// </summary>
+    /// <param name="firstName">The user's first name.</param>
+    /// <param name="lastName">The user's last name.</param>
+    /// <param name="imageId">The optional image asset identifier.</param>
+    /// <returns>A success result, or a validation failure.</returns>
+    public Result Update(FirstName firstName, LastName lastName, string? imageId)
+    {
+        if (string.IsNullOrWhiteSpace(firstName.Value))
+        {
+            return Result.Failure(UserErrors.EmptyFirstName);
+        }
+
+        if (string.IsNullOrWhiteSpace(lastName.Value))
+        {
+            return Result.Failure(UserErrors.EmptyLastName);
+        }
+
+        FirstName = firstName;
+        LastName = lastName;
+        ImageId = string.IsNullOrWhiteSpace(imageId) ? null : imageId.Trim();
+
+        return Result.Success();
     }
 }

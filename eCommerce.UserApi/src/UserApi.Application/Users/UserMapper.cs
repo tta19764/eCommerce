@@ -20,7 +20,8 @@ internal static class UserMapper
             user.FirstName.Value,
             user.LastName.Value,
             user.FullName,
-            user.Email.Value);
+            user.Email.Value,
+            user.ImageId);
     }
 
     /// <summary>

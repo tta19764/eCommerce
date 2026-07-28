@@ -3,8 +3,8 @@ using SharedLibrary.Api.Contracts;
 using SharedLibrary.Api.Extensions;
 using UserApi.Api.Endpoints;
 using UserApi.Application.Users;
-using UserApi.Application.Users.CreateUser;
 using UserApi.Application.Users.GetUser;
+using UserApi.Application.Users.UpdateUser;
 
 namespace UserApi.Api.Endpoints.Users;
 
@@ -24,39 +24,18 @@ public static class UserEndpoints
             .WithTags("Users")
             .HasApiVersion(UserApiApiVersions.V1);
 
-        group.MapPost(string.Empty, CreateUser)
-            .WithName(nameof(CreateUser))
-            .Produces<ApiResponse<Guid>>(StatusCodes.Status201Created)
-            .Produces<ApiResponse<Guid>>(StatusCodes.Status400BadRequest);
-
         group.MapGet("{userId:guid}", GetUser)
             .WithName(nameof(GetUser))
             .Produces<ApiResponse<UserResponse>>()
             .Produces<ApiResponse<UserResponse>>(StatusCodes.Status404NotFound);
 
+        group.MapPut("{userId:guid}", UpdateUser)
+            .WithName(nameof(UpdateUser))
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces<ApiResponse<object>>(StatusCodes.Status400BadRequest)
+            .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
+
         return builder;
-    }
-
-    /// <summary>
-    /// Creates a user profile.
-    /// </summary>
-    /// <param name="command">The create-user command.</param>
-    /// <param name="sender">The MediatR sender.</param>
-    /// <param name="cancellationToken">The request cancellation token.</param>
-    /// <returns>An HTTP result containing the created user identifier or validation errors.</returns>
-    public static async Task<IResult> CreateUser(
-        CreateUserCommand command,
-        ISender sender,
-        CancellationToken cancellationToken)
-    {
-        var result = await sender.Send(command, cancellationToken);
-
-        return result.IsSuccess
-            ? Results.CreatedAtRoute(
-                nameof(GetUser),
-                new { userId = result.Value, version = UserApiApiVersions.V1RouteValue },
-                result.MapToApiResponse())
-            : Results.BadRequest(result.MapToApiResponse());
     }
 
     /// <summary>
@@ -76,5 +55,33 @@ public static class UserEndpoints
         return result.IsSuccess
             ? Results.Ok(result.MapToApiResponse())
             : Results.NotFound(result.MapToApiResponse());
+    }
+
+    /// <summary>
+    /// Updates a user profile.
+    /// </summary>
+    /// <param name="userId">The user identifier.</param>
+    /// <param name="request">The update-user request body.</param>
+    /// <param name="sender">The MediatR sender.</param>
+    /// <param name="cancellationToken">The request cancellation token.</param>
+    /// <returns>An HTTP result indicating the update outcome.</returns>
+    public static async Task<IResult> UpdateUser(
+        Guid userId,
+        UpdateUserRequest request,
+        ISender sender,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new UpdateUserCommand(userId, request.FirstName, request.LastName, request.ImageId),
+            cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            return Results.NoContent();
+        }
+
+        return result.Error.Code.EndsWith(".NotFound", StringComparison.Ordinal)
+            ? Results.NotFound(result.MapToApiResponse())
+            : Results.BadRequest(result.MapToApiResponse());
     }
 }

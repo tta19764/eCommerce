@@ -1,3 +1,4 @@
+using AuthenticationApi.Application;
 using AuthenticationApi.Application.Abstractions;
 using AuthenticationApi.Domain.Accounts;
 using AuthenticationApi.Infrastructure.Authentication;
@@ -24,6 +25,8 @@ public static class DependencyInjection
         services.AddScoped<IUnitOfWork>(serviceProvider => serviceProvider.GetRequiredService<AuthenticationDbContext>());
 
         AddKeycloakIdentityProvider(services, configuration);
+
+        services.AddSharedMessaging(configuration, typeof(AuthenticationApi.Application.DependencyInjection).Assembly);
 
         return services;
     }

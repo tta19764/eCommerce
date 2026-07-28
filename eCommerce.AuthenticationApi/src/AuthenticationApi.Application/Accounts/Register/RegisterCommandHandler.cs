@@ -1,19 +1,22 @@
 using AuthenticationApi.Application.Abstractions;
 using AuthenticationApi.Domain.Accounts;
+using MassTransit;
 using Microsoft.Extensions.Logging;
 using SharedLibrary.Application.Abstractions.Messaging;
 using SharedLibrary.Domain.Abstractions;
+using UserApi.Messages.Users;
 
 namespace AuthenticationApi.Application.Accounts.Register;
 
 /// <summary>
-/// Handles account registration in Keycloak and the local auth store.
+/// Handles account registration in Keycloak, the local auth store, and the user profile store.
 /// </summary>
 public sealed class RegisterCommandHandler(
     IAccountRepository accountRepository,
     IRoleRepository roleRepository,
     IUnitOfWork unitOfWork,
     IIdentityProvider identityProvider,
+    IRequestClient<CreateUserProfileRequest> userProfileClient,
     ILogger<RegisterCommandHandler> logger) : ICommandHandler<RegisterCommand, Guid>
 {
     public async Task<Result<Guid>> Handle(RegisterCommand request, CancellationToken cancellationToken)
@@ -29,8 +32,6 @@ public sealed class RegisterCommandHandler(
         var accountId = Guid.NewGuid();
         var accountResult = Account.Create(
             accountId,
-            new FirstName(request.FirstName),
-            new LastName(request.LastName),
             new Email(normalizedEmail));
 
         if (accountResult.IsFailure)
@@ -74,6 +75,29 @@ public sealed class RegisterCommandHandler(
 
         accountRepository.Add(accountResult.Value);
         await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        // UserApi owns profile data; AuthenticationApi is the only service that starts profile creation.
+        var profile = await userProfileClient.GetResponse<CreateUserProfileResponse>(
+            new CreateUserProfileRequest(
+                accountId,
+                request.FirstName,
+                request.LastName,
+                request.Email.Trim()),
+            cancellationToken);
+
+        if (!profile.Message.Created)
+        {
+            accountRepository.Delete(accountResult.Value);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+            await identityProvider.DeleteAsync(accountId, cancellationToken);
+
+            logger.LogWarning(
+                "Profile creation failed for account {AccountId}: {ErrorCode}",
+                accountId,
+                profile.Message.ErrorCode);
+
+            return Result.Failure<Guid>(AccountErrors.ProfileCreationFailed);
+        }
 
         logger.LogInformation("Registered account {AccountId}", accountId);
 

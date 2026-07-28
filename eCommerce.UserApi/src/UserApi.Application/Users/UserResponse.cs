@@ -8,9 +8,11 @@ namespace UserApi.Application.Users;
 /// <param name="LastName">The user's last name.</param>
 /// <param name="FullName">The user's displayable full name.</param>
 /// <param name="Email">The user's email address.</param>
+/// <param name="ImageId">The optional profile image asset identifier.</param>
 public sealed record UserResponse(
     Guid Id,
     string FirstName,
     string LastName,
     string FullName,
-    string Email);
+    string Email,
+    string? ImageId);

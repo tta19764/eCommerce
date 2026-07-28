@@ -47,6 +47,16 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
                 .IsUnique();
         });
 
+        builder.Property(user => user.IdentityId)
+            .HasMaxLength(100);
+
+        builder.Property(user => user.ImageId)
+            .HasMaxLength(100);
+
+        builder.HasIndex(user => user.IdentityId)
+            .IsUnique()
+            .HasFilter("\"IdentityId\" IS NOT NULL");
+
         builder.Ignore(user => user.FullName);
     }
 }

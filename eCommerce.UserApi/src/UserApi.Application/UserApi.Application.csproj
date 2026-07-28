@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\..\eCommerce.SharedLibrary\SharedLibrary.Application\SharedLibrary.Application.csproj" />
+      <ProjectReference Include="..\..\..\eCommerce.OrderApi\src\OrderApi.Messages\OrderApi.Messages.csproj" />
       <ProjectReference Include="..\UserApi.Domain\UserApi.Domain.csproj" />
       <ProjectReference Include="..\UserApi.Messages\UserApi.Messages.csproj" />
     </ItemGroup>
