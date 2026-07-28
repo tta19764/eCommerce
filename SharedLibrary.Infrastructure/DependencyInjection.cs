@@ -45,8 +45,8 @@ public static class DependencyInjection
 
         services.AddDbContext<TContext>(options =>
         {
-            options.UseSqlServer(connectionString, 
-                sqlServerOptions => sqlServerOptions.EnableRetryOnFailure());
+            options.UseNpgsql(connectionString,
+                npgsqlOptions => npgsqlOptions.EnableRetryOnFailure());
         });
     }
     
