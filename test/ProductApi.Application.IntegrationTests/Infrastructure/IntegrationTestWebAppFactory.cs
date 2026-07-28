@@ -4,11 +4,19 @@ using ProductApi.Domain.Products;
 using ProductApi.Infrastructure;
 using ProductApi.Infrastructure.Repositories;
 using SharedLibrary.Domain.Abstractions;
+using Testcontainers.PostgreSql;
+using Xunit;
 
 namespace ProductApi.Application.IntegrationTests.Infrastructure;
 
-public sealed class IntegrationTestWebAppFactory : IDisposable
+public sealed class IntegrationTestWebAppFactory : IAsyncLifetime
 {
+    private readonly PostgreSqlContainer _dbContainer = new PostgreSqlBuilder("postgres:18.1")
+        .WithDatabase("eCommerceProductApiTest")
+        .WithUsername("postgres")
+        .WithPassword("postgres")
+        .Build();
+
     private readonly ServiceProvider _serviceProvider;
 
     public IntegrationTestWebAppFactory()
@@ -18,7 +26,7 @@ public sealed class IntegrationTestWebAppFactory : IDisposable
         services.AddLogging();
         services.AddApplication();
         services.AddDbContext<ProductDbContext>(options =>
-            options.UseInMemoryDatabase($"product-api-tests-{Guid.NewGuid():N}"));
+            options.UseNpgsql($"{_dbContainer.GetConnectionString()};Pooling=False"));
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<IUnitOfWork>(serviceProvider => serviceProvider.GetRequiredService<ProductDbContext>());
 
@@ -30,8 +38,18 @@ public sealed class IntegrationTestWebAppFactory : IDisposable
         return _serviceProvider.CreateScope();
     }
 
-    public void Dispose()
+    public async ValueTask InitializeAsync()
     {
-        _serviceProvider.Dispose();
+        await _dbContainer.StartAsync();
+
+        using var scope = CreateScope();
+        await scope.ServiceProvider.GetRequiredService<ProductDbContext>().Database.EnsureCreatedAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _serviceProvider.DisposeAsync();
+        await _dbContainer.StopAsync();
+        await _dbContainer.DisposeAsync();
     }
 }
