@@ -1,6 +1,7 @@
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using SharedLibrary.Application.Abstractions.Behaviors;
+using System.Reflection;
 
 namespace SharedLibrary.Application;
 
@@ -14,16 +15,21 @@ public static class DependencyInjection
     /// </summary>
     /// <param name="services">The service collection to register application services into.</param>
     /// <returns>The same service collection so calls can be chained.</returns>
-    public static IServiceCollection AddSharedApplication(this IServiceCollection services)
+    public static IServiceCollection AddSharedApplication(this IServiceCollection services, params Assembly[] applicationAssemblies)
     {
+        var assemblies = new[] { typeof(DependencyInjection).Assembly }
+            .Concat(applicationAssemblies)
+            .Distinct()
+            .ToArray();
+
         services.AddMediatR(configuration =>
         {
-            configuration.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly);
+            configuration.RegisterServicesFromAssemblies(assemblies);
             configuration.AddOpenBehavior(typeof(LoggingBehavior<,>));
             configuration.AddOpenBehavior(typeof(ValidationBehavior<,>));
         });
 
-        services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);
+        services.AddValidatorsFromAssemblies(assemblies);
 
         return services;
     }
