@@ -141,7 +141,8 @@ public static class ProductEndpoints
             request.Name,
             request.Price,
             request.CurrencyCode,
-            request.Quantity);
+            request.Quantity,
+            request.ImageIds);
 
         var result = await sender.Send(command, cancellationToken);
 

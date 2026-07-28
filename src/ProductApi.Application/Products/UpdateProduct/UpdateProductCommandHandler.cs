@@ -35,7 +35,8 @@ public sealed class UpdateProductCommandHandler(
         var updateResult = product.Update(
             new Name(request.Name.Trim()),
             new Money(request.Price, Currency.FromCode(request.CurrencyCode.Trim().ToUpperInvariant())),
-            new Quantity(request.Quantity));
+            new Quantity(request.Quantity),
+            request.ImageIds);
 
         if (updateResult.IsFailure)
         {

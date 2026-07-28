@@ -52,5 +52,9 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
                 .HasColumnName("Quantity")
                 .IsRequired();
         });
+
+        builder.Property(product => product.ImageIds)
+            .HasColumnType("uuid[]")
+            .IsRequired();
     }
 }

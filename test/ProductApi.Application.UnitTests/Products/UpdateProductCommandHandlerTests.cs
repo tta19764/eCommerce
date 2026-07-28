@@ -32,7 +32,8 @@ public class UpdateProductCommandHandlerTests
             _unitOfWorkMock,
             NullLogger<UpdateProductCommandHandler>.Instance);
 
-        var command = new UpdateProductCommand(product.Id, "Mouse", 49.99m, "eur", 5);
+        var imageId = Guid.NewGuid();
+        var command = new UpdateProductCommand(product.Id, "Mouse", 49.99m, "eur", 5, [imageId]);
 
         // Act
         Result result = await handler.Handle(command, cancellationToken);
@@ -43,6 +44,7 @@ public class UpdateProductCommandHandlerTests
         product.Price.Amount.Should().Be(command.Price);
         product.Price.Currency.Code.Should().Be("EUR");
         product.Quantity.Value.Should().Be(command.Quantity);
+        product.ImageIds.Should().ContainSingle().Which.Should().Be(imageId);
 
         _productRepositoryMock.Received(1).Update(product);
         await _unitOfWorkMock.Received(1).SaveChangesAsync(cancellationToken);

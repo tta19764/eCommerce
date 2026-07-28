@@ -11,6 +11,7 @@ internal static class ProductMapper
             product.Name.Value,
             product.Price.Amount,
             product.Price.Currency.Code,
-            product.Quantity.Value);
+            product.Quantity.Value,
+            product.ImageIds);
     }
 }

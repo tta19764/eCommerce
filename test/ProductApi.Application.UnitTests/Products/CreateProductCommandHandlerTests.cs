@@ -22,7 +22,8 @@ public class CreateProductCommandHandlerTests
             _unitOfWorkMock,
             NullLogger<CreateProductCommandHandler>.Instance);
 
-        var command = new CreateProductCommand("  Keyboard  ", 99.99m, "usd", 10);
+        var imageId = Guid.NewGuid();
+        var command = new CreateProductCommand("  Keyboard  ", 99.99m, "usd", 10, [imageId]);
 
         // Act
         Result<Guid> result = await handler.Handle(command, cancellationToken);
@@ -36,7 +37,8 @@ public class CreateProductCommandHandlerTests
             product.Name.Value == "Keyboard" &&
             product.Price.Amount == command.Price &&
             product.Price.Currency.Code == "USD" &&
-            product.Quantity.Value == command.Quantity));
+            product.Quantity.Value == command.Quantity &&
+            product.ImageIds.Contains(imageId)));
 
         await _unitOfWorkMock.Received(1).SaveChangesAsync(cancellationToken);
     }

@@ -13,18 +13,21 @@ public class Product : Entity
         Name = null!;
         Price = null!;
         Quantity = null!;
+        ImageIds = [];
     }
 
     private Product(
         Guid id, 
         Name name, 
         Money price, 
-        Quantity quantity)
+        Quantity quantity,
+        IReadOnlyCollection<Guid>? imageIds)
         : base(id)
     {
         Name = name;
         Price = price;
         Quantity = quantity;
+        ImageIds = imageIds?.Distinct().ToArray() ?? [];
     }
     
     public Name Name { get; private set; }
@@ -32,6 +35,8 @@ public class Product : Entity
     public Money Price { get; private set; }
 
     public Quantity Quantity { get; private set; }
+
+    public Guid[] ImageIds { get; private set; }
     
     /// <summary>
     /// Creates a product when the supplied values satisfy product invariants.
@@ -43,7 +48,8 @@ public class Product : Entity
     public static Result<Product> Create( 
         Name name, 
         Money price, 
-        Quantity quantity)
+        Quantity quantity,
+        IReadOnlyCollection<Guid>? imageIds = null)
     {
         // Products cannot be sold without a positive price.
         if(price.Amount <= 0)
@@ -53,7 +59,7 @@ public class Product : Entity
         if(quantity.Value < 0)
             return Result.Failure<Product>(ProductErrors.InvalidQuantity);
         
-        var product = new Product(Guid.NewGuid(), name, price, quantity);
+        var product = new Product(Guid.NewGuid(), name, price, quantity, imageIds);
         
         return product;
     }
@@ -68,7 +74,8 @@ public class Product : Entity
     public Result Update(
         Name name,
         Money price,
-        Quantity quantity)
+        Quantity quantity,
+        IReadOnlyCollection<Guid>? imageIds = null)
     {
         // Products cannot be sold without a positive price.
         if (price.Amount <= 0)
@@ -85,6 +92,7 @@ public class Product : Entity
         Name = name;
         Price = price;
         Quantity = quantity;
+        ImageIds = imageIds?.Distinct().ToArray() ?? [];
 
         return Result.Success();
     }

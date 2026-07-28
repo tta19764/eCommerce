@@ -13,15 +13,17 @@ public class ProductTests
         var name = new Name("Keyboard");
         var price = new Money(99.99m, Currency.Usd);
         var quantity = new Quantity(10);
+        var imageId = Guid.NewGuid();
 
         // Act
-        var result = Product.Create(name, price, quantity);
+        var result = Product.Create(name, price, quantity, [imageId]);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Name.Should().Be(name);
         result.Value.Price.Should().Be(price);
         result.Value.Quantity.Should().Be(quantity);
+        result.Value.ImageIds.Should().ContainSingle().Which.Should().Be(imageId);
         result.Value.Id.Should().NotBeEmpty();
     }
 
@@ -61,12 +63,14 @@ public class ProductTests
             new Name("Keyboard"),
             new Money(99.99m, Currency.Usd),
             new Quantity(10)).Value;
+        var imageId = Guid.NewGuid();
 
         // Act
         var result = product.Update(
             new Name("Mouse"),
             new Money(49.99m, Currency.Eur),
-            new Quantity(5));
+            new Quantity(5),
+            [imageId]);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -74,5 +78,6 @@ public class ProductTests
         product.Price.Amount.Should().Be(49.99m);
         product.Price.Currency.Should().Be(Currency.Eur);
         product.Quantity.Value.Should().Be(5);
+        product.ImageIds.Should().ContainSingle().Which.Should().Be(imageId);
     }
 }

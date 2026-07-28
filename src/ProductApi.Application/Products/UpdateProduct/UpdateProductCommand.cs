@@ -10,9 +10,11 @@ namespace ProductApi.Application.Products.UpdateProduct;
 /// <param name="Price">The product price amount.</param>
 /// <param name="CurrencyCode">The ISO currency code for the product price.</param>
 /// <param name="Quantity">The available product quantity.</param>
+/// <param name="ImageIds">The image identifiers already uploaded to ImageApi.</param>
 public sealed record UpdateProductCommand(
     Guid ProductId,
     string Name,
     decimal Price,
     string CurrencyCode,
-    int Quantity) : ICommand;
+    int Quantity,
+    IReadOnlyCollection<Guid>? ImageIds = null) : ICommand;

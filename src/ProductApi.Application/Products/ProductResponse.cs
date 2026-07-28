@@ -8,9 +8,11 @@ namespace ProductApi.Application.Products;
 /// <param name="Price">The product price amount.</param>
 /// <param name="Currency">The product price currency code.</param>
 /// <param name="Quantity">The available product quantity.</param>
+/// <param name="ImageIds">The product image identifiers.</param>
 public sealed record ProductResponse(
     Guid Id,
     string Name,
     decimal Price,
     string Currency,
-    int Quantity);
+    int Quantity,
+    IReadOnlyCollection<Guid> ImageIds);
