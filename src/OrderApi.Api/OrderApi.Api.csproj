@@ -12,6 +12,8 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\..\eCommerce.SharedLibrary\SharedLibrary.Api\SharedLibrary.Api.csproj" />
+      <ProjectReference Include="..\OrderApi.Application\OrderApi.Application.csproj" />
+      <ProjectReference Include="..\OrderApi.Infrastructure\OrderApi.Infrastructure.csproj" />
     </ItemGroup>
 
 </Project>
