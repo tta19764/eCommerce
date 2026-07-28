@@ -8,10 +8,17 @@
   <Project Path="../eCommerce.OrderApi/src/OrderApi.Application/OrderApi.Application.csproj" />
   <Project Path="../eCommerce.OrderApi/src/OrderApi.Domain/OrderApi.Domain.csproj" />
   <Project Path="../eCommerce.OrderApi/src/OrderApi.Infrastructure/OrderApi.Infrastructure.csproj" />
+  <Project Path="../eCommerce.OrderApi/src/OrderApi.Messages/OrderApi.Messages.csproj" />
   <Project Path="../eCommerce.ProductApi/src/ProductApi.Api/ProductApi.Api.csproj" />
   <Project Path="../eCommerce.ProductApi/src/ProductApi.Application/ProductApi.Application.csproj" />
   <Project Path="../eCommerce.ProductApi/src/ProductApi.Domain/ProductApi.Domain.csproj" />
   <Project Path="../eCommerce.ProductApi/src/ProductApi.Infrastructure/ProductApi.Infrastructure.csproj" />
+  <Project Path="../eCommerce.ProductApi/src/ProductApi.Messages/ProductApi.Messages.csproj" />
+  <Project Path="../eCommerce.UserApi/src/UserApi.Api/UserApi.Api.csproj" />
+  <Project Path="../eCommerce.UserApi/src/UserApi.Application/UserApi.Application.csproj" />
+  <Project Path="../eCommerce.UserApi/src/UserApi.Domain/UserApi.Domain.csproj" />
+  <Project Path="../eCommerce.UserApi/src/UserApi.Infrastructure/UserApi.Infrastructure.csproj" />
+  <Project Path="../eCommerce.UserApi/src/UserApi.Messages/UserApi.Messages.csproj" />
   <Project Path="../eCommerce.SharedLibrary/SharedLibrary.Api/SharedLibrary.Api.csproj" />
   <Project Path="../eCommerce.SharedLibrary/SharedLibrary.Application/SharedLibrary.Application.csproj" />
   <Project Path="../eCommerce.SharedLibrary/SharedLibrary.Domain/SharedLibrary.Domain.csproj" />

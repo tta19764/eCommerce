@@ -5,6 +5,7 @@ var postgres = builder.AddPostgres("postgres")
 
 var productDb = postgres.AddDatabase("product-db", "product_db");
 var orderDb = postgres.AddDatabase("order-db", "order_db");
+var userDb = postgres.AddDatabase("user-db", "user_db");
 
 var rabbitMq = builder.AddRabbitMQ("rabbitmq")
     .WithManagementPlugin()
@@ -24,13 +25,21 @@ var orderApi = builder.AddProject<Projects.OrderApi_Api>("order-api")
     .WaitFor(postgres)
     .WaitFor(rabbitMq);
 
+var userApi = builder.AddProject<Projects.UserApi_Api>("user-api")
+    .WithReference(userDb, "Database")
+    .WithReference(rabbitMq)
+    .WaitFor(postgres)
+    .WaitFor(rabbitMq);
+
 builder.AddProject<Projects.GatewayApi_Api>("gateway-api")
     .WithReference(authenticationApi)
     .WithReference(productApi)
     .WithReference(orderApi)
+    .WithReference(userApi)
     .WaitFor(authenticationApi)
     .WaitFor(productApi)
     .WaitFor(orderApi)
+    .WaitFor(userApi)
     .WithExternalHttpEndpoints();
 
 await builder.Build().RunAsync();
