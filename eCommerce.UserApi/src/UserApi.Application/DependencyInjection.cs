@@ -1,0 +1,29 @@
+using FluentValidation;
+using Microsoft.Extensions.DependencyInjection;
+using SharedLibrary.Application;
+
+namespace UserApi.Application;
+
+/// <summary>
+/// Registers User API application-layer services.
+/// </summary>
+public static class DependencyInjection
+{
+    /// <summary>
+    /// Adds MediatR handlers, validators, and shared application pipeline behavior.
+    /// </summary>
+    /// <param name="services">The service collection to configure.</param>
+    /// <returns>The configured service collection.</returns>
+    public static IServiceCollection AddApplication(this IServiceCollection services)
+    {
+        services.AddSharedApplication();
+        services.AddMediatR(configuration =>
+        {
+            configuration.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly);
+        });
+
+        services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);
+
+        return services;
+    }
+}

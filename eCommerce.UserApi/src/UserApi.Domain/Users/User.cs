@@ -1,0 +1,71 @@
+using SharedLibrary.Domain.Abstractions;
+
+namespace UserApi.Domain.Users;
+
+/// <summary>
+/// User profile aggregate root.
+/// </summary>
+public sealed class User : Entity
+{
+    private User()
+    {
+        FirstName = null!;
+        LastName = null!;
+        Email = null!;
+    }
+
+    private User(Guid id, FirstName firstName, LastName lastName, Email email)
+        : base(id)
+    {
+        FirstName = firstName;
+        LastName = lastName;
+        Email = email;
+    }
+
+    /// <summary>
+    /// User first name.
+    /// </summary>
+    public FirstName FirstName { get; private set; }
+
+    /// <summary>
+    /// User last name.
+    /// </summary>
+    public LastName LastName { get; private set; }
+
+    /// <summary>
+    /// User email address.
+    /// </summary>
+    public Email Email { get; private set; }
+
+    /// <summary>
+    /// Displayable full name composed from first and last name.
+    /// </summary>
+    public string FullName => $"{FirstName.Value} {LastName.Value}";
+
+    /// <summary>
+    /// Creates a user profile when required fields are provided.
+    /// </summary>
+    /// <param name="firstName">The user's first name.</param>
+    /// <param name="lastName">The user's last name.</param>
+    /// <param name="email">The user's email address.</param>
+    /// <returns>The created user, or a validation failure.</returns>
+    public static Result<User> Create(FirstName firstName, LastName lastName, Email email)
+    {
+        if (string.IsNullOrWhiteSpace(firstName.Value))
+        {
+            return Result.Failure<User>(UserErrors.EmptyFirstName);
+        }
+
+        if (string.IsNullOrWhiteSpace(lastName.Value))
+        {
+            return Result.Failure<User>(UserErrors.EmptyLastName);
+        }
+
+        if (string.IsNullOrWhiteSpace(email.Value))
+        {
+            return Result.Failure<User>(UserErrors.EmptyEmail);
+        }
+
+        return new User(Guid.NewGuid(), firstName, lastName, email);
+    }
+}
