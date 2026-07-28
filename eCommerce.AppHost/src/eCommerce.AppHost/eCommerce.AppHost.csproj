@@ -19,6 +19,7 @@
     <ProjectReference Include="..\..\..\eCommerce.OrderApi\src\OrderApi.Api\OrderApi.Api.csproj" />
     <ProjectReference Include="..\..\..\eCommerce.ProductApi\src\ProductApi.Api\ProductApi.Api.csproj" />
     <ProjectReference Include="..\..\..\eCommerce.UserApi\src\UserApi.Api\UserApi.Api.csproj" />
+    <ProjectReference Include="..\..\..\eCommerce.ImageApi\src\ImageApi.Api\ImageApi.Api.csproj" />
   </ItemGroup>
 
 </Project>

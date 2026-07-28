@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ImageApi.Api/ImageApi.Api.csproj" />
+    <Project Path="src/ImageApi.Application/ImageApi.Application.csproj" />
+    <Project Path="src/ImageApi.Domain/ImageApi.Domain.csproj" />
+    <Project Path="src/ImageApi.Infrastructure/ImageApi.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/ImageApi.Application.UnitTests/ImageApi.Application.UnitTests.csproj" />
+  </Folder>
+  <Project Path="../eCommerce.SharedLibrary/SharedLibrary.Api/SharedLibrary.Api.csproj" />
+  <Project Path="../eCommerce.SharedLibrary/SharedLibrary.Application/SharedLibrary.Application.csproj" />
+  <Project Path="../eCommerce.SharedLibrary/SharedLibrary.Domain/SharedLibrary.Domain.csproj" />
+  <Project Path="../eCommerce.SharedLibrary/SharedLibrary.Infrastructure/SharedLibrary.Infrastructure.csproj" />
+</Solution>

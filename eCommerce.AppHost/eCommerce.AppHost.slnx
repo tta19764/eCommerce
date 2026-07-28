@@ -4,6 +4,10 @@
   </Folder>
   <Project Path="../eCommerce.AuthenticationApi/src/AuthenticationApi.Api/AuthenticationApi.Api.csproj" />
   <Project Path="../eCommerce.GatewayApi/src/GatewayApi.Api/GatewayApi.Api.csproj" />
+  <Project Path="../eCommerce.ImageApi/src/ImageApi.Api/ImageApi.Api.csproj" />
+  <Project Path="../eCommerce.ImageApi/src/ImageApi.Application/ImageApi.Application.csproj" />
+  <Project Path="../eCommerce.ImageApi/src/ImageApi.Domain/ImageApi.Domain.csproj" />
+  <Project Path="../eCommerce.ImageApi/src/ImageApi.Infrastructure/ImageApi.Infrastructure.csproj" />
   <Project Path="../eCommerce.OrderApi/src/OrderApi.Api/OrderApi.Api.csproj" />
   <Project Path="../eCommerce.OrderApi/src/OrderApi.Application/OrderApi.Application.csproj" />
   <Project Path="../eCommerce.OrderApi/src/OrderApi.Domain/OrderApi.Domain.csproj" />
