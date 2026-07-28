@@ -67,6 +67,11 @@ public class Order : Entity
             return Result.Failure(OrderErrors.NotPending);
         }
 
+        if (quantity.Value <= 0)
+        {
+            return Result.Failure(OrderErrors.InvalidQuantity);
+        }
+
         var existingItem = _items.FirstOrDefault(item => item.ProductId == productId);
 
         if (existingItem is not null)
@@ -76,6 +81,26 @@ public class Order : Entity
         }
 
         _items.Add(OrderItem.Create(Id, productId, productName, unitPrice, quantity));
+
+        return Result.Success();
+    }
+
+    public Result ReplaceItems(IEnumerable<OrderItem> items)
+    {
+        if (Status != OrderStatus.Pending)
+        {
+            return Result.Failure(OrderErrors.NotPending);
+        }
+
+        var orderItems = items.ToList();
+
+        if (orderItems.Count == 0)
+        {
+            return Result.Failure(OrderErrors.EmptyOrder);
+        }
+
+        _items.Clear();
+        _items.AddRange(orderItems);
 
         return Result.Success();
     }

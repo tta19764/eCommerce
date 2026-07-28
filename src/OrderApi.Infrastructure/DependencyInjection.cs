@@ -23,6 +23,7 @@ public static class DependencyInjection
         services.AddSharedInfrastructure<OrderDbContext>(configuration);
 
         AddPersistence(services);
+        services.AddSharedMessaging(configuration, typeof(OrderApi.Application.DependencyInjection).Assembly);
 
         return services;
     }

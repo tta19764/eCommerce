@@ -9,6 +9,13 @@ namespace OrderApi.Infrastructure.Repositories;
 /// </summary>
 public class OrderRepository(OrderDbContext dbContext) : Repository<Order, OrderDbContext>(dbContext), IOrderRepository
 {
+    public new async Task<Order?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return await DbSet
+            .Include(order => order.Items)
+            .FirstOrDefaultAsync(order => order.Id == id, cancellationToken);
+    }
+
     /// <summary>
     /// Gets one page of orders with items loaded and newest orders first.
     /// </summary>

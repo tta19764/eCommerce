@@ -48,7 +48,7 @@ public class OrderItem : Entity
         Quantity = Quantity.Increase(quantity);
     }
 
-    internal static OrderItem Create(
+    public static OrderItem Create(
         Guid orderId,
         Guid productId,
         ProductName productName,
