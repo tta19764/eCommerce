@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SharedLibrary.Infrastructure.Options;
+using System.Reflection;
+using MassTransit;
 
 namespace SharedLibrary.Infrastructure;
 
@@ -24,6 +26,39 @@ public static class DependencyInjection
         AddPersistence<TContext>(services, configuration);
         AddGatewayOptions(services, configuration);
         
+        return services;
+    }
+
+    /// <summary>
+    /// Adds MassTransit with RabbitMQ and registers consumers from the supplied assemblies.
+    /// </summary>
+    /// <param name="services">The service collection to configure.</param>
+    /// <param name="configuration">The application configuration.</param>
+    /// <param name="consumerAssemblies">Assemblies that contain MassTransit consumers for the service.</param>
+    /// <returns>The configured service collection.</returns>
+    public static IServiceCollection AddSharedMessaging(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        params Assembly[] consumerAssemblies)
+    {
+        services.AddMassTransit(busConfigurator =>
+        {
+            foreach (var consumerAssembly in consumerAssemblies.Distinct())
+            {
+                busConfigurator.AddConsumers(consumerAssembly);
+            }
+
+            busConfigurator.UsingRabbitMq((context, configurator) =>
+            {
+                var connectionString = configuration.GetConnectionString("rabbitmq")
+                    ?? configuration.GetConnectionString("RabbitMQ")
+                    ?? throw new ArgumentException("'rabbitmq' connection string cannot be null.");
+
+                configurator.Host(new Uri(connectionString));
+                configurator.ConfigureEndpoints(context);
+            });
+        });
+
         return services;
     }
     
