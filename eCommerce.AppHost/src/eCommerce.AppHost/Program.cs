@@ -1,6 +1,9 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-var postgres = builder.AddPostgres("postgres")
+var postgresUser = builder.AddParameter("postgres-user", "postgres");
+var postgresPassword = builder.AddParameter("postgres-password", "postgres", secret: true);
+
+var postgres = builder.AddPostgres("postgres", postgresUser, postgresPassword, port: 5432)
     .WithDataVolume("ecommerce-postgres-data");
 
 var productDb = postgres.AddDatabase("product-db", "product_db");
