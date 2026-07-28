@@ -11,17 +11,19 @@ public sealed class RolePermissionConfiguration : IEntityTypeConfiguration<RoleP
 {
     public void Configure(EntityTypeBuilder<RolePermission> builder)
     {
-        builder.HasKey(rolePermission => rolePermission.Id);
+        builder.HasKey(rolePermission => new { rolePermission.RoleId, rolePermission.PermissionId });
 
-        builder.Property(rolePermission => rolePermission.Id)
-            .ValueGeneratedNever();
-
-        builder.HasIndex(rolePermission => new { rolePermission.RoleId, rolePermission.PermissionId })
-            .IsUnique();
+        builder.ToTable("RolePermission");
 
         builder.HasOne(rolePermission => rolePermission.Permission)
             .WithMany()
             .HasForeignKey(rolePermission => rolePermission.PermissionId);
+
+        builder.HasData(Role.All.SelectMany(role =>
+            role.Permissions.Select(rolePermission => new
+            {
+                rolePermission.RoleId,
+                rolePermission.PermissionId
+            })));
     }
 }
-

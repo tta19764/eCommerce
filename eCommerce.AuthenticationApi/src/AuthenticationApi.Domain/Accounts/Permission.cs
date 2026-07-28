@@ -1,32 +1,47 @@
-using SharedLibrary.Domain.Abstractions;
-
 namespace AuthenticationApi.Domain.Accounts;
 
 /// <summary>
 /// Fine-grained authorization capability granted through roles.
 /// </summary>
-public sealed class Permission : Entity
+public sealed class Permission
 {
+    public static readonly Permission ProductRead = new(1, "products:read");
+    public static readonly Permission ProductCreate = new(2, "products:create");
+    public static readonly Permission ProductUpdate = new(3, "products:update");
+    public static readonly Permission ProductDelete = new(4, "products:delete");
+    public static readonly Permission OrderReadOwn = new(5, "orders:read-own");
+    public static readonly Permission OrderCreate = new(6, "orders:create");
+    public static readonly Permission OrderRead = new(7, "orders:read");
+    public static readonly Permission OrderUpdateStatus = new(8, "orders:update-status");
+    public static readonly Permission UserRead = new(9, "users:read");
+    public static readonly Permission UserUpdate = new(10, "users:update");
+
     private Permission()
     {
-        Code = null!;
-        Description = null!;
+        Name = string.Empty;
     }
 
-    private Permission(Guid id, PermissionCode code, string description)
-        : base(id)
+    public Permission(int id, string name)
     {
-        Code = code;
-        Description = description;
+        Id = id;
+        Name = name;
     }
 
-    public PermissionCode Code { get; private set; }
+    public int Id { get; init; }
 
-    public string Description { get; private set; }
+    public string Name { get; init; }
 
-    public static Permission Create(Guid id, PermissionCode code, string description)
-    {
-        return new Permission(id, code, description);
-    }
+    public static IReadOnlyCollection<Permission> All { get; } =
+    [
+        ProductRead,
+        ProductCreate,
+        ProductUpdate,
+        ProductDelete,
+        OrderReadOwn,
+        OrderCreate,
+        OrderRead,
+        OrderUpdateStatus,
+        UserRead,
+        UserUpdate
+    ];
 }
-

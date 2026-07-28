@@ -11,7 +11,7 @@ public sealed class AccountRole : Entity
     {
     }
 
-    private AccountRole(Guid accountId, Guid roleId)
+    private AccountRole(Guid accountId, int roleId)
         : base(Guid.NewGuid())
     {
         AccountId = accountId;
@@ -20,13 +20,12 @@ public sealed class AccountRole : Entity
 
     public Guid AccountId { get; private set; }
 
-    public Guid RoleId { get; private set; }
+    public int RoleId { get; private set; }
 
     public Role Role { get; private set; } = null!;
 
-    public static AccountRole Create(Guid accountId, Guid roleId)
+    public static AccountRole Create(Guid accountId, int roleId)
     {
         return new AccountRole(accountId, roleId);
     }
 }
-

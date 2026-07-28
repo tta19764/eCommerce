@@ -73,7 +73,7 @@ public sealed class KeycloakIdentityProvider(
         {
             new("client_id", _options.AuthClientId),
             new("client_secret", _options.AuthClientSecret),
-            new("scope", "openid email"),
+            new("scope", "openid email roles"),
             new("grant_type", PasswordCredentialType),
             new("username", email),
             new("password", password)

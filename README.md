@@ -43,4 +43,4 @@ Service infrastructure projects should keep only service-specific registrations 
 
 `Audience` must match an `aud` claim emitted by Keycloak for the target API. If each API uses a distinct audience such as `product-api`, `order-api`, or `user-api`, configure Keycloak audience mappers so tokens include the resource API audience.
 
-For production, override `MetadataUrl`, `Issuer`, and `RequireHttpsMetadata` with environment-specific Keycloak values. Local `RequireHttpsMetadata: false` is only appropriate for local HTTP Keycloak development.
+For now, local service configuration belongs in `appsettings.Development.json`; keep base `appsettings.json` limited to defaults such as logging and `AllowedHosts`. Local `RequireHttpsMetadata: false` is only appropriate for local HTTP Keycloak development.

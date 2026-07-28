@@ -25,7 +25,7 @@ public class RegisterCommandHandlerTests
     {
         // Arrange
         CancellationToken cancellationToken = TestContext.Current.CancellationToken;
-        var customerRole = Role.Create(Guid.NewGuid(), new RoleName("Customer"));
+        var customerRole = Role.Customer;
 
         _roleRepositoryMock.GetByNameAsync("Customer", cancellationToken).Returns(customerRole);
         _identityProviderMock

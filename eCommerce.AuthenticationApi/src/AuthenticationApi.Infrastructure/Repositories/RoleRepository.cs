@@ -13,7 +13,6 @@ public sealed class RoleRepository(AuthenticationDbContext dbContext) : IRoleRep
         return await dbContext.Roles
             .Include(role => role.Permissions)
             .ThenInclude(rolePermission => rolePermission.Permission)
-            .FirstOrDefaultAsync(role => role.Name.Value == name, cancellationToken);
+            .FirstOrDefaultAsync(role => role.Name == name, cancellationToken);
     }
 }
-

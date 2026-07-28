@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace AuthenticationApi.Infrastructure.Migrations
 {
     /// <inheritdoc />
@@ -31,9 +33,8 @@ namespace AuthenticationApi.Infrastructure.Migrations
                 name: "Permissions",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Code = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false),
+                    Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -44,7 +45,7 @@ namespace AuthenticationApi.Infrastructure.Migrations
                 name: "Roles",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Id = table.Column<int>(type: "integer", nullable: false),
                     Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false)
                 },
                 constraints: table =>
@@ -58,7 +59,7 @@ namespace AuthenticationApi.Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     AccountId = table.Column<Guid>(type: "uuid", nullable: false),
-                    RoleId = table.Column<Guid>(type: "uuid", nullable: false)
+                    RoleId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -81,13 +82,12 @@ namespace AuthenticationApi.Infrastructure.Migrations
                 name: "RolePermission",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    RoleId = table.Column<Guid>(type: "uuid", nullable: false),
-                    PermissionId = table.Column<Guid>(type: "uuid", nullable: false)
+                    RoleId = table.Column<int>(type: "integer", nullable: false),
+                    PermissionId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RolePermission", x => x.Id);
+                    table.PrimaryKey("PK_RolePermission", x => new { x.RoleId, x.PermissionId });
                     table.ForeignKey(
                         name: "FK_RolePermission_Permissions_PermissionId",
                         column: x => x.PermissionId,
@@ -100,6 +100,52 @@ namespace AuthenticationApi.Infrastructure.Migrations
                         principalTable: "Roles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "Permissions",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { 1, "products:read" },
+                    { 2, "products:create" },
+                    { 3, "products:update" },
+                    { 4, "products:delete" },
+                    { 5, "orders:read-own" },
+                    { 6, "orders:create" },
+                    { 7, "orders:read" },
+                    { 8, "orders:update-status" },
+                    { 9, "users:read" },
+                    { 10, "users:update" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Roles",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { 1, "Customer" },
+                    { 2, "Admin" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "RolePermission",
+                columns: new[] { "PermissionId", "RoleId" },
+                values: new object[,]
+                {
+                    { 1, 1 },
+                    { 5, 1 },
+                    { 6, 1 },
+                    { 1, 2 },
+                    { 2, 2 },
+                    { 3, 2 },
+                    { 4, 2 },
+                    { 5, 2 },
+                    { 6, 2 },
+                    { 7, 2 },
+                    { 8, 2 },
+                    { 9, 2 },
+                    { 10, 2 }
                 });
 
             migrationBuilder.CreateIndex(
@@ -120,21 +166,15 @@ namespace AuthenticationApi.Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Permissions_Code",
+                name: "IX_Permissions_Name",
                 table: "Permissions",
-                column: "Code",
+                column: "Name",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_RolePermission_PermissionId",
                 table: "RolePermission",
                 column: "PermissionId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RolePermission_RoleId_PermissionId",
-                table: "RolePermission",
-                columns: new[] { "RoleId", "PermissionId" },
-                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Roles_Name",

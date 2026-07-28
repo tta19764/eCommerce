@@ -16,20 +16,13 @@ public sealed class PermissionConfiguration : IEntityTypeConfiguration<Permissio
         builder.Property(permission => permission.Id)
             .ValueGeneratedNever();
 
-        builder.OwnsOne(permission => permission.Code, codeBuilder =>
-        {
-            codeBuilder.Property(code => code.Value)
-                .HasColumnName("Code")
-                .HasMaxLength(200)
-                .IsRequired();
-
-            codeBuilder.HasIndex(code => code.Value)
-                .IsUnique();
-        });
-
-        builder.Property(permission => permission.Description)
-            .HasMaxLength(500)
+        builder.Property(permission => permission.Name)
+            .HasMaxLength(200)
             .IsRequired();
+
+        builder.HasIndex(permission => permission.Name)
+            .IsUnique();
+
+        builder.HasData(Permission.All);
     }
 }
-

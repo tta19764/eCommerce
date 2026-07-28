@@ -1,47 +1,62 @@
-using SharedLibrary.Domain.Abstractions;
-
 namespace AuthenticationApi.Domain.Accounts;
 
 /// <summary>
 /// Role grouping permissions that can be assigned to accounts.
 /// </summary>
-public sealed class Role : Entity
+public sealed class Role
 {
     private readonly List<RolePermission> _permissions = [];
 
+    public static readonly Role Customer = Create(
+        1,
+        "Customer",
+        Permission.ProductRead,
+        Permission.OrderReadOwn,
+        Permission.OrderCreate);
+
+    public static readonly Role Admin = Create(
+        2,
+        "Admin",
+        Permission.All.ToArray());
+
     private Role()
     {
-        Name = null!;
+        Name = string.Empty;
     }
 
-    private Role(Guid id, RoleName name)
-        : base(id)
+    private Role(int id, string name)
     {
+        Id = id;
         Name = name;
     }
 
-    public RoleName Name { get; private set; }
+    public int Id { get; init; }
+
+    public string Name { get; init; }
 
     public IReadOnlyCollection<RolePermission> Permissions => _permissions;
 
-    public static Role Create(RoleName name)
+    public static IReadOnlyCollection<Role> All { get; } = [Customer, Admin];
+
+    private static Role Create(int id, string name, params Permission[] permissions)
     {
-        return new Role(Guid.NewGuid(), name);
+        var role = new Role(id, name);
+
+        foreach (var permission in permissions)
+        {
+            role.AttachPermission(permission);
+        }
+
+        return role;
     }
 
-    public static Role Create(Guid id, RoleName name)
-    {
-        return new Role(id, name);
-    }
-
-    public void AttachPermission(Permission permission)
+    private void AttachPermission(Permission permission)
     {
         if (_permissions.Any(rolePermission => rolePermission.PermissionId == permission.Id))
         {
             return;
         }
 
-        _permissions.Add(RolePermission.Create(Id, permission.Id));
+        _permissions.Add(new RolePermission(Id, permission.Id));
     }
 }
-

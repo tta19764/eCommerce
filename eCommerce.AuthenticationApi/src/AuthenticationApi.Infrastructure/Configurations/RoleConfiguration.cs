@@ -16,16 +16,12 @@ public sealed class RoleConfiguration : IEntityTypeConfiguration<Role>
         builder.Property(role => role.Id)
             .ValueGeneratedNever();
 
-        builder.OwnsOne(role => role.Name, nameBuilder =>
-        {
-            nameBuilder.Property(name => name.Value)
-                .HasColumnName("Name")
-                .HasMaxLength(100)
-                .IsRequired();
+        builder.Property(role => role.Name)
+            .HasMaxLength(100)
+            .IsRequired();
 
-            nameBuilder.HasIndex(name => name.Value)
-                .IsUnique();
-        });
+        builder.HasIndex(role => role.Name)
+            .IsUnique();
 
         builder.HasMany(role => role.Permissions)
             .WithOne()
@@ -34,6 +30,11 @@ public sealed class RoleConfiguration : IEntityTypeConfiguration<Role>
 
         builder.Navigation(role => role.Permissions)
             .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        builder.HasData(Role.All.Select(role => new
+        {
+            role.Id,
+            role.Name
+        }));
     }
 }
-

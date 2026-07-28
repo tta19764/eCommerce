@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AuthenticationApi.Infrastructure.Migrations
 {
     [DbContext(typeof(AuthenticationDbContext))]
-    [Migration("20260728144955_InitialMigration")]
+    [Migration("20260728152414_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -52,8 +52,8 @@ namespace AuthenticationApi.Infrastructure.Migrations
                     b.Property<Guid>("AccountId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("RoleId")
-                        .HasColumnType("uuid");
+                    b.Property<int>("RoleId")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -67,48 +67,184 @@ namespace AuthenticationApi.Infrastructure.Migrations
 
             modelBuilder.Entity("AuthenticationApi.Domain.Accounts.Permission", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
+                    b.Property<int>("Id")
+                        .HasColumnType("integer");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Name")
+                        .IsUnique();
+
                     b.ToTable("Permissions");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "products:read"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "products:create"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "products:update"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "products:delete"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "orders:read-own"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Name = "orders:create"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Name = "orders:read"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Name = "orders:update-status"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Name = "users:read"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Name = "users:update"
+                        });
                 });
 
             modelBuilder.Entity("AuthenticationApi.Domain.Accounts.Role", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
+                    b.Property<int>("Id")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Name")
+                        .IsUnique();
+
                     b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Customer"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Admin"
+                        });
                 });
 
             modelBuilder.Entity("AuthenticationApi.Domain.Accounts.RolePermission", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
+                    b.Property<int>("RoleId")
+                        .HasColumnType("integer");
 
-                    b.Property<Guid>("PermissionId")
-                        .HasColumnType("uuid");
+                    b.Property<int>("PermissionId")
+                        .HasColumnType("integer");
 
-                    b.Property<Guid>("RoleId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
+                    b.HasKey("RoleId", "PermissionId");
 
                     b.HasIndex("PermissionId");
 
-                    b.HasIndex("RoleId", "PermissionId")
-                        .IsUnique();
+                    b.ToTable("RolePermission", (string)null);
 
-                    b.ToTable("RolePermission");
+                    b.HasData(
+                        new
+                        {
+                            RoleId = 1,
+                            PermissionId = 1
+                        },
+                        new
+                        {
+                            RoleId = 1,
+                            PermissionId = 5
+                        },
+                        new
+                        {
+                            RoleId = 1,
+                            PermissionId = 6
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            PermissionId = 1
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            PermissionId = 2
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            PermissionId = 3
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            PermissionId = 4
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            PermissionId = 5
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            PermissionId = 6
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            PermissionId = 7
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            PermissionId = 8
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            PermissionId = 9
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            PermissionId = 10
+                        });
                 });
 
             modelBuilder.Entity("AuthenticationApi.Domain.Accounts.Account", b =>
@@ -175,62 +311,6 @@ namespace AuthenticationApi.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Role");
-                });
-
-            modelBuilder.Entity("AuthenticationApi.Domain.Accounts.Permission", b =>
-                {
-                    b.OwnsOne("AuthenticationApi.Domain.Accounts.PermissionCode", "Code", b1 =>
-                        {
-                            b1.Property<Guid>("PermissionId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<string>("Value")
-                                .IsRequired()
-                                .HasMaxLength(200)
-                                .HasColumnType("character varying(200)")
-                                .HasColumnName("Code");
-
-                            b1.HasKey("PermissionId");
-
-                            b1.HasIndex("Value")
-                                .IsUnique();
-
-                            b1.ToTable("Permissions");
-
-                            b1.WithOwner()
-                                .HasForeignKey("PermissionId");
-                        });
-
-                    b.Navigation("Code")
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("AuthenticationApi.Domain.Accounts.Role", b =>
-                {
-                    b.OwnsOne("AuthenticationApi.Domain.Accounts.RoleName", "Name", b1 =>
-                        {
-                            b1.Property<Guid>("RoleId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<string>("Value")
-                                .IsRequired()
-                                .HasMaxLength(100)
-                                .HasColumnType("character varying(100)")
-                                .HasColumnName("Name");
-
-                            b1.HasKey("RoleId");
-
-                            b1.HasIndex("Value")
-                                .IsUnique();
-
-                            b1.ToTable("Roles");
-
-                            b1.WithOwner()
-                                .HasForeignKey("RoleId");
-                        });
-
-                    b.Navigation("Name")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("AuthenticationApi.Domain.Accounts.RolePermission", b =>
