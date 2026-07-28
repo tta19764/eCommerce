@@ -2,8 +2,8 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ProductApi.Infrastructure;
 
 #nullable disable
@@ -18,14 +18,14 @@ namespace ProductApi.Infrastructure.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "10.0.9")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("ProductApi.Domain.Products.Product", b =>
                 {
                     b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -37,12 +37,12 @@ namespace ProductApi.Infrastructure.Migrations
                     b.OwnsOne("ProductApi.Domain.Products.Name", "Name", b1 =>
                         {
                             b1.Property<Guid>("ProductId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<string>("Value")
                                 .IsRequired()
                                 .HasMaxLength(200)
-                                .HasColumnType("nvarchar(200)")
+                                .HasColumnType("character varying(200)")
                                 .HasColumnName("Name");
 
                             b1.HasKey("ProductId");
@@ -56,10 +56,10 @@ namespace ProductApi.Infrastructure.Migrations
                     b.OwnsOne("ProductApi.Domain.Products.Quantity", "Quantity", b1 =>
                         {
                             b1.Property<Guid>("ProductId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<int>("Value")
-                                .HasColumnType("int")
+                                .HasColumnType("integer")
                                 .HasColumnName("Quantity");
 
                             b1.HasKey("ProductId");
@@ -73,17 +73,17 @@ namespace ProductApi.Infrastructure.Migrations
                     b.OwnsOne("SharedLibrary.Domain.Money.Money", "Price", b1 =>
                         {
                             b1.Property<Guid>("ProductId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<decimal>("Amount")
                                 .HasPrecision(18, 2)
-                                .HasColumnType("decimal(18,2)")
+                                .HasColumnType("numeric(18,2)")
                                 .HasColumnName("Price");
 
                             b1.Property<string>("Currency")
                                 .IsRequired()
                                 .HasMaxLength(3)
-                                .HasColumnType("nvarchar(3)")
+                                .HasColumnType("character varying(3)")
                                 .HasColumnName("Currency");
 
                             b1.HasKey("ProductId");
