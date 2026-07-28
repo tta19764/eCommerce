@@ -7,6 +7,7 @@ public sealed class Role
 {
     private readonly List<RolePermission> _permissions = [];
 
+    // Roles are fixed reference data; changing these ids requires a matching migration.
     public static readonly Role Customer = Create(
         1,
         "Customer",

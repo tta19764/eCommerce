@@ -17,6 +17,7 @@ public sealed class LoginCommandHandler(
         var normalizedEmail = request.Email.Trim().ToUpperInvariant();
         var account = await accountRepository.GetByEmailAsync(normalizedEmail, cancellationToken);
 
+        // Keycloak validates credentials, but the local account still controls whether this identity is active.
         if (account is null || !account.IsActive)
         {
             return Result.Failure<TokenResponse>(AccountErrors.InvalidCredentials);

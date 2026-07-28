@@ -19,6 +19,7 @@ public sealed class AdminAuthorizationDelegatingHandler(IOptions<KeycloakOptions
     {
         var token = await GetAuthorizationTokenAsync(cancellationToken);
 
+        // Keycloak admin endpoints require a service-account token, separate from user login tokens.
         request.Headers.Authorization = new AuthenticationHeaderValue(
             JwtBearerDefaults.AuthenticationScheme,
             token.AccessToken);

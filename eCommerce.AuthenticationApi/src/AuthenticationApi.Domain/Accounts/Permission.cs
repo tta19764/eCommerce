@@ -5,6 +5,7 @@ namespace AuthenticationApi.Domain.Accounts;
 /// </summary>
 public sealed class Permission
 {
+    // Authorization permissions are reference data, not aggregate roots, so stable integer ids are enough.
     public static readonly Permission ProductRead = new(1, "products:read");
     public static readonly Permission ProductCreate = new(2, "products:create");
     public static readonly Permission ProductUpdate = new(3, "products:update");

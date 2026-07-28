@@ -13,6 +13,7 @@ public static class AuthenticationDataSeeder
         using var scope = serviceProvider.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<AuthenticationDbContext>();
 
+        // Static roles and permissions are seeded by EF model data in the migration.
         await dbContext.Database.MigrateAsync();
     }
 }
