@@ -26,8 +26,3 @@ app.UseSharedMiddleware();
 app.MapEndpoints();
 
 app.Run();
-
-/// <summary>
-/// Entry point marker used by integration tests.
-/// </summary>
-public partial class Program;
