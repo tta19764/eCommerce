@@ -8,6 +8,7 @@ public static class SwaggerExtensions
     public static IServiceCollection AddGatewaySwagger(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<SwaggerServiceOptions>(configuration.GetSection("Swagger"));
+        services.Configure<GatewaySignatureOptions>(configuration.GetSection("Gateway"));
         services.AddHttpClient();
         services.AddSingleton<SwaggerDocumentProxy>();
 
@@ -18,8 +19,12 @@ public static class SwaggerExtensions
     {
         builder.MapGet(
             "/swagger/{serviceName}/swagger.json",
-            async (string serviceName, SwaggerDocumentProxy proxy, CancellationToken cancellationToken) =>
-                await proxy.GetSwaggerDocumentAsync(serviceName, cancellationToken));
+            async (
+                    string serviceName,
+                    HttpContext context,
+                    SwaggerDocumentProxy proxy,
+                    CancellationToken cancellationToken) =>
+                await proxy.GetSwaggerDocumentAsync(serviceName, context, cancellationToken));
 
         return builder;
     }

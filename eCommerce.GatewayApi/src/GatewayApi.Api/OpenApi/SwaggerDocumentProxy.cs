@@ -6,9 +6,13 @@ namespace GatewayApi.Api.OpenApi;
 
 public sealed class SwaggerDocumentProxy(
     IHttpClientFactory httpClientFactory,
-    IOptions<SwaggerServiceOptions> options)
+    IOptions<SwaggerServiceOptions> options,
+    IOptions<GatewaySignatureOptions> gatewayOptions)
 {
-    public async Task<IResult> GetSwaggerDocumentAsync(string serviceName, CancellationToken cancellationToken)
+    public async Task<IResult> GetSwaggerDocumentAsync(
+        string serviceName,
+        HttpContext context,
+        CancellationToken cancellationToken)
     {
         var service = options.Value.Services.FirstOrDefault(
             configuredService => string.Equals(configuredService.Name, serviceName, StringComparison.OrdinalIgnoreCase));
@@ -22,7 +26,10 @@ public sealed class SwaggerDocumentProxy(
         {
             var documentUrl = $"{service.Address.TrimEnd('/')}/{service.DocumentPath.TrimStart('/')}";
             var httpClient = httpClientFactory.CreateClient();
-            using var response = await httpClient.GetAsync(documentUrl, cancellationToken);
+            using var request = new HttpRequestMessage(HttpMethod.Get, documentUrl);
+            AddGatewaySignature(request);
+
+            using var response = await httpClient.SendAsync(request, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
             {
@@ -42,7 +49,7 @@ public sealed class SwaggerDocumentProxy(
             }
 
             RewriteInfo(json, service);
-            RewriteServers(json);
+            RewriteServers(json, context);
             RewritePaths(json, service.RoutePrefix);
 
             return Results.Json(json);
@@ -61,6 +68,19 @@ public sealed class SwaggerDocumentProxy(
         }
     }
 
+    private void AddGatewaySignature(HttpRequestMessage request)
+    {
+        var signatureOptions = gatewayOptions.Value;
+
+        if (string.IsNullOrWhiteSpace(signatureOptions.HeaderName) ||
+            string.IsNullOrWhiteSpace(signatureOptions.Signature))
+        {
+            return;
+        }
+
+        request.Headers.TryAddWithoutValidation(signatureOptions.HeaderName, signatureOptions.Signature);
+    }
+
     private static void RewriteInfo(JsonObject document, SwaggerServiceDescriptor service)
     {
         var info = document["info"] as JsonObject ?? [];
@@ -68,9 +88,10 @@ public sealed class SwaggerDocumentProxy(
         document["info"] = info;
     }
 
-    private static void RewriteServers(JsonObject document)
+    private static void RewriteServers(JsonObject document, HttpContext context)
     {
-        document["servers"] = new JsonArray(new JsonObject { ["url"] = string.Empty });
+        var gatewayUrl = $"{context.Request.Scheme}://{context.Request.Host}{context.Request.PathBase}";
+        document["servers"] = new JsonArray(new JsonObject { ["url"] = gatewayUrl });
     }
 
     private static void RewritePaths(JsonObject document, string routePrefix)

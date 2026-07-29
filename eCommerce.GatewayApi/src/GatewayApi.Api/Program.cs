@@ -4,8 +4,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
 builder.Services.AddGatewaySwagger(builder.Configuration);
-builder.Services.AddReverseProxy()
-    .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
+builder.Services.AddGatewayCors();
+builder.Services.AddGatewayReverseProxy(builder.Configuration);
 
 var app = builder.Build();
 
@@ -17,8 +17,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-app.UseGatewaySignature();
+app.UseGatewayCors();
 
 app.MapReverseProxy();
 

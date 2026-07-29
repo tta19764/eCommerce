@@ -1,9 +1,9 @@
 # eCommerce Gateway API
 
-## Gateway Signature Middleware
+## Gateway Signature
 
-The gateway registers `UseGatewaySignature()` before `MapReverseProxy()` so forwarded
-requests include an internal signature header for downstream services.
+The gateway registers a YARP request transform so forwarded requests include an
+internal signature header for downstream services.
 
 Configure the header name and value with:
 
@@ -16,5 +16,5 @@ Configure the header name and value with:
 }
 ```
 
-If either `Gateway:HeaderName` or `Gateway:Signature` is missing or blank, the middleware
-does not add a header and simply continues the request pipeline.
+If either `Gateway:HeaderName` or `Gateway:Signature` is missing or blank, the
+transform does not add a header.
