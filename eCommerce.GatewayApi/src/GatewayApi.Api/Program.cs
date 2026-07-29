@@ -18,18 +18,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.Use(async (context, next) =>
-{
-    var headerName = builder.Configuration["Gateway:HeaderName"];
-    var signature = builder.Configuration["Gateway:Signature"];
-
-    if (!string.IsNullOrWhiteSpace(headerName) && !string.IsNullOrWhiteSpace(signature))
-    {
-        context.Request.Headers[headerName] = signature;
-    }
-
-    await next();
-});
+app.UseGatewaySignature();
 
 app.MapReverseProxy();
 
