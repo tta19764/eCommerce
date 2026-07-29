@@ -5,8 +5,8 @@ using NotificationApi.Application.Abstractions;
 using NotificationApi.Domain.Notifications;
 using NotificationApi.Infrastructure.BackgroundJobs;
 using NotificationApi.Infrastructure.Email;
-using NotificationApi.Infrastructure.Options;
 using NotificationApi.Infrastructure.Repositories;
+using Quartz;
 using SharedLibrary.Domain.Abstractions;
 using SharedLibrary.Infrastructure;
 
@@ -26,13 +26,28 @@ public static class DependencyInjection
         services.AddSharedMessaging(configuration, typeof(NotificationApi.Application.DependencyInjection).Assembly);
 
         services.Configure<NotificationEmailOptions>(configuration.GetSection(NotificationEmailOptions.SectionName));
-        services.Configure<NotificationWorkerOptions>(configuration.GetSection(NotificationWorkerOptions.SectionName));
+        AddBackgroundJobs(services, configuration);
 
         services.AddScoped<INotificationJobRepository, NotificationJobRepository>();
         services.AddScoped<IUnitOfWork>(serviceProvider => serviceProvider.GetRequiredService<NotificationDbContext>());
         services.AddScoped<IEmailSender, LoggingEmailSender>();
-        services.AddHostedService<NotificationJobWorker>();
 
         return services;
+    }
+
+    private static void AddBackgroundJobs(IServiceCollection services, IConfiguration configuration)
+    {
+        // Quartz reads this options object both when scheduling the job and when the job executes.
+        services.Configure<ProcessNotificationsOptions>(
+            configuration.GetSection(ProcessNotificationsOptions.SectionName));
+
+        services.AddQuartz();
+
+        services.AddQuartzHostedService(options =>
+        {
+            options.WaitForJobsToComplete = true;
+        });
+
+        services.ConfigureOptions<ProcessNotificationsJobSettings>();
     }
 }
