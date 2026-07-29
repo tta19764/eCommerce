@@ -13,5 +13,6 @@ public static class UserErrors
     public static readonly Error EmptyFirstName = new("User.EmptyFirstName", "First name is required");
     public static readonly Error EmptyLastName = new("User.EmptyLastName", "Last name is required");
     public static readonly Error EmptyEmail = new("User.EmptyEmail", "Email is required");
+    public static readonly Error InvalidImage = new("User.InvalidImage", "One or more image references are invalid");
     public static readonly Error HasOrders = new("User.HasOrders", "User cannot be removed because orders exist for this user");
 }

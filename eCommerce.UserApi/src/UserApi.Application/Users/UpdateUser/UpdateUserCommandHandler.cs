@@ -1,3 +1,5 @@
+using ImageApi.Messages.Images;
+using MassTransit;
 using Microsoft.Extensions.Logging;
 using SharedLibrary.Application.Abstractions.Messaging;
 using SharedLibrary.Domain.Abstractions;
@@ -11,6 +13,7 @@ namespace UserApi.Application.Users.UpdateUser;
 public sealed class UpdateUserCommandHandler(
     IUserRepository userRepository,
     IUnitOfWork unitOfWork,
+    IRequestClient<AddUserImageRequest> imageClient,
     ILogger<UpdateUserCommandHandler> logger) : ICommandHandler<UpdateUserCommand>
 {
     /// <summary>
@@ -29,9 +32,25 @@ public sealed class UpdateUserCommandHandler(
             return Result.Failure(UserErrors.NotFound);
         }
 
+        if (request.ImageId is { } imageId)
+        {
+            var validationResponse = await imageClient.GetResponse<AddUserImageResponse>(
+                new AddUserImageRequest(request.UserId, imageId),
+                cancellationToken);
+
+            if (!validationResponse.Message.Attached)
+            {
+                logger.LogWarning("User {UserId} update referenced invalid image {ImageId}", request.UserId, imageId);
+                return Result.Failure(UserErrors.InvalidImage);
+            }
+
+            imageId = validationResponse.Message.ImageId ?? imageId;
+            request = request with { ImageId = imageId };
+        }
+
         var updateResult = user.Update(
-            new FirstName(request.FirstName.Trim()),
-            new LastName(request.LastName.Trim()),
+            request.FirstName is null ? null : new FirstName(request.FirstName.Trim()),
+            request.LastName is null ? null : new LastName(request.LastName.Trim()),
             request.ImageId);
 
         if (updateResult.IsFailure)

@@ -1,3 +1,5 @@
+using ImageApi.Messages.Images;
+using MassTransit;
 using Microsoft.Extensions.Logging;
 using ProductApi.Domain.Products;
 using SharedLibrary.Application.Abstractions.Messaging;
@@ -12,6 +14,7 @@ namespace ProductApi.Application.Products.CreateProduct;
 public sealed class CreateProductCommandHandler(
     IProductRepository productRepository,
     IUnitOfWork unitOfWork,
+    IRequestClient<AddProductImagesRequest> imageClient,
     ILogger<CreateProductCommandHandler> logger) : ICommandHandler<CreateProductCommand, Guid>
 {
     /// <summary>
@@ -24,11 +27,13 @@ public sealed class CreateProductCommandHandler(
     {
         logger.LogInformation("Creating product with name {ProductName}", request.Name);
 
+        var imageIds = request.ImageIds?.Distinct().ToArray();
+
         var productResult = Product.Create(
             new Name(request.Name.Trim()),
             new Money(request.Price, Currency.FromCode(request.CurrencyCode.Trim().ToUpperInvariant())),
             new Quantity(request.Quantity),
-            request.ImageIds);
+            imageIds);
 
         if (productResult.IsFailure)
         {
@@ -37,6 +42,25 @@ public sealed class CreateProductCommandHandler(
                 productResult.Error.Code);
 
             return Result.Failure<Guid>(productResult.Error);
+        }
+
+        if (imageIds is { Length: > 0 })
+        {
+            var validationResponse = await imageClient.GetResponse<AddProductImagesResponse>(
+                new AddProductImagesRequest(productResult.Value.Id, imageIds),
+                cancellationToken);
+
+            if (!validationResponse.Message.Attached)
+            {
+                logger.LogWarning(
+                    "Product {ProductId} creation referenced invalid images {ImageIds}",
+                    productResult.Value.Id,
+                    string.Join(",", validationResponse.Message.MissingImageIds));
+
+                return Result.Failure<Guid>(ProductErrors.InvalidImages);
+            }
+
+            imageIds = validationResponse.Message.ImageIds.ToArray();
         }
 
         productRepository.Add(productResult.Value);

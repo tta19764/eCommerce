@@ -1,6 +1,11 @@
+using ImageApi.Messages.Images;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using NSubstitute;
+using ProductApi.Application.IntegrationTests.Products;
 using ProductApi.Domain.Products;
+using SharedLibrary.Application.Abstractions.Caching;
 using ProductApi.Infrastructure;
 using ProductApi.Infrastructure.Repositories;
 using SharedLibrary.Domain.Abstractions;
@@ -21,6 +26,23 @@ public sealed class IntegrationTestWebAppFactory : IAsyncLifetime
 
     public IntegrationTestWebAppFactory()
     {
+        var imageClient = Substitute.For<IRequestClient<AddProductImagesRequest>>();
+        imageClient
+            .GetResponse<AddProductImagesResponse>(
+                Arg.Any<AddProductImagesRequest>(),
+                Arg.Any<CancellationToken>())
+            .Returns(callInfo =>
+            {
+                var request = callInfo.Arg<AddProductImagesRequest>()!;
+                var imageIds = request.TemporaryImageIds.ToArray();
+
+                return Task.FromResult<Response<AddProductImagesResponse>>(
+                    new TestResponse<AddProductImagesResponse>(
+                        new AddProductImagesResponse(true, imageIds, [])));
+            });
+
+        var cacheService = Substitute.For<ICacheService>();
+
         var services = new ServiceCollection();
 
         services.AddLogging();
@@ -29,6 +51,8 @@ public sealed class IntegrationTestWebAppFactory : IAsyncLifetime
             options.UseNpgsql($"{_dbContainer.GetConnectionString()};Pooling=False"));
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<IUnitOfWork>(serviceProvider => serviceProvider.GetRequiredService<ProductDbContext>());
+        services.AddSingleton(imageClient);
+        services.AddSingleton(cacheService);
 
         _serviceProvider = services.BuildServiceProvider();
     }

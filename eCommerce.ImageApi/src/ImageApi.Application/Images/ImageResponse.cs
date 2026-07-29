@@ -6,4 +6,5 @@ public sealed record ImageResponse(
     string ContentType,
     long Size,
     string Url,
+    string Status,
     DateTime CreatedAtUtc);

@@ -1,3 +1,5 @@
+using ImageApi.Messages.Images;
+using MassTransit;
 using Microsoft.Extensions.Logging;
 using ProductApi.Domain.Products;
 using SharedLibrary.Application.Abstractions.Messaging;
@@ -12,6 +14,7 @@ namespace ProductApi.Application.Products.UpdateProduct;
 public sealed class UpdateProductCommandHandler(
     IProductRepository productRepository,
     IUnitOfWork unitOfWork,
+    IRequestClient<AddProductImagesRequest> imageClient,
     ILogger<UpdateProductCommandHandler> logger) : ICommandHandler<UpdateProductCommand>
 {
     /// <summary>
@@ -31,12 +34,33 @@ public sealed class UpdateProductCommandHandler(
             return Result.Failure(ProductErrors.NotFound);
         }
 
+        var imageIds = request.ImageIds?.Distinct().ToArray();
+
+        if (imageIds is { Length: > 0 })
+        {
+            var validationResponse = await imageClient.GetResponse<AddProductImagesResponse>(
+                new AddProductImagesRequest(request.ProductId, imageIds),
+                cancellationToken);
+
+            if (!validationResponse.Message.Attached)
+            {
+                logger.LogWarning(
+                    "Product {ProductId} update referenced invalid images {ImageIds}",
+                    request.ProductId,
+                    string.Join(",", validationResponse.Message.MissingImageIds));
+
+                return Result.Failure(ProductErrors.InvalidImages);
+            }
+
+            imageIds = validationResponse.Message.ImageIds.ToArray();
+        }
+
         // Product.Update enforces domain invariants before any changed values are persisted.
         var updateResult = product.Update(
             new Name(request.Name.Trim()),
             new Money(request.Price, Currency.FromCode(request.CurrencyCode.Trim().ToUpperInvariant())),
             new Quantity(request.Quantity),
-            request.ImageIds);
+            imageIds);
 
         if (updateResult.IsFailure)
         {

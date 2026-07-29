@@ -29,6 +29,7 @@ public sealed class Image : Entity
         Size = size;
         StorageKey = storageKey;
         BucketName = bucketName;
+        Status = ImageStatus.Temporary;
         CreatedAtUtc = DateTime.UtcNow;
     }
 
@@ -43,6 +44,11 @@ public sealed class Image : Entity
     public string BucketName { get; private set; }
 
     public DateTime CreatedAtUtc { get; private set; }
+
+    /// <summary>
+    /// Current lifecycle state. New uploads are temporary until a product or user attaches them.
+    /// </summary>
+    public ImageStatus Status { get; private set; }
 
     public static Result<Image> Create(
         Guid id,
@@ -83,5 +89,13 @@ public sealed class Image : Entity
         }
 
         return new Image(id, fileName, contentType, size, storageKey, bucketName);
+    }
+
+    /// <summary>
+    /// Marks an uploaded temporary image as attached to an owning aggregate.
+    /// </summary>
+    public void Attach()
+    {
+        Status = ImageStatus.Attached;
     }
 }

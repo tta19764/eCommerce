@@ -1,4 +1,6 @@
 using FluentAssertions;
+using ImageApi.Messages.Images;
+using MassTransit;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using SharedLibrary.Domain.Abstractions;
@@ -12,6 +14,8 @@ public class UpdateUserCommandHandlerTests
 {
     private readonly IUserRepository _userRepositoryMock = Substitute.For<IUserRepository>();
     private readonly IUnitOfWork _unitOfWorkMock = Substitute.For<IUnitOfWork>();
+    private readonly IRequestClient<AddUserImageRequest> _imageClientMock =
+        Substitute.For<IRequestClient<AddUserImageRequest>>();
 
     [Fact]
     public async Task Handle_Should_UpdateUserAndSaveChanges_WhenUserExists()
@@ -27,12 +31,15 @@ public class UpdateUserCommandHandlerTests
             .GetByIdAsync(user.Id, cancellationToken)
             .Returns(user);
 
+        var imageId = Guid.NewGuid();
+        SetupValidImagesResponse(imageId);
+
         var handler = new UpdateUserCommandHandler(
             _userRepositoryMock,
             _unitOfWorkMock,
+            _imageClientMock,
             NullLogger<UpdateUserCommandHandler>.Instance);
 
-        var imageId = Guid.NewGuid();
         var command = new UpdateUserCommand(user.Id, "  Jane  ", "  Doe  ", imageId);
 
         // Act
@@ -63,6 +70,7 @@ public class UpdateUserCommandHandlerTests
         var handler = new UpdateUserCommandHandler(
             _userRepositoryMock,
             _unitOfWorkMock,
+            _imageClientMock,
             NullLogger<UpdateUserCommandHandler>.Instance);
 
         // Act
@@ -76,5 +84,17 @@ public class UpdateUserCommandHandlerTests
 
         _userRepositoryMock.DidNotReceive().Update(Arg.Any<User>());
         await _unitOfWorkMock.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    private void SetupValidImagesResponse(Guid imageId)
+    {
+        var response = Substitute.For<Response<AddUserImageResponse>>();
+        response.Message.Returns(new AddUserImageResponse(true, imageId, []));
+
+        _imageClientMock
+            .GetResponse<AddUserImageResponse>(
+                Arg.Is<AddUserImageRequest>(request => request.TemporaryImageId == imageId),
+                Arg.Any<CancellationToken>())
+            .Returns(response);
     }
 }

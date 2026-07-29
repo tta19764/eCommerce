@@ -13,7 +13,14 @@ public sealed class UpdateUserCommandValidator : AbstractValidator<UpdateUserCom
     public UpdateUserCommandValidator()
     {
         RuleFor(command => command.UserId).NotEmpty();
-        RuleFor(command => command.FirstName).NotEmpty().MaximumLength(100);
-        RuleFor(command => command.LastName).NotEmpty().MaximumLength(100);
+        RuleFor(command => command.FirstName)
+            .NotEmpty()
+            .MaximumLength(100)
+            .When(command => command.FirstName is not null);
+
+        RuleFor(command => command.LastName)
+            .NotEmpty()
+            .MaximumLength(100)
+            .When(command => command.LastName is not null);
     }
 }

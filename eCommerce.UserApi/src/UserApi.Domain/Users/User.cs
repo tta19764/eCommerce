@@ -75,26 +75,26 @@ public sealed class User : Entity
     }
 
     /// <summary>
-    /// Updates profile details when required fields are provided.
+    /// Updates profile details when at least one supplied value changes.
     /// </summary>
-    /// <param name="firstName">The user's first name.</param>
-    /// <param name="lastName">The user's last name.</param>
+    /// <param name="firstName">The optional replacement first name.</param>
+    /// <param name="lastName">The optional replacement last name.</param>
     /// <param name="imageId">The optional image asset identifier.</param>
     /// <returns>A success result, or a validation failure.</returns>
-    public Result Update(FirstName firstName, LastName lastName, Guid? imageId)
+    public Result Update(FirstName? firstName, LastName? lastName, Guid? imageId)
     {
-        if (string.IsNullOrWhiteSpace(firstName.Value))
+        if (firstName is not null && string.IsNullOrWhiteSpace(firstName.Value))
         {
             return Result.Failure(UserErrors.EmptyFirstName);
         }
 
-        if (string.IsNullOrWhiteSpace(lastName.Value))
+        if (lastName is not null && string.IsNullOrWhiteSpace(lastName.Value))
         {
             return Result.Failure(UserErrors.EmptyLastName);
         }
 
-        FirstName = firstName;
-        LastName = lastName;
+        FirstName = firstName ?? FirstName;
+        LastName = lastName ?? LastName;
         ImageId = imageId;
 
         return Result.Success();

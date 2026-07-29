@@ -12,6 +12,7 @@ internal static class ImageMapper
             image.ContentType,
             image.Size,
             url,
+            image.Status.ToString(),
             image.CreatedAtUtc);
     }
 }

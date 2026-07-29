@@ -4,6 +4,7 @@
     <Project Path="src/ImageApi.Application/ImageApi.Application.csproj" />
     <Project Path="src/ImageApi.Domain/ImageApi.Domain.csproj" />
     <Project Path="src/ImageApi.Infrastructure/ImageApi.Infrastructure.csproj" />
+    <Project Path="src/ImageApi.Messages/ImageApi.Messages.csproj" />
   </Folder>
   <Folder Name="/test/">
     <Project Path="test/ImageApi.Application.UnitTests/ImageApi.Application.UnitTests.csproj" />

@@ -37,5 +37,9 @@ public sealed class ImageConfiguration : IEntityTypeConfiguration<Image>
 
         builder.Property(image => image.CreatedAtUtc)
             .IsRequired();
+
+        builder.Property(image => image.Status)
+            .HasConversion<int>()
+            .IsRequired();
     }
 }

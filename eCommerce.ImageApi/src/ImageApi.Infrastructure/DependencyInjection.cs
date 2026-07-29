@@ -18,6 +18,7 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSharedInfrastructure<ImageDbContext>(configuration);
+        services.AddSharedMessaging(configuration, typeof(Application.DependencyInjection).Assembly);
 
         services.AddScoped<IImageRepository, ImageRepository>();
         services.AddScoped<IUnitOfWork>(serviceProvider => serviceProvider.GetRequiredService<ImageDbContext>());

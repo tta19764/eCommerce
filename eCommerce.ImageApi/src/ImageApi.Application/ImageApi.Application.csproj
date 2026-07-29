@@ -2,7 +2,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ImageApi.Domain\ImageApi.Domain.csproj" />
+    <ProjectReference Include="..\ImageApi.Messages\ImageApi.Messages.csproj" />
     <ProjectReference Include="..\..\..\eCommerce.SharedLibrary\SharedLibrary.Application\SharedLibrary.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MassTransit" Version="8.4.1" />
   </ItemGroup>
 
   <PropertyGroup>

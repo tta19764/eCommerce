@@ -7,6 +7,6 @@ namespace UserApi.Application.Users.UpdateUser;
 /// <param name="LastName">The user's last name.</param>
 /// <param name="ImageId">The optional profile image asset identifier.</param>
 public sealed record UpdateUserRequest(
-    string FirstName,
-    string LastName,
+    string? FirstName,
+    string? LastName,
     Guid? ImageId);

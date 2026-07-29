@@ -1,4 +1,6 @@
 using FluentAssertions;
+using ImageApi.Messages.Images;
+using MassTransit;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using ProductApi.Application.Products.UpdateProduct;
@@ -12,6 +14,8 @@ public class UpdateProductCommandHandlerTests
 {
     private readonly IProductRepository _productRepositoryMock = Substitute.For<IProductRepository>();
     private readonly IUnitOfWork _unitOfWorkMock = Substitute.For<IUnitOfWork>();
+    private readonly IRequestClient<AddProductImagesRequest> _imageClientMock =
+        Substitute.For<IRequestClient<AddProductImagesRequest>>();
 
     [Fact]
     public async Task Handle_Should_UpdateProductAndSaveChanges_WhenProductExists()
@@ -27,12 +31,15 @@ public class UpdateProductCommandHandlerTests
             .GetByIdAsync(product.Id, cancellationToken)
             .Returns(product);
 
+        var imageId = Guid.NewGuid();
+        SetupValidImagesResponse(imageId);
+
         var handler = new UpdateProductCommandHandler(
             _productRepositoryMock,
             _unitOfWorkMock,
+            _imageClientMock,
             NullLogger<UpdateProductCommandHandler>.Instance);
 
-        var imageId = Guid.NewGuid();
         var command = new UpdateProductCommand(product.Id, "Mouse", 49.99m, "eur", 5, [imageId]);
 
         // Act
@@ -60,6 +67,7 @@ public class UpdateProductCommandHandlerTests
         var handler = new UpdateProductCommandHandler(
             _productRepositoryMock,
             _unitOfWorkMock,
+            _imageClientMock,
             NullLogger<UpdateProductCommandHandler>.Instance);
 
         var command = new UpdateProductCommand(productId, "Mouse", 49.99m, "EUR", 5);
@@ -73,5 +81,17 @@ public class UpdateProductCommandHandlerTests
 
         _productRepositoryMock.DidNotReceive().Update(Arg.Any<Product>());
         await _unitOfWorkMock.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
+    }
+
+    private void SetupValidImagesResponse(Guid imageId)
+    {
+        var response = Substitute.For<Response<AddProductImagesResponse>>();
+        response.Message.Returns(new AddProductImagesResponse(true, [imageId], []));
+
+        _imageClientMock
+            .GetResponse<AddProductImagesResponse>(
+                Arg.Is<AddProductImagesRequest>(request => request.TemporaryImageIds.Contains(imageId)),
+                Arg.Any<CancellationToken>())
+            .Returns(response);
     }
 }

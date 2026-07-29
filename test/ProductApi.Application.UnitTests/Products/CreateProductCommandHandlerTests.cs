@@ -1,4 +1,6 @@
 using FluentAssertions;
+using ImageApi.Messages.Images;
+using MassTransit;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using ProductApi.Application.Products.CreateProduct;
@@ -11,18 +13,23 @@ public class CreateProductCommandHandlerTests
 {
     private readonly IProductRepository _productRepositoryMock = Substitute.For<IProductRepository>();
     private readonly IUnitOfWork _unitOfWorkMock = Substitute.For<IUnitOfWork>();
+    private readonly IRequestClient<AddProductImagesRequest> _imageClientMock =
+        Substitute.For<IRequestClient<AddProductImagesRequest>>();
 
     [Fact]
     public async Task Handle_Should_AddProductAndSaveChanges()
     {
         // Arrange
         CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+        var imageId = Guid.NewGuid();
+        SetupValidImagesResponse(imageId);
+
         var handler = new CreateProductCommandHandler(
             _productRepositoryMock,
             _unitOfWorkMock,
+            _imageClientMock,
             NullLogger<CreateProductCommandHandler>.Instance);
 
-        var imageId = Guid.NewGuid();
         var command = new CreateProductCommand("  Keyboard  ", 99.99m, "usd", 10, [imageId]);
 
         // Act
@@ -41,5 +48,17 @@ public class CreateProductCommandHandlerTests
             product.ImageIds.Contains(imageId)));
 
         await _unitOfWorkMock.Received(1).SaveChangesAsync(cancellationToken);
+    }
+
+    private void SetupValidImagesResponse(Guid imageId)
+    {
+        var response = Substitute.For<Response<AddProductImagesResponse>>();
+        response.Message.Returns(new AddProductImagesResponse(true, [imageId], []));
+
+        _imageClientMock
+            .GetResponse<AddProductImagesResponse>(
+                Arg.Is<AddProductImagesRequest>(request => request.TemporaryImageIds.Contains(imageId)),
+                Arg.Any<CancellationToken>())
+            .Returns(response);
     }
 }

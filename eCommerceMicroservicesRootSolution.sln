@@ -123,6 +123,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserApi.Application.UnitTes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserApi.Domain.UnitTests", "eCommerce.UserApi\test\UserApi.Domain.UnitTests\UserApi.Domain.UnitTests.csproj", "{B6755572-462F-49FD-8BF1-6205AC997A01}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageApi.Messages", "eCommerce.ImageApi\src\ImageApi.Messages\ImageApi.Messages.csproj", "{8F6FE3F5-DD97-43F6-83C0-5BF3CA94ED2A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -613,6 +615,18 @@ Global
 		{B6755572-462F-49FD-8BF1-6205AC997A01}.Release|x64.Build.0 = Release|Any CPU
 		{B6755572-462F-49FD-8BF1-6205AC997A01}.Release|x86.ActiveCfg = Release|Any CPU
 		{B6755572-462F-49FD-8BF1-6205AC997A01}.Release|x86.Build.0 = Release|Any CPU
+		{8F6FE3F5-DD97-43F6-83C0-5BF3CA94ED2A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F6FE3F5-DD97-43F6-83C0-5BF3CA94ED2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F6FE3F5-DD97-43F6-83C0-5BF3CA94ED2A}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{8F6FE3F5-DD97-43F6-83C0-5BF3CA94ED2A}.Debug|x64.Build.0 = Debug|Any CPU
+		{8F6FE3F5-DD97-43F6-83C0-5BF3CA94ED2A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8F6FE3F5-DD97-43F6-83C0-5BF3CA94ED2A}.Debug|x86.Build.0 = Debug|Any CPU
+		{8F6FE3F5-DD97-43F6-83C0-5BF3CA94ED2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F6FE3F5-DD97-43F6-83C0-5BF3CA94ED2A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F6FE3F5-DD97-43F6-83C0-5BF3CA94ED2A}.Release|x64.ActiveCfg = Release|Any CPU
+		{8F6FE3F5-DD97-43F6-83C0-5BF3CA94ED2A}.Release|x64.Build.0 = Release|Any CPU
+		{8F6FE3F5-DD97-43F6-83C0-5BF3CA94ED2A}.Release|x86.ActiveCfg = Release|Any CPU
+		{8F6FE3F5-DD97-43F6-83C0-5BF3CA94ED2A}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -670,5 +684,6 @@ Global
 		{5B92E01C-C3C6-4DF2-9665-C88DA81A4F82} = {EF4A1FB1-5F66-0CBF-BAED-F7D63401E42C}
 		{74F66043-9170-4548-85E5-8C1780D9B9BE} = {EF4A1FB1-5F66-0CBF-BAED-F7D63401E42C}
 		{B6755572-462F-49FD-8BF1-6205AC997A01} = {EF4A1FB1-5F66-0CBF-BAED-F7D63401E42C}
+		{8F6FE3F5-DD97-43F6-83C0-5BF3CA94ED2A} = {8F750DA9-2F6C-8A71-402E-74E9E8AA0592}
 	EndGlobalSection
 EndGlobal

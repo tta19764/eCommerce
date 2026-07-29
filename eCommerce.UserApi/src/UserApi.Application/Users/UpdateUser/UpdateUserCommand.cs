@@ -11,6 +11,6 @@ namespace UserApi.Application.Users.UpdateUser;
 /// <param name="ImageId">The optional profile image asset identifier.</param>
 public sealed record UpdateUserCommand(
     Guid UserId,
-    string FirstName,
-    string LastName,
+    string? FirstName,
+    string? LastName,
     Guid? ImageId) : ICommand;

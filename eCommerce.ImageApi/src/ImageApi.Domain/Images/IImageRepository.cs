@@ -10,5 +10,7 @@ public interface IImageRepository
 
     void Add(Image image);
 
+    void Update(Image image);
+
     void Delete(Image image);
 }
