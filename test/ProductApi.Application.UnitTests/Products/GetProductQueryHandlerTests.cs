@@ -19,6 +19,7 @@ public class GetProductQueryHandlerTests
         CancellationToken cancellationToken = TestContext.Current.CancellationToken;
         var product = Product.Create(
             new Name("Keyboard"),
+            new Description("Mechanical keyboard"),
             new Money(99.99m, Currency.Usd),
             new Quantity(10)).Value;
 
@@ -38,6 +39,7 @@ public class GetProductQueryHandlerTests
         result.IsSuccess.Should().BeTrue();
         result.Value.Id.Should().Be(product.Id);
         result.Value.Name.Should().Be(product.Name.Value);
+        result.Value.Description.Should().Be(product.Description.Value);
         result.Value.Price.Should().Be(product.Price.Amount);
         result.Value.Currency.Should().Be(product.Price.Currency.Code);
         result.Value.Quantity.Should().Be(product.Quantity.Value);

@@ -11,16 +11,18 @@ public class ProductTests
     {
         // Arrange
         var name = new Name("Keyboard");
+        var description = new Description("Mechanical keyboard");
         var price = new Money(99.99m, Currency.Usd);
         var quantity = new Quantity(10);
         var imageId = Guid.NewGuid();
 
         // Act
-        var result = Product.Create(name, price, quantity, [imageId]);
+        var result = Product.Create(name, description, price, quantity, [imageId]);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Name.Should().Be(name);
+        result.Value.Description.Should().Be(description);
         result.Value.Price.Should().Be(price);
         result.Value.Quantity.Should().Be(quantity);
         result.Value.ImageIds.Should().ContainSingle().Which.Should().Be(imageId);
@@ -33,6 +35,7 @@ public class ProductTests
         // Act
         var result = Product.Create(
             new Name("Keyboard"),
+            new Description("Mechanical keyboard"),
             new Money(0m, Currency.Usd),
             new Quantity(10));
 
@@ -47,6 +50,7 @@ public class ProductTests
         // Act
         var result = Product.Create(
             new Name("Keyboard"),
+            new Description("Mechanical keyboard"),
             new Money(99.99m, Currency.Uah),
             new Quantity(-1));
 
@@ -61,6 +65,7 @@ public class ProductTests
         // Arrange
         var product = Product.Create(
             new Name("Keyboard"),
+            new Description("Mechanical keyboard"),
             new Money(99.99m, Currency.Usd),
             new Quantity(10)).Value;
         var imageId = Guid.NewGuid();
@@ -68,6 +73,7 @@ public class ProductTests
         // Act
         var result = product.Update(
             new Name("Mouse"),
+            new Description("Wireless mouse"),
             new Money(49.99m, Currency.Eur),
             new Quantity(5),
             [imageId]);
@@ -75,6 +81,7 @@ public class ProductTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         product.Name.Value.Should().Be("Mouse");
+        product.Description.Value.Should().Be("Wireless mouse");
         product.Price.Amount.Should().Be(49.99m);
         product.Price.Currency.Should().Be(Currency.Eur);
         product.Quantity.Value.Should().Be(5);

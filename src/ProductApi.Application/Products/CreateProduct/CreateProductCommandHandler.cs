@@ -31,6 +31,7 @@ public sealed class CreateProductCommandHandler(
 
         var productResult = Product.Create(
             new Name(request.Name.Trim()),
+            new Description(request.Description.Trim()),
             new Money(request.Price, Currency.FromCode(request.CurrencyCode.Trim().ToUpperInvariant())),
             new Quantity(request.Quantity),
             imageIds);

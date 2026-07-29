@@ -24,6 +24,7 @@ public class UpdateProductCommandHandlerTests
         CancellationToken cancellationToken = TestContext.Current.CancellationToken;
         var product = Product.Create(
             new Name("Keyboard"),
+            new Description("Mechanical keyboard"),
             new Money(99.99m, Currency.Usd),
             new Quantity(10)).Value;
 
@@ -40,7 +41,7 @@ public class UpdateProductCommandHandlerTests
             _imageClientMock,
             NullLogger<UpdateProductCommandHandler>.Instance);
 
-        var command = new UpdateProductCommand(product.Id, "Mouse", 49.99m, "eur", 5, [imageId]);
+        var command = new UpdateProductCommand(product.Id, "Mouse", "Wireless mouse", 49.99m, "eur", 5, [imageId]);
 
         // Act
         Result result = await handler.Handle(command, cancellationToken);
@@ -48,6 +49,7 @@ public class UpdateProductCommandHandlerTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         product.Name.Value.Should().Be(command.Name);
+        product.Description.Value.Should().Be(command.Description);
         product.Price.Amount.Should().Be(command.Price);
         product.Price.Currency.Code.Should().Be("EUR");
         product.Quantity.Value.Should().Be(command.Quantity);
@@ -70,7 +72,7 @@ public class UpdateProductCommandHandlerTests
             _imageClientMock,
             NullLogger<UpdateProductCommandHandler>.Instance);
 
-        var command = new UpdateProductCommand(productId, "Mouse", 49.99m, "EUR", 5);
+        var command = new UpdateProductCommand(productId, "Mouse", "Wireless mouse", 49.99m, "EUR", 5);
 
         // Act
         Result result = await handler.Handle(command, cancellationToken);

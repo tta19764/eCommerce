@@ -15,7 +15,7 @@ public class ProductCommandTests(IntegrationTestWebAppFactory factory) : BaseInt
     {
         // Arrange
         CancellationToken cancellationToken = TestContext.Current.CancellationToken;
-        var command = new CreateProductCommand($"Keyboard {Guid.NewGuid():N}", 99.99m, "USD", 10);
+        var command = new CreateProductCommand($"Keyboard {Guid.NewGuid():N}", "Mechanical keyboard", 99.99m, "USD", 10);
 
         // Act
         Result<Guid> result = await Sender.Send(command, cancellationToken);
@@ -31,6 +31,7 @@ public class ProductCommandTests(IntegrationTestWebAppFactory factory) : BaseInt
 
         product.Should().NotBeNull();
         product.Name.Value.Should().Be(command.Name);
+        product.Description.Value.Should().Be(command.Description);
         product.Price.Amount.Should().Be(command.Price);
         // ReSharper disable once EntityFramework.NPlusOne.IncompleteDataUsage
         product.Price.Currency.Code.Should().Be(command.CurrencyCode);
@@ -43,11 +44,11 @@ public class ProductCommandTests(IntegrationTestWebAppFactory factory) : BaseInt
         // Arrange
         CancellationToken cancellationToken = TestContext.Current.CancellationToken;
         Guid productId = (await Sender.Send(
-            new CreateProductCommand($"Keyboard {Guid.NewGuid():N}", 99.99m, "USD", 10),
+            new CreateProductCommand($"Keyboard {Guid.NewGuid():N}", "Mechanical keyboard", 99.99m, "USD", 10),
             cancellationToken)).Value;
         DbContext.ChangeTracker.Clear();
 
-        var command = new UpdateProductCommand(productId, "Mouse", 49.99m, "EUR", 5);
+        var command = new UpdateProductCommand(productId, "Mouse", "Wireless mouse", 49.99m, "EUR", 5);
 
         // Act
         Result result = await Sender.Send(command, cancellationToken);
@@ -63,6 +64,7 @@ public class ProductCommandTests(IntegrationTestWebAppFactory factory) : BaseInt
 
         product.Should().NotBeNull();
         product.Name.Value.Should().Be(command.Name);
+        product.Description.Value.Should().Be(command.Description);
         product.Price.Amount.Should().Be(command.Price);
         // ReSharper disable once EntityFramework.NPlusOne.IncompleteDataUsage
         product.Price.Currency.Code.Should().Be(command.CurrencyCode);
@@ -75,7 +77,7 @@ public class ProductCommandTests(IntegrationTestWebAppFactory factory) : BaseInt
         // Arrange
         CancellationToken cancellationToken = TestContext.Current.CancellationToken;
         Guid productId = (await Sender.Send(
-            new CreateProductCommand($"Keyboard {Guid.NewGuid():N}", 99.99m, "USD", 10),
+            new CreateProductCommand($"Keyboard {Guid.NewGuid():N}", "Mechanical keyboard", 99.99m, "USD", 10),
             cancellationToken)).Value;
         DbContext.ChangeTracker.Clear();
 

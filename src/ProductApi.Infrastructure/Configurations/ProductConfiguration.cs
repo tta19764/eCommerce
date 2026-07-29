@@ -30,6 +30,14 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
                 .IsRequired();
         });
 
+        builder.OwnsOne(product => product.Description, descriptionBuilder =>
+        {
+            descriptionBuilder.Property(description => description.Value)
+                .HasColumnName("Description")
+                .HasMaxLength(2000)
+                .IsRequired();
+        });
+
         builder.OwnsOne(product => product.Price, priceBuilder =>
         {
             priceBuilder.Property(price => price.Amount)

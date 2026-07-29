@@ -9,6 +9,7 @@ internal static class ProductMapper
         return new ProductResponse(
             product.Id,
             product.Name.Value,
+            product.Description.Value,
             product.Price.Amount,
             product.Price.Currency.Code,
             product.Quantity.Value,

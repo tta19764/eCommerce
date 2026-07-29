@@ -11,6 +11,7 @@ public class Product : Entity
     private Product()
     {
         Name = null!;
+        Description = null!;
         Price = null!;
         Quantity = null!;
         ImageIds = [];
@@ -18,19 +19,23 @@ public class Product : Entity
 
     private Product(
         Guid id, 
-        Name name, 
+        Name name,
+        Description description,
         Money price, 
         Quantity quantity,
         IReadOnlyCollection<Guid>? imageIds)
         : base(id)
     {
         Name = name;
+        Description = description;
         Price = price;
         Quantity = quantity;
         ImageIds = imageIds?.Distinct().ToArray() ?? [];
     }
     
     public Name Name { get; private set; }
+
+    public Description Description { get; private set; }
 
     public Money Price { get; private set; }
 
@@ -46,7 +51,8 @@ public class Product : Entity
     /// <param name="quantity">The available product quantity.</param>
     /// <returns>A successful result containing the product, or a failure result with a product error.</returns>
     public static Result<Product> Create( 
-        Name name, 
+        Name name,
+        Description description,
         Money price, 
         Quantity quantity,
         IReadOnlyCollection<Guid>? imageIds = null)
@@ -59,7 +65,7 @@ public class Product : Entity
         if(quantity.Value < 0)
             return Result.Failure<Product>(ProductErrors.InvalidQuantity);
         
-        var product = new Product(Guid.NewGuid(), name, price, quantity, imageIds);
+        var product = new Product(Guid.NewGuid(), name, description, price, quantity, imageIds);
         
         return product;
     }
@@ -73,6 +79,7 @@ public class Product : Entity
     /// <returns>A success result, or a failure result with a product error.</returns>
     public Result Update(
         Name name,
+        Description description,
         Money price,
         Quantity quantity,
         IReadOnlyCollection<Guid>? imageIds = null)
@@ -90,6 +97,7 @@ public class Product : Entity
         }
 
         Name = name;
+        Description = description;
         Price = price;
         Quantity = quantity;
         ImageIds = imageIds?.Distinct().ToArray() ?? [];

@@ -16,7 +16,7 @@ public class ProductQueryTests(IntegrationTestWebAppFactory factory) : BaseInteg
     {
         // Arrange
         CancellationToken cancellationToken = TestContext.Current.CancellationToken;
-        var createCommand = new CreateProductCommand($"Keyboard {Guid.NewGuid():N}", 99.99m, "USD", 10);
+        var createCommand = new CreateProductCommand($"Keyboard {Guid.NewGuid():N}", "Mechanical keyboard", 99.99m, "USD", 10);
         Guid productId = (await Sender.Send(createCommand, cancellationToken)).Value;
 
         // Act
@@ -26,6 +26,7 @@ public class ProductQueryTests(IntegrationTestWebAppFactory factory) : BaseInteg
         result.IsSuccess.Should().BeTrue();
         result.Value.Id.Should().Be(productId);
         result.Value.Name.Should().Be(createCommand.Name);
+        result.Value.Description.Should().Be(createCommand.Description);
         result.Value.Price.Should().Be(createCommand.Price);
         result.Value.Currency.Should().Be(createCommand.CurrencyCode);
         result.Value.Quantity.Should().Be(createCommand.Quantity);
@@ -40,7 +41,7 @@ public class ProductQueryTests(IntegrationTestWebAppFactory factory) : BaseInteg
         for (int index = 0; index < 3; index++)
         {
             await Sender.Send(
-                new CreateProductCommand($"Product {Guid.NewGuid():N}", 10 + index, "USD", index),
+                new CreateProductCommand($"Product {Guid.NewGuid():N}", $"Product description {index}", 10 + index, "USD", index),
                 cancellationToken);
         }
 

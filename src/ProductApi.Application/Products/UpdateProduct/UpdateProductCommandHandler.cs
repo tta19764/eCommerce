@@ -58,6 +58,7 @@ public sealed class UpdateProductCommandHandler(
         // Product.Update enforces domain invariants before any changed values are persisted.
         var updateResult = product.Update(
             new Name(request.Name.Trim()),
+            new Description(request.Description.Trim()),
             new Money(request.Price, Currency.FromCode(request.CurrencyCode.Trim().ToUpperInvariant())),
             new Quantity(request.Quantity),
             imageIds);

@@ -140,6 +140,7 @@ public static class ProductEndpoints
         var command = new UpdateProductCommand(
             productId,
             request.Name,
+            request.Description,
             request.Price,
             request.CurrencyCode,
             request.Quantity,

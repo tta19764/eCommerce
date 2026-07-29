@@ -20,6 +20,7 @@ public class DeleteProductCommandHandlerTests
         CancellationToken cancellationToken = TestContext.Current.CancellationToken;
         var product = Product.Create(
             new Name("Keyboard"),
+            new Description("Mechanical keyboard"),
             new Money(99.99m, Currency.Usd),
             new Quantity(10)).Value;
 

@@ -30,7 +30,7 @@ public class CreateProductCommandHandlerTests
             _imageClientMock,
             NullLogger<CreateProductCommandHandler>.Instance);
 
-        var command = new CreateProductCommand("  Keyboard  ", 99.99m, "usd", 10, [imageId]);
+        var command = new CreateProductCommand("  Keyboard  ", "  Mechanical keyboard  ", 99.99m, "usd", 10, [imageId]);
 
         // Act
         Result<Guid> result = await handler.Handle(command, cancellationToken);
@@ -42,6 +42,7 @@ public class CreateProductCommandHandlerTests
         _productRepositoryMock.Received(1).Add(Arg.Is<Product>(product =>
             product.Id == result.Value &&
             product.Name.Value == "Keyboard" &&
+            product.Description.Value == "Mechanical keyboard" &&
             product.Price.Amount == command.Price &&
             product.Price.Currency.Code == "USD" &&
             product.Quantity.Value == command.Quantity &&

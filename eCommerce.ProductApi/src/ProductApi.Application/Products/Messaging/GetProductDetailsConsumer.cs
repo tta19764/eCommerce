@@ -27,6 +27,7 @@ public sealed class GetProductDetailsConsumer(
             await context.RespondAsync(new GetProductDetailsResponse(
                 context.Message.ProductId,
                 string.Empty,
+                string.Empty,
                 0,
                 string.Empty,
                 0,
@@ -38,6 +39,7 @@ public sealed class GetProductDetailsConsumer(
         await context.RespondAsync(new GetProductDetailsResponse(
             product.Id,
             product.Name.Value,
+            product.Description.Value,
             product.Price.Amount,
             product.Price.Currency.Code,
             product.Quantity.Value,
