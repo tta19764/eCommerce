@@ -4,6 +4,7 @@ using AuthenticationApi.Domain.Accounts;
 using FluentAssertions;
 using MassTransit;
 using Microsoft.Extensions.Logging.Abstractions;
+using NotificationApi.Messages.Emails;
 using NSubstitute;
 using SharedLibrary.Domain.Abstractions;
 using UserApi.Messages.Users;
@@ -19,6 +20,7 @@ public class RegisterCommandHandlerTests
     private readonly IIdentityProvider _identityProviderMock = Substitute.For<IIdentityProvider>();
     private readonly IRequestClient<CreateUserProfileRequest> _userProfileClientMock =
         Substitute.For<IRequestClient<CreateUserProfileRequest>>();
+    private readonly IPublishEndpoint _publishEndpointMock = Substitute.For<IPublishEndpoint>();
 
     [Fact]
     public async Task Handle_Should_RegisterIdentityAndCreateAccount()
@@ -51,6 +53,7 @@ public class RegisterCommandHandlerTests
             _unitOfWorkMock,
             _identityProviderMock,
             _userProfileClientMock,
+            _publishEndpointMock,
             NullLogger<RegisterCommandHandler>.Instance);
 
         var command = new RegisterCommand(
@@ -89,6 +92,14 @@ public class RegisterCommandHandlerTests
                 request.LastName == "Smith" &&
                 request.Email == "john.smith@example.com"),
             cancellationToken);
+
+        await _publishEndpointMock.Received(1).Publish(
+            Arg.Is<SendEmailConfirmationRequest>(request =>
+                request.AccountId == result.Value &&
+                request.Email == "john.smith@example.com" &&
+                request.FirstName == "John" &&
+                request.LastName == "Smith"),
+            cancellationToken);
     }
 
     [Fact]
@@ -110,6 +121,7 @@ public class RegisterCommandHandlerTests
             _unitOfWorkMock,
             _identityProviderMock,
             _userProfileClientMock,
+            _publishEndpointMock,
             NullLogger<RegisterCommandHandler>.Instance);
 
         // Act

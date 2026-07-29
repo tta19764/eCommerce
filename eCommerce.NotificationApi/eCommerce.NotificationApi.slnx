@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/NotificationApi.Api/NotificationApi.Api.csproj" />
+    <Project Path="src/NotificationApi.Application/NotificationApi.Application.csproj" />
+    <Project Path="src/NotificationApi.Domain/NotificationApi.Domain.csproj" />
+    <Project Path="src/NotificationApi.Infrastructure/NotificationApi.Infrastructure.csproj" />
+    <Project Path="src/NotificationApi.Messages/NotificationApi.Messages.csproj" />
+  </Folder>
+  <Project Path="../eCommerce.SharedLibrary/SharedLibrary.Api/SharedLibrary.Api.csproj" />
+  <Project Path="../eCommerce.SharedLibrary/SharedLibrary.Application/SharedLibrary.Application.csproj" />
+  <Project Path="../eCommerce.SharedLibrary/SharedLibrary.Domain/SharedLibrary.Domain.csproj" />
+  <Project Path="../eCommerce.SharedLibrary/SharedLibrary.Infrastructure/SharedLibrary.Infrastructure.csproj" />
+</Solution>

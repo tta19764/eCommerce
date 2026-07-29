@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AuthenticationApi.Domain\AuthenticationApi.Domain.csproj" />
+    <ProjectReference Include="..\..\..\eCommerce.NotificationApi\src\NotificationApi.Messages\NotificationApi.Messages.csproj" />
     <ProjectReference Include="..\..\..\eCommerce.SharedLibrary\SharedLibrary.Application\SharedLibrary.Application.csproj" />
     <ProjectReference Include="..\..\..\eCommerce.UserApi\src\UserApi.Messages\UserApi.Messages.csproj" />
   </ItemGroup>

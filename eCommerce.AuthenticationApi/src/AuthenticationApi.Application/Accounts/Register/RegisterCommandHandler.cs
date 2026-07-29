@@ -2,6 +2,7 @@ using AuthenticationApi.Application.Abstractions;
 using AuthenticationApi.Domain.Accounts;
 using MassTransit;
 using Microsoft.Extensions.Logging;
+using NotificationApi.Messages.Emails;
 using SharedLibrary.Application.Abstractions.Messaging;
 using SharedLibrary.Domain.Abstractions;
 using UserApi.Messages.Users;
@@ -17,6 +18,7 @@ public sealed class RegisterCommandHandler(
     IUnitOfWork unitOfWork,
     IIdentityProvider identityProvider,
     IRequestClient<CreateUserProfileRequest> userProfileClient,
+    IPublishEndpoint publishEndpoint,
     ILogger<RegisterCommandHandler> logger) : ICommandHandler<RegisterCommand, Guid>
 {
     public async Task<Result<Guid>> Handle(RegisterCommand request, CancellationToken cancellationToken)
@@ -110,6 +112,14 @@ public sealed class RegisterCommandHandler(
         }
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await publishEndpoint.Publish(
+            new SendEmailConfirmationRequest(
+                accountId,
+                request.Email.Trim(),
+                request.FirstName,
+                request.LastName),
+            cancellationToken);
 
         logger.LogInformation("Registered account {AccountId}", accountId);
 

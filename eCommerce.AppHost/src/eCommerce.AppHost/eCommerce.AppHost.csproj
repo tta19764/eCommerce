@@ -16,6 +16,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\eCommerce.AuthenticationApi\src\AuthenticationApi.Api\AuthenticationApi.Api.csproj" />
     <ProjectReference Include="..\..\..\eCommerce.GatewayApi\src\GatewayApi.Api\GatewayApi.Api.csproj" />
+    <ProjectReference Include="..\..\..\eCommerce.NotificationApi\src\NotificationApi.Api\NotificationApi.Api.csproj" />
     <ProjectReference Include="..\..\..\eCommerce.OrderApi\src\OrderApi.Api\OrderApi.Api.csproj" />
     <ProjectReference Include="..\..\..\eCommerce.ProductApi\src\ProductApi.Api\ProductApi.Api.csproj" />
     <ProjectReference Include="..\..\..\eCommerce.UserApi\src\UserApi.Api\UserApi.Api.csproj" />
