@@ -26,11 +26,12 @@ public static class DependencyInjection
         services.AddSharedMessaging(configuration, typeof(NotificationApi.Application.DependencyInjection).Assembly);
 
         services.Configure<NotificationEmailOptions>(configuration.GetSection(NotificationEmailOptions.SectionName));
+        services.Configure<SmtpOptions>(configuration.GetSection(SmtpOptions.SectionName));
         AddBackgroundJobs(services, configuration);
 
         services.AddScoped<INotificationJobRepository, NotificationJobRepository>();
         services.AddScoped<IUnitOfWork>(serviceProvider => serviceProvider.GetRequiredService<NotificationDbContext>());
-        services.AddScoped<IEmailSender, LoggingEmailSender>();
+        services.AddScoped<IEmailSender, SmtpEmailSender>();
 
         return services;
     }

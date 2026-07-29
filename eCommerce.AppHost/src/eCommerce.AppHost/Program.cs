@@ -72,6 +72,13 @@ var redisPort = GetRequiredInt("AppHost:Redis:Port");
 var redisDataVolume = GetRequired("AppHost:Redis:DataVolume");
 var redisConnectionString = GetRequired("AppHost:Redis:ConnectionString");
 
+// Mailpit is the local SMTP target for NotificationApi. It accepts SMTP on one endpoint and exposes
+// a browser inbox on another, which lets development exercise real SMTP delivery without external
+// credentials or sending messages outside the developer machine.
+var mailpitImage = GetRequired("AppHost:Mailpit:Image");
+var mailpitSmtpPort = GetRequiredInt("AppHost:Mailpit:SmtpPort");
+var mailpitUiPort = GetRequiredInt("AppHost:Mailpit:UiPort");
+
 // Authentication settings are injected into AuthenticationApi so local Keycloak URLs, issuer,
 // audience, and HTTPS metadata behavior are controlled from AppHost configuration.
 var authenticationAudience = GetRequired("AppHost:Authentication:Audience");
@@ -87,11 +94,16 @@ var keycloakTokenUrl = GetRequired("AppHost:Authentication:Keycloak:TokenUrl");
 var keycloakAdminClientId = GetRequired("AppHost:Authentication:Keycloak:AdminClientId");
 var keycloakAuthClientId = GetRequired("AppHost:Authentication:Keycloak:AuthClientId");
 
-// Notification settings are passed to NotificationApi so background email content is still
-// environment-specific. The development sender logs messages to Seq, but the same option names can
-// be reused by a future SMTP/provider sender without changing the producer contracts.
+// Notification settings are passed to NotificationApi so background email content and SMTP delivery
+// stay environment-specific. Production should override the same keys with a real SMTP host and
+// credentials from a secure configuration source.
 var notificationFromAddress = GetRequired("AppHost:Notifications:FromAddress");
 var notificationEmailConfirmationUrlTemplate = GetRequired("AppHost:Notifications:EmailConfirmationUrlTemplate");
+var notificationSmtpHost = GetRequired("AppHost:Notifications:Smtp:Host");
+var notificationSmtpPort = GetRequired("AppHost:Notifications:Smtp:Port");
+var notificationSmtpEnableSsl = GetRequired("AppHost:Notifications:Smtp:EnableSsl");
+var notificationSmtpFromName = GetRequired("AppHost:Notifications:Smtp:FromName");
+var notificationSmtpTimeoutSeconds = GetRequired("AppHost:Notifications:Smtp:TimeoutSeconds");
 
 // Project ports are pinned so the gateway, Swagger UI, and external tools can use stable localhost
 // URLs. Aspire still wires service references internally, but fixed ports make manual testing and
@@ -165,6 +177,11 @@ var redis = builder.AddContainer("redis", redisImage)
     .WithArgs("redis-server", "--appendonly", "yes")
     .WithEndpoint(port: redisPort, targetPort: 6379, name: "tcp")
     .WithVolume(redisDataVolume, "/data");
+
+// Mailpit receives development SMTP messages and keeps them in an inspectable local inbox.
+var mailpit = builder.AddContainer("mailpit", mailpitImage)
+    .WithEndpoint(port: mailpitSmtpPort, targetPort: 1025, name: "smtp")
+    .WithHttpEndpoint(port: mailpitUiPort, targetPort: 8025, name: "http");
 
 // AuthenticationApi owns identity/account workflows. It depends on PostgreSQL for local account
 // state, RabbitMQ for profile creation requests to UserApi, Keycloak for real identity management,
@@ -266,10 +283,16 @@ var notificationApi = builder.AddProject<Projects.NotificationApi_Api>("notifica
     .WithEnvironment("Serilog__WriteTo__1__Args__serverUrl", seqServerUrl)
     .WithEnvironment("Email__FromAddress", notificationFromAddress)
     .WithEnvironment("Email__EmailConfirmationUrlTemplate", notificationEmailConfirmationUrlTemplate)
+    .WithEnvironment("Smtp__Host", notificationSmtpHost)
+    .WithEnvironment("Smtp__Port", notificationSmtpPort)
+    .WithEnvironment("Smtp__EnableSsl", notificationSmtpEnableSsl)
+    .WithEnvironment("Smtp__FromName", notificationSmtpFromName)
+    .WithEnvironment("Smtp__TimeoutSeconds", notificationSmtpTimeoutSeconds)
     .WithReference(notificationDb, "Database")
     .WithReference(rabbitMq)
     .WaitFor(postgres)
     .WaitFor(rabbitMq)
+    .WaitFor(mailpit)
     .WaitFor(seq);
 
 // GatewayApi is the only externally exposed API entry point. It proxies to the backend service
