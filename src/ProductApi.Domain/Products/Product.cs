@@ -31,6 +31,8 @@ public class Product : Entity
         Price = price;
         Quantity = quantity;
         ImageIds = imageIds?.Distinct().ToArray() ?? [];
+        Rating = 0.0m;
+        ReviewsCount = 0;
     }
     
     public Name Name { get; private set; }
@@ -42,6 +44,16 @@ public class Product : Entity
     public Quantity Quantity { get; private set; }
 
     public Guid[] ImageIds { get; private set; }
+
+    /// <summary>
+    /// Average product rating rounded to one digit after the decimal point.
+    /// </summary>
+    public decimal Rating { get; private set; }
+
+    /// <summary>
+    /// Number of reviews included in the rating.
+    /// </summary>
+    public int ReviewsCount { get; private set; }
     
     /// <summary>
     /// Creates a product when the supplied values satisfy product invariants.
@@ -101,6 +113,27 @@ public class Product : Entity
         Price = price;
         Quantity = quantity;
         ImageIds = imageIds?.Distinct().ToArray() ?? [];
+
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// Applies a newly created review to the denormalized rating summary.
+    /// </summary>
+    /// <param name="rating">The new review rating from one to five.</param>
+    /// <returns>A success result, or a validation failure.</returns>
+    public Result AddReview(int rating)
+    {
+        if (rating is < 1 or > 5)
+        {
+            return Result.Failure(ProductErrors.InvalidReviewRating);
+        }
+
+        Rating = Math.Round(
+            ((Rating * ReviewsCount) + rating) / (ReviewsCount + 1),
+            1,
+            MidpointRounding.AwayFromZero);
+        ReviewsCount++;
 
         return Result.Success();
     }

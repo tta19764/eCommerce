@@ -32,7 +32,7 @@ public class CreateOrderCommandHandlerTests
                 cancellationToken)
             .Returns(Task.FromResult<Response<GetProductDetailsResponse>>(
                 new TestResponse<GetProductDetailsResponse>(
-                    new GetProductDetailsResponse(productId, "Keyboard", "Mechanical keyboard", 100m, "USD", 7, true))));
+                    new GetProductDetailsResponse(productId, "Keyboard", "Mechanical keyboard", 100m, "USD", 7, 0.0m, 0, true))));
 
         var handler = new CreateOrderCommandHandler(
             _orderRepositoryMock,
@@ -78,7 +78,7 @@ public class CreateOrderCommandHandlerTests
                 cancellationToken)
             .Returns(Task.FromResult<Response<GetProductDetailsResponse>>(
                 new TestResponse<GetProductDetailsResponse>(
-                    new GetProductDetailsResponse(productId, string.Empty, string.Empty, 0m, "USD", 0, false))));
+                    new GetProductDetailsResponse(productId, string.Empty, string.Empty, 0m, "USD", 0, 0.0m, 0, false))));
 
         var handler = new CreateOrderCommandHandler(
             _orderRepositoryMock,

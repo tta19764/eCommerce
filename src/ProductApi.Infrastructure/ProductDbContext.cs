@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using ProductApi.Domain.Products;
+using ProductApi.Domain.Reviews;
 using SharedLibrary.Domain.Abstractions;
 
 namespace ProductApi.Infrastructure;
@@ -13,6 +14,11 @@ public class ProductDbContext(DbContextOptions<ProductDbContext> options) : DbCo
     /// Product catalog table.
     /// </summary>
     public DbSet<Product> Products { get; set; }
+
+    /// <summary>
+    /// Product reviews table.
+    /// </summary>
+    public DbSet<ProductReview> ProductReviews { get; set; }
 
     /// <summary>
     /// Applies all entity configurations from the infrastructure assembly.

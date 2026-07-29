@@ -13,6 +13,8 @@ internal static class ProductMapper
             product.Price.Amount,
             product.Price.Currency.Code,
             product.Quantity.Value,
-            product.ImageIds);
+            product.ImageIds,
+            Math.Round(product.Rating, 1, MidpointRounding.AwayFromZero),
+            product.ReviewsCount);
     }
 }

@@ -31,6 +31,8 @@ public sealed class GetProductDetailsConsumer(
                 0,
                 string.Empty,
                 0,
+                0.0m,
+                0,
                 false));
 
             return;
@@ -43,6 +45,8 @@ public sealed class GetProductDetailsConsumer(
             product.Price.Amount,
             product.Price.Currency.Code,
             product.Quantity.Value,
+            Math.Round(product.Rating, 1, MidpointRounding.AwayFromZero),
+            product.ReviewsCount,
             true));
     }
 }

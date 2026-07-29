@@ -1,5 +1,6 @@
 using FluentAssertions;
 using ProductApi.Domain.Products;
+using SharedLibrary.Domain.Abstractions;
 using SharedLibrary.Domain.Money;
 
 namespace ProductApi.Domain.UnitTests.Products;
@@ -26,6 +27,8 @@ public class ProductTests
         result.Value.Price.Should().Be(price);
         result.Value.Quantity.Should().Be(quantity);
         result.Value.ImageIds.Should().ContainSingle().Which.Should().Be(imageId);
+        result.Value.Rating.Should().Be(0.0m);
+        result.Value.ReviewsCount.Should().Be(0);
         result.Value.Id.Should().NotBeEmpty();
     }
 
@@ -86,5 +89,26 @@ public class ProductTests
         product.Price.Currency.Should().Be(Currency.Eur);
         product.Quantity.Value.Should().Be(5);
         product.ImageIds.Should().ContainSingle().Which.Should().Be(imageId);
+    }
+
+    [Fact]
+    public void AddReview_Should_UpdateRatingSummaryRoundedToOneDecimal()
+    {
+        // Arrange
+        var product = Product.Create(
+            new Name("Keyboard"),
+            new Description("Mechanical keyboard"),
+            new Money(99.99m, Currency.Usd),
+            new Quantity(10)).Value;
+
+        // Act
+        Result firstResult = product.AddReview(5);
+        Result secondResult = product.AddReview(4);
+
+        // Assert
+        firstResult.IsSuccess.Should().BeTrue();
+        secondResult.IsSuccess.Should().BeTrue();
+        product.Rating.Should().Be(4.5m);
+        product.ReviewsCount.Should().Be(2);
     }
 }

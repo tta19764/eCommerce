@@ -42,7 +42,7 @@ public sealed class IntegrationTestWebAppFactory : IAsyncLifetime
                     new TestResponse<GetProductDetailsResponse>(
                         _products.GetValueOrDefault(
                             request.ProductId,
-                            new GetProductDetailsResponse(request.ProductId, string.Empty, string.Empty, 0m, "USD", 0, false))));
+                            new GetProductDetailsResponse(request.ProductId, string.Empty, string.Empty, 0m, "USD", 0, 0.0m, 0, false))));
             });
 
         var userClient = Substitute.For<IRequestClient<GetUserDetailsRequest>>();
@@ -92,7 +92,7 @@ public sealed class IntegrationTestWebAppFactory : IAsyncLifetime
 
     public void AddProduct(Guid productId, string name, decimal price, string currencyCode = "USD", int quantity = 10)
     {
-        _products[productId] = new GetProductDetailsResponse(productId, name, string.Empty, price, currencyCode, quantity, true);
+        _products[productId] = new GetProductDetailsResponse(productId, name, string.Empty, price, currencyCode, quantity, 0.0m, 0, true);
     }
 
     public void AddUser(Guid userId, string fullName, string email)

@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ProductApi.Domain.Products;
+using ProductApi.Domain.Reviews;
 using ProductApi.Infrastructure.Repositories;
 using SharedLibrary.Domain.Abstractions;
 using SharedLibrary.Infrastructure;
@@ -31,6 +32,7 @@ public static class DependencyInjection
     private static void AddPersistence(IServiceCollection services)
     {
         services.AddScoped<IProductRepository, ProductRepository>();
+        services.AddScoped<IProductReviewRepository, ProductReviewRepository>();
         services.AddScoped<IUnitOfWork>(serviceProvider => serviceProvider.GetRequiredService<ProductDbContext>());
     }
 }

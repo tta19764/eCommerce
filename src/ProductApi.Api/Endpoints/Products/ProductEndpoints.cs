@@ -5,6 +5,9 @@ using ProductApi.Application.Products.DeleteProduct;
 using ProductApi.Application.Products.GetProduct;
 using ProductApi.Application.Products.GetProductPage;
 using ProductApi.Application.Products.UpdateProduct;
+using ProductApi.Application.Reviews;
+using ProductApi.Application.Reviews.CreateProductReview;
+using ProductApi.Application.Reviews.GetProductReviewsPage;
 using SharedLibrary.Api.Contracts;
 using SharedLibrary.Api.Extensions;
 using SharedLibrary.Application.Pagination;
@@ -57,6 +60,20 @@ public static class ProductEndpoints
             .WithSummary("Delete a product")
             .Produces(StatusCodes.Status204NoContent)
             .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
+
+        group.MapPost("{productId:guid}/reviews", CreateProductReview)
+            .WithName(nameof(CreateProductReview))
+            .WithSummary("Create a product review")
+            .Produces<ApiResponse<Guid>>(StatusCodes.Status201Created)
+            .Produces<ApiResponse<Guid>>(StatusCodes.Status400BadRequest)
+            .Produces<ApiResponse<Guid>>(StatusCodes.Status404NotFound);
+
+        group.MapGet("{productId:guid}/reviews", GetProductReviewsPage)
+            .WithName(nameof(GetProductReviewsPage))
+            .WithSummary("Get product reviews by page")
+            .Produces<ApiResponse<PagedListResponse<ProductReviewResponse>>>()
+            .Produces<ApiResponse<PagedListResponse<ProductReviewResponse>>>(StatusCodes.Status400BadRequest)
+            .Produces<ApiResponse<PagedListResponse<ProductReviewResponse>>>(StatusCodes.Status404NotFound);
 
         return builder;
     }
@@ -176,5 +193,68 @@ public static class ProductEndpoints
         return result.IsSuccess
             ? Results.NoContent()
             : Results.NotFound(result.MapToApiResponse());
+    }
+
+    /// <summary>
+    /// Creates a product review and updates the product rating summary.
+    /// </summary>
+    /// <param name="productId">The reviewed product identifier.</param>
+    /// <param name="request">The review request body.</param>
+    /// <param name="sender">The MediatR sender.</param>
+    /// <param name="cancellationToken">The request cancellation token.</param>
+    /// <returns>An HTTP result containing the created review identifier or validation errors.</returns>
+    public static async Task<IResult> CreateProductReview(
+        Guid productId,
+        CreateProductReviewRequest request,
+        ISender sender,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new CreateProductReviewCommand(
+                productId,
+                request.UserId,
+                request.Rating,
+                request.Comment),
+            cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            return Results.CreatedAtRoute(
+                nameof(GetProductReviewsPage),
+                new { productId, version = ProductApiApiVersions.V1RouteValue },
+                result.MapToApiResponse());
+        }
+
+        return result.Error.Code.EndsWith(".NotFound", StringComparison.Ordinal)
+            ? Results.NotFound(result.MapToApiResponse())
+            : Results.BadRequest(result.MapToApiResponse());
+    }
+
+    /// <summary>
+    /// Gets a page of reviews for a product.
+    /// </summary>
+    /// <param name="productId">The product identifier.</param>
+    /// <param name="request">The pagination request values.</param>
+    /// <param name="sender">The MediatR sender.</param>
+    /// <param name="cancellationToken">The request cancellation token.</param>
+    /// <returns>An HTTP result containing a page of product reviews or validation errors.</returns>
+    public static async Task<IResult> GetProductReviewsPage(
+        Guid productId,
+        [AsParameters] GetProductReviewsRequest request,
+        ISender sender,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new GetProductReviewsPageQuery(productId, request.Page, request.PageSize),
+            cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            return Results.Ok(result.MapToApiResponse());
+        }
+
+        return result.Error.Code.EndsWith(".NotFound", StringComparison.Ordinal)
+            ? Results.NotFound(result.MapToApiResponse())
+            : Results.BadRequest(result.MapToApiResponse());
     }
 }

@@ -4,6 +4,8 @@ using ProductApi.Application.Products.CreateProduct;
 using ProductApi.Application.Products.GetProduct;
 using ProductApi.Application.Products.GetProductPage;
 using ProductApi.Application.Products;
+using ProductApi.Application.Reviews.CreateProductReview;
+using ProductApi.Application.Reviews.GetProductReviewsPage;
 using SharedLibrary.Application.Pagination;
 using SharedLibrary.Domain.Abstractions;
 
@@ -30,6 +32,8 @@ public class ProductQueryTests(IntegrationTestWebAppFactory factory) : BaseInteg
         result.Value.Price.Should().Be(createCommand.Price);
         result.Value.Currency.Should().Be(createCommand.CurrencyCode);
         result.Value.Quantity.Should().Be(createCommand.Quantity);
+        result.Value.Rating.Should().Be(0.0m);
+        result.Value.ReviewsCount.Should().Be(0);
     }
 
     [Fact]
@@ -55,5 +59,40 @@ public class ProductQueryTests(IntegrationTestWebAppFactory factory) : BaseInteg
         result.Value.Page.Should().Be(1);
         result.Value.PageSize.Should().Be(2);
         result.Value.TotalCount.Should().BeGreaterThanOrEqualTo(3);
+    }
+
+    [Fact]
+    public async Task GetProductReviewsPage_Should_ReturnReviewsAndProductRating()
+    {
+        // Arrange
+        CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+        Guid productId = (await Sender.Send(
+            new CreateProductCommand($"Keyboard {Guid.NewGuid():N}", "Mechanical keyboard", 99.99m, "USD", 10),
+            cancellationToken)).Value;
+        DbContext.ChangeTracker.Clear();
+
+        await Sender.Send(
+            new CreateProductReviewCommand(productId, Guid.NewGuid(), 5, "Great keyboard"),
+            cancellationToken);
+        DbContext.ChangeTracker.Clear();
+
+        await Sender.Send(
+            new CreateProductReviewCommand(productId, Guid.NewGuid(), 4, "Good keyboard"),
+            cancellationToken);
+        DbContext.ChangeTracker.Clear();
+
+        // Act
+        Result<PagedListResponse<ProductApi.Application.Reviews.ProductReviewResponse>> reviewsResult =
+            await Sender.Send(new GetProductReviewsPageQuery(productId, 1, 10), cancellationToken);
+        Result<ProductResponse> productResult = await Sender.Send(new GetProductQuery(productId), cancellationToken);
+
+        // Assert
+        reviewsResult.IsSuccess.Should().BeTrue();
+        reviewsResult.Value.Items.Should().HaveCount(2);
+        reviewsResult.Value.TotalCount.Should().Be(2);
+
+        productResult.IsSuccess.Should().BeTrue();
+        productResult.Value.Rating.Should().Be(4.5m);
+        productResult.Value.ReviewsCount.Should().Be(2);
     }
 }

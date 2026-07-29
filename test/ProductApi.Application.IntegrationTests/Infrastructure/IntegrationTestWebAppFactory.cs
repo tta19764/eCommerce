@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using ProductApi.Application.IntegrationTests.Products;
 using ProductApi.Domain.Products;
+using ProductApi.Domain.Reviews;
 using SharedLibrary.Application.Abstractions.Caching;
 using ProductApi.Infrastructure;
 using ProductApi.Infrastructure.Repositories;
@@ -50,6 +51,7 @@ public sealed class IntegrationTestWebAppFactory : IAsyncLifetime
         services.AddDbContext<ProductDbContext>(options =>
             options.UseNpgsql($"{_dbContainer.GetConnectionString()};Pooling=False"));
         services.AddScoped<IProductRepository, ProductRepository>();
+        services.AddScoped<IProductReviewRepository, ProductReviewRepository>();
         services.AddScoped<IUnitOfWork>(serviceProvider => serviceProvider.GetRequiredService<ProductDbContext>());
         services.AddSingleton(imageClient);
         services.AddSingleton(cacheService);

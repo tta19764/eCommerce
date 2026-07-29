@@ -64,5 +64,12 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         builder.Property(product => product.ImageIds)
             .HasColumnType("uuid[]")
             .IsRequired();
+
+        builder.Property(product => product.Rating)
+            .HasPrecision(3, 1)
+            .IsRequired();
+
+        builder.Property(product => product.ReviewsCount)
+            .IsRequired();
     }
 }

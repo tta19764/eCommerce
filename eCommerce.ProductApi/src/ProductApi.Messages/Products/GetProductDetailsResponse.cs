@@ -9,6 +9,8 @@ namespace ProductApi.Messages.Products;
 /// <param name="Price">The current product price.</param>
 /// <param name="Currency">The product price currency code.</param>
 /// <param name="Quantity">The current available product quantity.</param>
+/// <param name="Rating">The average product rating rounded to one digit after the decimal point.</param>
+/// <param name="ReviewsCount">The number of product reviews.</param>
 /// <param name="Found">Indicates whether the product exists.</param>
 public sealed record GetProductDetailsResponse(
     Guid ProductId,
@@ -17,4 +19,6 @@ public sealed record GetProductDetailsResponse(
     decimal Price,
     string Currency,
     int Quantity,
+    decimal Rating,
+    int ReviewsCount,
     bool Found);
