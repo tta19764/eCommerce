@@ -32,7 +32,7 @@ public sealed class SmtpEmailSender(
             From = new MailAddress(emailOptions.Value.FromAddress, smtp.FromName),
             Subject = subject,
             Body = body,
-            IsBodyHtml = false
+            IsBodyHtml = true
         };
 
         message.To.Add(recipient);

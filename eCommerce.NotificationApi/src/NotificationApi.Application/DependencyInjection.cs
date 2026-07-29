@@ -1,4 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
+using NotificationApi.Application.Abstractions;
+using NotificationApi.Application.Templates;
 using SharedLibrary.Application;
 
 namespace NotificationApi.Application;
@@ -15,6 +17,7 @@ public static class DependencyInjection
     {
         services.AddSharedApplication(typeof(DependencyInjection).Assembly);
         services.AddScoped<NotificationJobProcessor>();
+        services.AddSingleton<IEmailTemplateRenderer, EmbeddedEmailTemplateRenderer>();
 
         return services;
     }

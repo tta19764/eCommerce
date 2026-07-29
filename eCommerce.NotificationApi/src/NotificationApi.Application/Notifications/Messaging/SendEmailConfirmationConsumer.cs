@@ -1,6 +1,7 @@
 using System.Text.Json;
 using MassTransit;
 using Microsoft.Extensions.Options;
+using NotificationApi.Application.Abstractions;
 using NotificationApi.Domain.Notifications;
 using NotificationApi.Messages.Emails;
 using SharedLibrary.Domain.Abstractions;
@@ -13,19 +14,18 @@ namespace NotificationApi.Application.Notifications.Messaging;
 public sealed class SendEmailConfirmationConsumer(
     INotificationJobRepository notificationJobRepository,
     IUnitOfWork unitOfWork,
-    IOptions<NotificationEmailOptions> emailOptions) : IConsumer<SendEmailConfirmationRequest>
+    IOptions<NotificationEmailOptions> emailOptions,
+    IEmailTemplateRenderer emailTemplateRenderer) : IConsumer<SendEmailConfirmationRequest>
 {
     public async Task Consume(ConsumeContext<SendEmailConfirmationRequest> context)
     {
         var message = context.Message;
         var confirmationUrl = BuildConfirmationUrl(message, emailOptions.Value);
         var subject = "Confirm your eCommerce account";
-        var body = $"""
-                   Hello {message.FirstName} {message.LastName},
-
-                   Confirm your account using this link:
-                   {confirmationUrl}
-                   """;
+        var body = emailTemplateRenderer.RenderEmailConfirmation(
+            message.FirstName,
+            message.LastName,
+            confirmationUrl);
 
         var payload = JsonSerializer.Serialize(message);
         var job = NotificationJob.CreateEmail(
