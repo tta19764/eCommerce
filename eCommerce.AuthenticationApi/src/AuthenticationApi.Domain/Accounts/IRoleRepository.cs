@@ -6,5 +6,11 @@ namespace AuthenticationApi.Domain.Accounts;
 public interface IRoleRepository
 {
     Task<Role?> GetByNameAsync(string name, CancellationToken cancellationToken = default);
-}
 
+    Task<IReadOnlyCollection<Role>> GetPageAsync(
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default);
+
+    Task<int> CountAsync(CancellationToken cancellationToken = default);
+}

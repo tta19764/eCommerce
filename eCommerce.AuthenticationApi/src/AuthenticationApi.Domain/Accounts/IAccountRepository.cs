@@ -9,10 +9,16 @@ public interface IAccountRepository
 
     Task<Account?> GetByEmailAsync(string email, CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyCollection<Account>> GetPageAsync(
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default);
+
+    Task<int> CountAsync(CancellationToken cancellationToken = default);
+
     void Add(Account account);
 
     void Update(Account account);
 
     void Delete(Account account);
 }
-

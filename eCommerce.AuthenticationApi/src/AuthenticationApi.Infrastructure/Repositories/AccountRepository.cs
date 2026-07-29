@@ -29,5 +29,27 @@ public sealed class AccountRepository(AuthenticationDbContext dbContext)
             .ThenInclude(rolePermission => rolePermission.Permission)
             .FirstOrDefaultAsync(account => account.Email.Value == email, cancellationToken);
     }
+
+    public new async Task<IReadOnlyCollection<Account>> GetPageAsync(
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        return await DbSet
+            .AsNoTracking()
+            .Include(account => account.Roles)
+            .ThenInclude(accountRole => accountRole.Role)
+            .ThenInclude(role => role.Permissions)
+            .ThenInclude(rolePermission => rolePermission.Permission)
+            .OrderByDescending(account => account.CreatedAtUtc)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<int> CountAsync(CancellationToken cancellationToken = default)
+    {
+        return await DbSet.CountAsync(cancellationToken);
+    }
 }
 

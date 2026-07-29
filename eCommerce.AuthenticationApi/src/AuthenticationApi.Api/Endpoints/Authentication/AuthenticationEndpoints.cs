@@ -1,7 +1,11 @@
 using AuthenticationApi.Application;
+using AuthenticationApi.Application.Accounts;
 using AuthenticationApi.Application.Accounts.DeleteAccount;
+using AuthenticationApi.Application.Accounts.GetAccounts;
+using AuthenticationApi.Application.Accounts.GetRoles;
 using AuthenticationApi.Application.Accounts.Login;
 using AuthenticationApi.Application.Accounts.Register;
+using AuthenticationApi.Application.Common;
 using AuthenticationApi.Domain.Accounts;
 using MediatR;
 using SharedLibrary.Api.Contracts;
@@ -36,6 +40,16 @@ public static class AuthenticationEndpoints
             .WithSummary("Log in with email and password")
             .Produces<ApiResponse<TokenResponse>>()
             .Produces<ApiResponse<TokenResponse>>(StatusCodes.Status401Unauthorized);
+
+        group.MapGet("roles", GetRoles)
+            .WithName(nameof(GetRoles))
+            .WithSummary("Get a page of roles with permissions")
+            .Produces<ApiResponse<PagedListResponse<RoleResponse>>>();
+
+        group.MapGet("accounts", GetAccounts)
+            .WithName(nameof(GetAccounts))
+            .WithSummary("Get a page of accounts with linked user profile data")
+            .Produces<ApiResponse<PagedListResponse<AccountResponse>>>();
 
         group.MapDelete("accounts/{accountId:guid}", DeleteAccount)
             .WithName(nameof(DeleteAccount))
@@ -72,6 +86,28 @@ public static class AuthenticationEndpoints
         return result.IsSuccess
             ? Results.Ok(result.MapToApiResponse())
             : Results.Unauthorized();
+    }
+
+    public static async Task<IResult> GetRoles(
+        ISender sender,
+        CancellationToken cancellationToken,
+        int page = 1,
+        int pageSize = 10)
+    {
+        var result = await sender.Send(new GetRolesPageQuery(page, pageSize), cancellationToken);
+
+        return Results.Ok(result.MapToApiResponse());
+    }
+
+    public static async Task<IResult> GetAccounts(
+        ISender sender,
+        CancellationToken cancellationToken,
+        int page = 1,
+        int pageSize = 10)
+    {
+        var result = await sender.Send(new GetAccountsPageQuery(page, pageSize), cancellationToken);
+
+        return Results.Ok(result.MapToApiResponse());
     }
 
     public static async Task<IResult> DeleteAccount(
