@@ -15,8 +15,8 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
+    app.ApplyMigrations<AuthenticationDbContext>();
     app.MapOpenApi();
-    await AuthenticationDataSeeder.SeedAsync(app.Services);
 }
 
 app.UseHttpsRedirection();
