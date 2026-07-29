@@ -1,4 +1,3 @@
-using AuthenticationApi.Application;
 using AuthenticationApi.Application.Abstractions;
 using AuthenticationApi.Domain.Accounts;
 using AuthenticationApi.Infrastructure.Authentication;

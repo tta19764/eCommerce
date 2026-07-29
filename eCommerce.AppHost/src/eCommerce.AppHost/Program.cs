@@ -10,6 +10,7 @@ var productDb = postgres.AddDatabase("product-db", "product_db");
 var orderDb = postgres.AddDatabase("order-db", "order_db");
 var userDb = postgres.AddDatabase("user-db", "user_db");
 var imageDb = postgres.AddDatabase("image-db", "image_db");
+var authenticationDb = postgres.AddDatabase("authentication-db", "authentication_db");
 
 var rabbitMq = builder.AddRabbitMQ("rabbitmq")
     .WithManagementPlugin()
@@ -23,7 +24,11 @@ var minio = builder.AddContainer("minio", "minio/minio")
     .WithHttpEndpoint(port: 9001, targetPort: 9001, name: "console")
     .WithVolume("ecommerce-minio-data", "/data");
 
-var authenticationApi = builder.AddProject<Projects.AuthenticationApi_Api>("authentication-api");
+var authenticationApi = builder.AddProject<Projects.AuthenticationApi_Api>("authentication-api")
+    .WithReference(authenticationDb, "Database")
+    .WithReference(rabbitMq)
+    .WaitFor(postgres)
+    .WaitFor(rabbitMq);
 
 var productApi = builder.AddProject<Projects.ProductApi_Api>("product-api")
     .WithReference(productDb, "Database")
