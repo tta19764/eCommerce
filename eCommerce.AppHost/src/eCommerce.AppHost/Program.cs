@@ -1,34 +1,91 @@
+using Microsoft.Extensions.Configuration;
+
 var builder = DistributedApplication.CreateBuilder(args);
 
-var postgresUser = builder.AddParameter("postgres-user", "postgres");
-var postgresPassword = builder.AddParameter("postgres-password", "postgres", secret: true);
+var postgresUser = builder.AddParameter("postgres-user");
+var postgresPassword = builder.AddParameter("postgres-password", secret: true);
+var minioRootUser = builder.AddParameter("minio-root-user");
+var minioRootPassword = builder.AddParameter("minio-root-password", secret: true);
+var keycloakAdminUser = builder.AddParameter("keycloak-admin-user");
+var keycloakAdminPassword = builder.AddParameter("keycloak-admin-password", secret: true);
+var keycloakAdminClientSecret = builder.AddParameter("keycloak-admin-client-secret", secret: true);
+var keycloakAuthClientSecret = builder.AddParameter("keycloak-auth-client-secret", secret: true);
 
-var postgres = builder.AddPostgres("postgres", postgresUser, postgresPassword, port: 5432)
-    .WithDataVolume("ecommerce-postgres-data");
+var postgresPort = GetRequiredInt("AppHost:Postgres:Port");
+var postgresDataVolume = GetRequired("AppHost:Postgres:DataVolume");
 
-var productDb = postgres.AddDatabase("product-db", "product_db");
-var orderDb = postgres.AddDatabase("order-db", "order_db");
-var userDb = postgres.AddDatabase("user-db", "user_db");
-var imageDb = postgres.AddDatabase("image-db", "image_db");
-var authenticationDb = postgres.AddDatabase("authentication-db", "authentication_db");
+var productDbName = GetRequired("AppHost:Postgres:Databases:Product");
+var orderDbName = GetRequired("AppHost:Postgres:Databases:Order");
+var userDbName = GetRequired("AppHost:Postgres:Databases:User");
+var imageDbName = GetRequired("AppHost:Postgres:Databases:Image");
+var authenticationDbName = GetRequired("AppHost:Postgres:Databases:Authentication");
+
+var rabbitMqDataVolume = GetRequired("AppHost:RabbitMq:DataVolume");
+
+var minioImage = GetRequired("AppHost:Minio:Image");
+var minioApiPort = GetRequiredInt("AppHost:Minio:ApiPort");
+var minioConsolePort = GetRequiredInt("AppHost:Minio:ConsolePort");
+var minioDataVolume = GetRequired("AppHost:Minio:DataVolume");
+
+var keycloakImage = GetRequired("AppHost:Keycloak:Image");
+var keycloakPort = GetRequiredInt("AppHost:Keycloak:Port");
+var keycloakHostname = GetRequired("AppHost:Keycloak:Hostname");
+var keycloakDataVolume = GetRequired("AppHost:Keycloak:DataVolume");
+
+var authenticationAudience = GetRequired("AppHost:Authentication:Audience");
+var authenticationMetadataUrl = GetRequired("AppHost:Authentication:MetadataUrl");
+var authenticationRequireHttpsMetadata = GetRequired("AppHost:Authentication:RequireHttpsMetadata");
+var authenticationIssuer = GetRequired("AppHost:Authentication:Issuer");
+
+var keycloakAdminUrl = GetRequired("AppHost:Authentication:Keycloak:AdminUrl");
+var keycloakTokenUrl = GetRequired("AppHost:Authentication:Keycloak:TokenUrl");
+var keycloakAdminClientId = GetRequired("AppHost:Authentication:Keycloak:AdminClientId");
+var keycloakAuthClientId = GetRequired("AppHost:Authentication:Keycloak:AuthClientId");
+
+var postgres = builder.AddPostgres("postgres", postgresUser, postgresPassword, port: postgresPort)
+    .WithDataVolume(postgresDataVolume);
+
+var productDb = postgres.AddDatabase("product-db", productDbName);
+var orderDb = postgres.AddDatabase("order-db", orderDbName);
+var userDb = postgres.AddDatabase("user-db", userDbName);
+var imageDb = postgres.AddDatabase("image-db", imageDbName);
+var authenticationDb = postgres.AddDatabase("authentication-db", authenticationDbName);
 
 var rabbitMq = builder.AddRabbitMQ("rabbitmq")
     .WithManagementPlugin()
-    .WithDataVolume("ecommerce-rabbitmq-data");
+    .WithDataVolume(rabbitMqDataVolume);
 
-var minio = builder.AddContainer("minio", "minio/minio")
+var minio = builder.AddContainer("minio", minioImage)
     .WithArgs("server", "/data", "--console-address", ":9001")
-    .WithEnvironment("MINIO_ROOT_USER", "minioadmin")
-    .WithEnvironment("MINIO_ROOT_PASSWORD", "minioadmin")
-    .WithHttpEndpoint(port: 9000, targetPort: 9000, name: "api")
-    .WithHttpEndpoint(port: 9001, targetPort: 9001, name: "console")
-    .WithVolume("ecommerce-minio-data", "/data");
+    .WithEnvironment("MINIO_ROOT_USER", minioRootUser)
+    .WithEnvironment("MINIO_ROOT_PASSWORD", minioRootPassword)
+    .WithHttpEndpoint(port: minioApiPort, targetPort: 9000, name: "api")
+    .WithHttpEndpoint(port: minioConsolePort, targetPort: 9001, name: "console")
+    .WithVolume(minioDataVolume, "/data");
+
+var keycloak = builder.AddContainer("keycloak", keycloakImage)
+    .WithArgs("start-dev", $"--http-port={keycloakPort}", $"--hostname={keycloakHostname}")
+    .WithEnvironment("KEYCLOAK_ADMIN", keycloakAdminUser)
+    .WithEnvironment("KEYCLOAK_ADMIN_PASSWORD", keycloakAdminPassword)
+    .WithHttpEndpoint(port: keycloakPort, targetPort: keycloakPort, name: "http")
+    .WithVolume(keycloakDataVolume, "/opt/keycloak/data");
 
 var authenticationApi = builder.AddProject<Projects.AuthenticationApi_Api>("authentication-api")
     .WithReference(authenticationDb, "Database")
     .WithReference(rabbitMq)
+    .WithEnvironment("Authentication__Audience", authenticationAudience)
+    .WithEnvironment("Authentication__MetadataUrl", authenticationMetadataUrl)
+    .WithEnvironment("Authentication__RequireHttpsMetadata", authenticationRequireHttpsMetadata)
+    .WithEnvironment("Authentication__Issuer", authenticationIssuer)
+    .WithEnvironment("Keycloak__AdminUrl", keycloakAdminUrl)
+    .WithEnvironment("Keycloak__TokenUrl", keycloakTokenUrl)
+    .WithEnvironment("Keycloak__AdminClientId", keycloakAdminClientId)
+    .WithEnvironment("Keycloak__AdminClientSecret", keycloakAdminClientSecret)
+    .WithEnvironment("Keycloak__AuthClientId", keycloakAuthClientId)
+    .WithEnvironment("Keycloak__AuthClientSecret", keycloakAuthClientSecret)
     .WaitFor(postgres)
-    .WaitFor(rabbitMq);
+    .WaitFor(rabbitMq)
+    .WaitFor(keycloak);
 
 var productApi = builder.AddProject<Projects.ProductApi_Api>("product-api")
     .WithReference(productDb, "Database")
@@ -67,3 +124,11 @@ builder.AddProject<Projects.GatewayApi_Api>("gateway-api")
     .WithExternalHttpEndpoints();
 
 await builder.Build().RunAsync();
+
+string GetRequired(string key) =>
+    builder.Configuration[key] ??
+    throw new InvalidOperationException($"Missing required configuration value '{key}'.");
+
+int GetRequiredInt(string key) =>
+    builder.Configuration.GetValue<int?>(key) ??
+    throw new InvalidOperationException($"Missing required configuration value '{key}'.");
