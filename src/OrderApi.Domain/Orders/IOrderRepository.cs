@@ -51,6 +51,18 @@ public interface IOrderRepository
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Counts orders matching the supplied optional total-price filters.
+    /// </summary>
+    /// <param name="minOrderPrice">The minimum total order price to include.</param>
+    /// <param name="maxOrderPrice">The maximum total order price to include.</param>
+    /// <param name="cancellationToken">The request cancellation token.</param>
+    /// <returns>The number of matching orders.</returns>
+    public Task<int> CountAsync(
+        decimal? minOrderPrice = null,
+        decimal? maxOrderPrice = null,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Gets orders placed by the supplied client.
     /// </summary>
     /// <param name="clientId">The client identifier.</param>
@@ -63,6 +75,14 @@ public interface IOrderRepository
         int page = 1,
         int pageSize = 10,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Counts orders placed by the supplied client.
+    /// </summary>
+    /// <param name="clientId">The client identifier.</param>
+    /// <param name="cancellationToken">The request cancellation token.</param>
+    /// <returns>The number of matching client orders.</returns>
+    public Task<int> CountByClientIdAsync(Guid clientId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Marks an order for deletion.

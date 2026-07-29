@@ -7,6 +7,7 @@ using ProductApi.Application.Products.GetProductPage;
 using ProductApi.Application.Products.UpdateProduct;
 using SharedLibrary.Api.Contracts;
 using SharedLibrary.Api.Extensions;
+using SharedLibrary.Application.Pagination;
 
 namespace ProductApi.Api.Endpoints.Products;
 
@@ -35,8 +36,8 @@ public static class ProductEndpoints
         group.MapGet(string.Empty, GetProducts)
             .WithName(nameof(GetProducts))
             .WithSummary("Get products by page")
-            .Produces<ApiResponse<IReadOnlyCollection<ProductResponse>>>()
-            .Produces<ApiResponse<IReadOnlyCollection<ProductResponse>>>(StatusCodes.Status400BadRequest);
+            .Produces<ApiResponse<PagedListResponse<ProductResponse>>>()
+            .Produces<ApiResponse<PagedListResponse<ProductResponse>>>(StatusCodes.Status400BadRequest);
 
         group.MapGet("{productId:guid}", GetProduct)
             .WithName(nameof(GetProduct))

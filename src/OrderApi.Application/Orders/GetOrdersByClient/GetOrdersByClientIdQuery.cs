@@ -1,4 +1,5 @@
-using SharedLibrary.Application.Abstractions.Messaging;
+using SharedLibrary.Application.Abstractions.Caching;
+using SharedLibrary.Application.Pagination;
 
 namespace OrderApi.Application.Orders.GetOrdersByClient;
 
@@ -11,4 +12,9 @@ namespace OrderApi.Application.Orders.GetOrdersByClient;
 public sealed record GetOrdersByClientIdQuery(
     Guid ClientId,
     int Page = 1,
-    int PageSize = 10) : IQuery<IReadOnlyCollection<OrderResponse>>;
+    int PageSize = 10) : ICachedQuery<PagedListResponse<OrderResponse>>
+{
+    public string CacheKey => $"orders:client:{ClientId}:page:{Page}:size:{PageSize}";
+
+    public TimeSpan? Expiration => TimeSpan.FromMinutes(1);
+}

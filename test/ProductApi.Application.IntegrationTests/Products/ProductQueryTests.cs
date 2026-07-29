@@ -4,6 +4,7 @@ using ProductApi.Application.Products.CreateProduct;
 using ProductApi.Application.Products.GetProduct;
 using ProductApi.Application.Products.GetProductPage;
 using ProductApi.Application.Products;
+using SharedLibrary.Application.Pagination;
 using SharedLibrary.Domain.Abstractions;
 
 namespace ProductApi.Application.IntegrationTests.Products;
@@ -44,11 +45,14 @@ public class ProductQueryTests(IntegrationTestWebAppFactory factory) : BaseInteg
         }
 
         // Act
-        Result<IReadOnlyCollection<ProductResponse>> result =
+        Result<PagedListResponse<ProductResponse>> result =
             await Sender.Send(new GetProductPageQuery(1, 2), cancellationToken);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        result.Value.Should().HaveCount(2);
+        result.Value.Items.Should().HaveCount(2);
+        result.Value.Page.Should().Be(1);
+        result.Value.PageSize.Should().Be(2);
+        result.Value.TotalCount.Should().BeGreaterThanOrEqualTo(3);
     }
 }

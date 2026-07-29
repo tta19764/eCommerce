@@ -8,6 +8,7 @@ using OrderApi.Domain.Orders;
 using OrderApi.Infrastructure;
 using OrderApi.Infrastructure.Repositories;
 using ProductApi.Messages.Products;
+using SharedLibrary.Application.Abstractions.Caching;
 using SharedLibrary.Domain.Abstractions;
 using Testcontainers.PostgreSql;
 using UserApi.Messages.Users;
@@ -60,6 +61,7 @@ public sealed class IntegrationTestWebAppFactory : IAsyncLifetime
             });
 
         var services = new ServiceCollection();
+        var cacheService = Substitute.For<ICacheService>();
 
         services.AddLogging();
         services.AddApplication();
@@ -70,6 +72,7 @@ public sealed class IntegrationTestWebAppFactory : IAsyncLifetime
         services.AddTransient<GetOrderFullInfoConsumer>();
         services.AddSingleton(productClient);
         services.AddSingleton(userClient);
+        services.AddSingleton(cacheService);
 
         _serviceProvider = services.BuildServiceProvider();
     }

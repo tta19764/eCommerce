@@ -85,6 +85,16 @@ public abstract class Repository<T, TContext>(TContext dbContext)
     }
 
     /// <summary>
+    /// Counts all entities in the repository.
+    /// </summary>
+    /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
+    /// <returns>The total number of entities.</returns>
+    public virtual Task<int> CountAsync(CancellationToken cancellationToken = default)
+    {
+        return DbSet.CountAsync(cancellationToken);
+    }
+
+    /// <summary>
     /// Adds an entity to the underlying context.
     /// </summary>
     /// <param name="entity">The entity to add.</param>

@@ -47,7 +47,7 @@ public sealed class AccountRepository(AuthenticationDbContext dbContext)
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<int> CountAsync(CancellationToken cancellationToken = default)
+    public override async Task<int> CountAsync(CancellationToken cancellationToken = default)
     {
         return await DbSet.CountAsync(cancellationToken);
     }

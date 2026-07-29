@@ -1,6 +1,6 @@
-using AuthenticationApi.Application.Common;
 using AuthenticationApi.Domain.Accounts;
 using SharedLibrary.Application.Abstractions.Messaging;
+using SharedLibrary.Application.Pagination;
 using SharedLibrary.Domain.Abstractions;
 
 namespace AuthenticationApi.Application.Accounts.GetRoles;

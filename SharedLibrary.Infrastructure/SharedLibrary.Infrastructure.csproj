@@ -9,11 +9,13 @@
     <ItemGroup>
       <PackageReference Include="MassTransit.RabbitMQ" Version="8.4.1" />
       <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.9" />
+      <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.10" />
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
       <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.10" />
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\SharedLibrary.Application\SharedLibrary.Application.csproj" />
       <ProjectReference Include="..\SharedLibrary.Domain\SharedLibrary.Domain.csproj" />
     </ItemGroup>
 

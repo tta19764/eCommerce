@@ -5,11 +5,11 @@ using AuthenticationApi.Application.Accounts.GetAccounts;
 using AuthenticationApi.Application.Accounts.GetRoles;
 using AuthenticationApi.Application.Accounts.Login;
 using AuthenticationApi.Application.Accounts.Register;
-using AuthenticationApi.Application.Common;
 using AuthenticationApi.Domain.Accounts;
 using MediatR;
 using SharedLibrary.Api.Contracts;
 using SharedLibrary.Api.Extensions;
+using SharedLibrary.Application.Pagination;
 
 namespace AuthenticationApi.Api.Endpoints.Authentication;
 

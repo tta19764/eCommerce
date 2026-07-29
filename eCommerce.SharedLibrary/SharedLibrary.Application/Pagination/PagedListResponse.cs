@@ -1,4 +1,4 @@
-namespace AuthenticationApi.Application.Common;
+namespace SharedLibrary.Application.Pagination;
 
 /// <summary>
 /// Paged read-model response.

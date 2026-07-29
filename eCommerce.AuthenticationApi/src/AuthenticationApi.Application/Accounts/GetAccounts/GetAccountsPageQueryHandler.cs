@@ -1,7 +1,7 @@
-using AuthenticationApi.Application.Common;
 using AuthenticationApi.Domain.Accounts;
 using MassTransit;
 using SharedLibrary.Application.Abstractions.Messaging;
+using SharedLibrary.Application.Pagination;
 using SharedLibrary.Domain.Abstractions;
 using UserApi.Messages.Users;
 

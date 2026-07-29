@@ -2,7 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SharedLibrary.Application.Abstractions.Caching;
 using SharedLibrary.Infrastructure.Options;
+using SharedLibrary.Infrastructure.Caching;
 using System.Reflection;
 using MassTransit;
 
@@ -23,6 +25,7 @@ public static class DependencyInjection
     public static IServiceCollection AddSharedInfrastructure<TContext>(this IServiceCollection services, IConfiguration configuration) where TContext: DbContext
     {
         AddJwtAuthentication(services, configuration);
+        AddCaching(services, configuration);
         AddPersistence<TContext>(services, configuration);
         AddGatewayOptions(services, configuration);
         
@@ -83,6 +86,26 @@ public static class DependencyInjection
             options.UseNpgsql(connectionString,
                 npgsqlOptions => npgsqlOptions.EnableRetryOnFailure());
         });
+    }
+
+    private static void AddCaching(IServiceCollection services, IConfiguration configuration)
+    {
+        var redisConnectionString = configuration.GetConnectionString("Redis")
+            ?? configuration.GetConnectionString("redis");
+
+        if (string.IsNullOrWhiteSpace(redisConnectionString))
+        {
+            services.AddDistributedMemoryCache();
+        }
+        else
+        {
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = redisConnectionString;
+            });
+        }
+
+        services.AddSingleton<ICacheService, CacheService>();
     }
     
     private static void AddGatewayOptions(IServiceCollection services, IConfiguration configuration)

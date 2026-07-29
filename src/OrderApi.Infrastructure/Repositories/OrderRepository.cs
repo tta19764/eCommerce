@@ -96,6 +96,26 @@ public class OrderRepository(OrderDbContext dbContext) : Repository<Order, Order
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<int> CountAsync(
+        decimal? minOrderPrice = null,
+        decimal? maxOrderPrice = null,
+        CancellationToken cancellationToken = default)
+    {
+        var query = FilterByOrderPrice(
+            DbSet.AsNoTracking().Include(order => order.Items),
+            minOrderPrice,
+            maxOrderPrice);
+
+        return await query.CountAsync(cancellationToken);
+    }
+
+    public Task<int> CountByClientIdAsync(Guid clientId, CancellationToken cancellationToken = default)
+    {
+        return DbSet
+            .AsNoTracking()
+            .CountAsync(order => order.ClientId == clientId, cancellationToken);
+    }
+
     private static IQueryable<Order> FilterByOrderPrice(
         IQueryable<Order> query,
         decimal? minOrderPrice,

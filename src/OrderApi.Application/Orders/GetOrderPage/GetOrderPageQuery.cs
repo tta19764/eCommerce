@@ -1,4 +1,5 @@
-using SharedLibrary.Application.Abstractions.Messaging;
+using SharedLibrary.Application.Abstractions.Caching;
+using SharedLibrary.Application.Pagination;
 
 namespace OrderApi.Application.Orders.GetOrderPage;
 
@@ -17,4 +18,10 @@ public sealed record GetOrderPageQuery(
     decimal? MinOrderPrice = null,
     decimal? MaxOrderPrice = null,
     bool SortByOrderPrice = false,
-    bool SortDescending = true) : IQuery<IReadOnlyCollection<OrderResponse>>;
+    bool SortDescending = true) : ICachedQuery<PagedListResponse<OrderResponse>>
+{
+    public string CacheKey =>
+        $"orders:page:{Page}:size:{PageSize}:min:{MinOrderPrice?.ToString() ?? "none"}:max:{MaxOrderPrice?.ToString() ?? "none"}:sort-price:{SortByOrderPrice}:desc:{SortDescending}";
+
+    public TimeSpan? Expiration => TimeSpan.FromMinutes(1);
+}

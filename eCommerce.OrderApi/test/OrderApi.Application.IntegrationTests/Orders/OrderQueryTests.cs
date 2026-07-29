@@ -5,6 +5,7 @@ using OrderApi.Application.Orders.CreateOrder;
 using OrderApi.Application.Orders.GetOrder;
 using OrderApi.Application.Orders.GetOrderPage;
 using OrderApi.Application.Orders.GetOrdersByClient;
+using SharedLibrary.Application.Pagination;
 using SharedLibrary.Domain.Abstractions;
 using Xunit;
 
@@ -55,13 +56,14 @@ public class OrderQueryTests(IntegrationTestWebAppFactory factory) : BaseIntegra
         DbContext.ChangeTracker.Clear();
 
         // Act
-        Result<IReadOnlyCollection<OrderResponse>> result = await Sender.Send(
+        Result<PagedListResponse<OrderResponse>> result = await Sender.Send(
             new GetOrderPageQuery(1, 10),
             cancellationToken);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        result.Value.Select(order => order.Id).Should().Contain([cheapOrderId, expensiveOrderId]);
+        result.Value.Items.Select(order => order.Id).Should().Contain([cheapOrderId, expensiveOrderId]);
+        result.Value.TotalCount.Should().BeGreaterThanOrEqualTo(2);
     }
 
     [Fact]
@@ -83,14 +85,15 @@ public class OrderQueryTests(IntegrationTestWebAppFactory factory) : BaseIntegra
         DbContext.ChangeTracker.Clear();
 
         // Act
-        Result<IReadOnlyCollection<OrderResponse>> result = await Sender.Send(
+        Result<PagedListResponse<OrderResponse>> result = await Sender.Send(
             new GetOrdersByClientIdQuery(clientId, 1, 10),
             cancellationToken);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        result.Value.Should().ContainSingle();
-        result.Value.Single().Id.Should().Be(clientOrderId);
-        result.Value.Single().ClientId.Should().Be(clientId);
+        result.Value.Items.Should().ContainSingle();
+        result.Value.Items.Single().Id.Should().Be(clientOrderId);
+        result.Value.Items.Single().ClientId.Should().Be(clientId);
+        result.Value.TotalCount.Should().Be(1);
     }
 }

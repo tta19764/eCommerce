@@ -40,6 +40,13 @@ public interface IProductRepository
     public Task<IEnumerable<Product>> GetPageAsync(int page = 1, int pageSize = 10, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Counts all products.
+    /// </summary>
+    /// <param name="cancellationToken">The request cancellation token.</param>
+    /// <returns>The total number of products.</returns>
+    public Task<int> CountAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Marks a product for deletion.
     /// </summary>
     /// <param name="product">The product to delete.</param>

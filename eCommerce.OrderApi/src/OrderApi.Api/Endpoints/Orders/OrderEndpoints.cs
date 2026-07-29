@@ -9,6 +9,7 @@ using OrderApi.Application.Orders.GetOrdersByClient;
 using OrderApi.Application.Orders.UpdateOrder;
 using SharedLibrary.Api.Contracts;
 using SharedLibrary.Api.Extensions;
+using SharedLibrary.Application.Pagination;
 
 namespace OrderApi.Api.Endpoints.Orders;
 
@@ -27,7 +28,7 @@ public static class OrderEndpoints
 
         group.MapGet(string.Empty, GetOrders)
             .WithName(nameof(GetOrders))
-            .Produces<ApiResponse<IReadOnlyCollection<OrderResponse>>>();
+            .Produces<ApiResponse<PagedListResponse<OrderResponse>>>();
 
         group.MapGet("{orderId:guid}", GetOrder)
             .WithName(nameof(GetOrder))
@@ -36,7 +37,7 @@ public static class OrderEndpoints
 
         group.MapGet("clients/{clientId:guid}", GetOrdersByClient)
             .WithName(nameof(GetOrdersByClient))
-            .Produces<ApiResponse<IReadOnlyCollection<OrderResponse>>>();
+            .Produces<ApiResponse<PagedListResponse<OrderResponse>>>();
 
         group.MapPut("{orderId:guid}", UpdateOrder)
             .WithName(nameof(UpdateOrder))
