@@ -12,4 +12,10 @@ public sealed class AuthorizationToken
 
     [JsonPropertyName("expires_in")]
     public int ExpiresIn { get; init; }
+
+    [JsonPropertyName("refresh_token")]
+    public string RefreshToken { get; init; } = string.Empty;
+
+    [JsonPropertyName("refresh_expires_in")]
+    public int RefreshExpiresIn { get; init; }
 }

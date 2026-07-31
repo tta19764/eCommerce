@@ -4,6 +4,7 @@ using AuthenticationApi.Application.Accounts.DeleteAccount;
 using AuthenticationApi.Application.Accounts.GetAccounts;
 using AuthenticationApi.Application.Accounts.GetRoles;
 using AuthenticationApi.Application.Accounts.Login;
+using AuthenticationApi.Application.Accounts.RefreshToken;
 using AuthenticationApi.Application.Accounts.Register;
 using AuthenticationApi.Domain.Accounts;
 using MediatR;
@@ -38,6 +39,12 @@ public static class AuthenticationEndpoints
         group.MapPost("login", Login)
             .WithName(nameof(Login))
             .WithSummary("Log in with email and password")
+            .Produces<ApiResponse<TokenResponse>>()
+            .Produces<ApiResponse<TokenResponse>>(StatusCodes.Status401Unauthorized);
+
+        group.MapPost("refresh", Refresh)
+            .WithName(nameof(Refresh))
+            .WithSummary("Refresh access and refresh tokens")
             .Produces<ApiResponse<TokenResponse>>()
             .Produces<ApiResponse<TokenResponse>>(StatusCodes.Status401Unauthorized);
 
@@ -78,6 +85,18 @@ public static class AuthenticationEndpoints
 
     public static async Task<IResult> Login(
         LoginCommand command,
+        ISender sender,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(command, cancellationToken);
+
+        return result.IsSuccess
+            ? Results.Ok(result.MapToApiResponse())
+            : Results.Unauthorized();
+    }
+
+    public static async Task<IResult> Refresh(
+        RefreshTokenCommand command,
         ISender sender,
         CancellationToken cancellationToken)
     {

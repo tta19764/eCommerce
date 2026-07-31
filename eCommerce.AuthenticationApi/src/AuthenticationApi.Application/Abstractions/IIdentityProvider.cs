@@ -20,5 +20,9 @@ public interface IIdentityProvider
         string password,
         CancellationToken cancellationToken = default);
 
+    Task<Result<TokenResponse>> RefreshTokenAsync(
+        string refreshToken,
+        CancellationToken cancellationToken = default);
+
     Task<Result> DeleteAsync(Guid accountId, CancellationToken cancellationToken = default);
 }

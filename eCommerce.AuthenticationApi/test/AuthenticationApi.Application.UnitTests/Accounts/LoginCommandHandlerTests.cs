@@ -22,7 +22,11 @@ public class LoginCommandHandlerTests
             Guid.NewGuid(),
             new Email("JOHN.SMITH@EXAMPLE.COM")).Value;
 
-        var tokenResponse = new TokenResponse("access-token", DateTime.UtcNow.AddMinutes(5));
+        var tokenResponse = new TokenResponse(
+            "access-token",
+            DateTime.UtcNow.AddMinutes(5),
+            "refresh-token",
+            DateTime.UtcNow.AddDays(7));
 
         _accountRepositoryMock
             .GetByEmailAsync("JOHN.SMITH@EXAMPLE.COM", cancellationToken)

@@ -17,6 +17,7 @@ public sealed class KeycloakIdentityProvider(
     IOptions<KeycloakOptions> options) : IIdentityProvider
 {
     private const string PasswordCredentialType = "password";
+    private const string RefreshTokenGrantType = "refresh_token";
     private const string TokenClientName = "Keycloak.Token";
 
     private readonly KeycloakOptions _options = options.Value;
@@ -81,34 +82,22 @@ public sealed class KeycloakIdentityProvider(
             new("password", password)
         };
 
-        try
+        return await RequestTokenAsync(requestParameters, cancellationToken);
+    }
+
+    public async Task<Result<TokenResponse>> RefreshTokenAsync(
+        string refreshToken,
+        CancellationToken cancellationToken = default)
+    {
+        var requestParameters = new KeyValuePair<string, string>[]
         {
-            var tokenClient = httpClientFactory.CreateClient(TokenClientName);
-            var response = await tokenClient.PostAsync(
-                string.Empty,
-                new FormUrlEncodedContent(requestParameters),
-                cancellationToken);
+            new("client_id", _options.AuthClientId),
+            new("client_secret", _options.AuthClientSecret),
+            new("grant_type", RefreshTokenGrantType),
+            new("refresh_token", refreshToken)
+        };
 
-            if (!response.IsSuccessStatusCode)
-            {
-                return Result.Failure<TokenResponse>(AccountErrors.InvalidCredentials);
-            }
-
-            var token = await response.Content.ReadFromJsonAsync<AuthorizationToken>(cancellationToken);
-
-            if (token is null || string.IsNullOrWhiteSpace(token.AccessToken))
-            {
-                return Result.Failure<TokenResponse>(AccountErrors.InvalidCredentials);
-            }
-
-            var expiresAtUtc = DateTime.UtcNow.AddSeconds(token.ExpiresIn);
-
-            return Result.Success(new TokenResponse(token.AccessToken, expiresAtUtc));
-        }
-        catch (HttpRequestException)
-        {
-            return Result.Failure<TokenResponse>(AccountErrors.InvalidCredentials);
-        }
+        return await RequestTokenAsync(requestParameters, cancellationToken);
     }
 
     public async Task<Result> DeleteAsync(Guid accountId, CancellationToken cancellationToken = default)
@@ -125,6 +114,46 @@ public sealed class KeycloakIdentityProvider(
         catch (HttpRequestException)
         {
             return Result.Failure(AccountErrors.IdentityDeletionFailed);
+        }
+    }
+
+    private async Task<Result<TokenResponse>> RequestTokenAsync(
+        IEnumerable<KeyValuePair<string, string>> requestParameters,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var tokenClient = httpClientFactory.CreateClient(TokenClientName);
+            var response = await tokenClient.PostAsync(
+                string.Empty,
+                new FormUrlEncodedContent(requestParameters),
+                cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return Result.Failure<TokenResponse>(AccountErrors.InvalidCredentials);
+            }
+
+            var token = await response.Content.ReadFromJsonAsync<AuthorizationToken>(cancellationToken);
+
+            if (token is null ||
+                string.IsNullOrWhiteSpace(token.AccessToken) ||
+                string.IsNullOrWhiteSpace(token.RefreshToken))
+            {
+                return Result.Failure<TokenResponse>(AccountErrors.InvalidCredentials);
+            }
+
+            var issuedAtUtc = DateTime.UtcNow;
+
+            return Result.Success(new TokenResponse(
+                token.AccessToken,
+                issuedAtUtc.AddSeconds(token.ExpiresIn),
+                token.RefreshToken,
+                issuedAtUtc.AddSeconds(token.RefreshExpiresIn)));
+        }
+        catch (HttpRequestException)
+        {
+            return Result.Failure<TokenResponse>(AccountErrors.InvalidCredentials);
         }
     }
 }
