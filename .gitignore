@@ -11,3 +11,11 @@ riderModule.iml
 .idea/
 *.DotSettings.user
 logs/
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+.angular/
+**/.angular/
+out-tsc/
+**/out-tsc/

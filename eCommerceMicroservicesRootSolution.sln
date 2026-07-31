@@ -139,6 +139,52 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotificationApi.Messages", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotificationApi.Infrastructure", "eCommerce.NotificationApi\src\NotificationApi.Infrastructure\NotificationApi.Infrastructure.csproj", "{7511A654-14FA-44C9-A241-BD24BFFCCCCB}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "eCommerce.WebApp", "eCommerce.WebApp", "{D71C29DC-C031-4873-AF47-43D198E83178}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A2A7AA25-A55E-4AC4-8D28-E73CFB6C09AB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ecommerce-web-app", "ecommerce-web-app", "{DB1DF386-A7DC-4B0C-9335-19D93F5E1D68}"
+	ProjectSection(SolutionItems) = preProject
+		eCommerce.WebApp\src\ecommerce-web-app\.editorconfig = eCommerce.WebApp\src\ecommerce-web-app\.editorconfig
+		eCommerce.WebApp\src\ecommerce-web-app\.gitignore = eCommerce.WebApp\src\ecommerce-web-app\.gitignore
+		eCommerce.WebApp\src\ecommerce-web-app\angular.json = eCommerce.WebApp\src\ecommerce-web-app\angular.json
+		eCommerce.WebApp\src\ecommerce-web-app\package-lock.json = eCommerce.WebApp\src\ecommerce-web-app\package-lock.json
+		eCommerce.WebApp\src\ecommerce-web-app\package.json = eCommerce.WebApp\src\ecommerce-web-app\package.json
+		eCommerce.WebApp\src\ecommerce-web-app\README.md = eCommerce.WebApp\src\ecommerce-web-app\README.md
+		eCommerce.WebApp\src\ecommerce-web-app\tsconfig.app.json = eCommerce.WebApp\src\ecommerce-web-app\tsconfig.app.json
+		eCommerce.WebApp\src\ecommerce-web-app\tsconfig.json = eCommerce.WebApp\src\ecommerce-web-app\tsconfig.json
+		eCommerce.WebApp\src\ecommerce-web-app\tsconfig.spec.json = eCommerce.WebApp\src\ecommerce-web-app\tsconfig.spec.json
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".vscode", ".vscode", "{F987B9BB-A1DD-4B9C-B88F-E2513ED14256}"
+	ProjectSection(SolutionItems) = preProject
+		eCommerce.WebApp\src\ecommerce-web-app\.vscode\extensions.json = eCommerce.WebApp\src\ecommerce-web-app\.vscode\extensions.json
+		eCommerce.WebApp\src\ecommerce-web-app\.vscode\launch.json = eCommerce.WebApp\src\ecommerce-web-app\.vscode\launch.json
+		eCommerce.WebApp\src\ecommerce-web-app\.vscode\tasks.json = eCommerce.WebApp\src\ecommerce-web-app\.vscode\tasks.json
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "public", "public", "{00C06861-4A78-4B08-908E-2743D16FE113}"
+	ProjectSection(SolutionItems) = preProject
+		eCommerce.WebApp\src\ecommerce-web-app\public\favicon.ico = eCommerce.WebApp\src\ecommerce-web-app\public\favicon.ico
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{4E92B185-30B7-4E1A-B4FD-8B7652687515}"
+	ProjectSection(SolutionItems) = preProject
+		eCommerce.WebApp\src\ecommerce-web-app\src\index.html = eCommerce.WebApp\src\ecommerce-web-app\src\index.html
+		eCommerce.WebApp\src\ecommerce-web-app\src\main.ts = eCommerce.WebApp\src\ecommerce-web-app\src\main.ts
+		eCommerce.WebApp\src\ecommerce-web-app\src\styles.scss = eCommerce.WebApp\src\ecommerce-web-app\src\styles.scss
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "app", "app", "{0C5045B4-8925-4524-A7C9-9FC55B864E1C}"
+	ProjectSection(SolutionItems) = preProject
+		eCommerce.WebApp\src\ecommerce-web-app\src\app\app.config.ts = eCommerce.WebApp\src\ecommerce-web-app\src\app\app.config.ts
+		eCommerce.WebApp\src\ecommerce-web-app\src\app\app.html = eCommerce.WebApp\src\ecommerce-web-app\src\app\app.html
+		eCommerce.WebApp\src\ecommerce-web-app\src\app\app.routes.ts = eCommerce.WebApp\src\ecommerce-web-app\src\app\app.routes.ts
+		eCommerce.WebApp\src\ecommerce-web-app\src\app\app.scss = eCommerce.WebApp\src\ecommerce-web-app\src\app\app.scss
+		eCommerce.WebApp\src\ecommerce-web-app\src\app\app.spec.ts = eCommerce.WebApp\src\ecommerce-web-app\src\app\app.spec.ts
+		eCommerce.WebApp\src\ecommerce-web-app\src\app\app.ts = eCommerce.WebApp\src\ecommerce-web-app\src\app\app.ts
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -765,5 +811,11 @@ Global
 		{89A6158C-3082-4791-8605-516096BF5601} = {06D2461F-9613-B861-14E2-2C4827489749}
 		{7CB818E4-426B-4F4C-92D1-E30F5D3CB7A1} = {06D2461F-9613-B861-14E2-2C4827489749}
 		{7511A654-14FA-44C9-A241-BD24BFFCCCCB} = {06D2461F-9613-B861-14E2-2C4827489749}
+		{A2A7AA25-A55E-4AC4-8D28-E73CFB6C09AB} = {D71C29DC-C031-4873-AF47-43D198E83178}
+		{DB1DF386-A7DC-4B0C-9335-19D93F5E1D68} = {A2A7AA25-A55E-4AC4-8D28-E73CFB6C09AB}
+		{F987B9BB-A1DD-4B9C-B88F-E2513ED14256} = {DB1DF386-A7DC-4B0C-9335-19D93F5E1D68}
+		{00C06861-4A78-4B08-908E-2743D16FE113} = {DB1DF386-A7DC-4B0C-9335-19D93F5E1D68}
+		{4E92B185-30B7-4E1A-B4FD-8B7652687515} = {DB1DF386-A7DC-4B0C-9335-19D93F5E1D68}
+		{0C5045B4-8925-4524-A7C9-9FC55B864E1C} = {4E92B185-30B7-4E1A-B4FD-8B7652687515}
 	EndGlobalSection
 EndGlobal
