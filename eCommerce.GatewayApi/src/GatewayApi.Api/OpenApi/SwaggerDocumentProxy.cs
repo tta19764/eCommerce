@@ -9,6 +9,8 @@ public sealed class SwaggerDocumentProxy(
     IOptions<SwaggerServiceOptions> options,
     IOptions<GatewaySignatureOptions> gatewayOptions)
 {
+    private const string BearerSecuritySchemeName = "Bearer";
+
     public async Task<IResult> GetSwaggerDocumentAsync(
         string serviceName,
         HttpContext context,
@@ -51,6 +53,7 @@ public sealed class SwaggerDocumentProxy(
             RewriteInfo(json, service);
             RewriteServers(json, context);
             RewritePaths(json, service.RoutePrefix);
+            AddBearerSecurity(json);
 
             return Results.Json(json);
         }
@@ -110,6 +113,57 @@ public sealed class SwaggerDocumentProxy(
         }
 
         document["paths"] = rewrittenPaths;
+    }
+
+    private static void AddBearerSecurity(JsonObject document)
+    {
+        var components = document["components"] as JsonObject ?? [];
+        var securitySchemes = components["securitySchemes"] as JsonObject ?? [];
+
+        securitySchemes[BearerSecuritySchemeName] = new JsonObject
+        {
+            ["type"] = "http",
+            ["scheme"] = "bearer",
+            ["bearerFormat"] = "JWT",
+            ["description"] = "Paste the access token returned from the authentication login or refresh endpoint."
+        };
+
+        components["securitySchemes"] = securitySchemes;
+        document["components"] = components;
+
+        if (document["paths"] is not JsonObject paths)
+        {
+            return;
+        }
+
+        foreach (var path in paths)
+        {
+            if (path.Value is not JsonObject pathItem)
+            {
+                continue;
+            }
+
+            foreach (var operation in pathItem)
+            {
+                if (operation.Value is JsonObject operationObject &&
+                    RequiresBearerToken(operationObject))
+                {
+                    operationObject["security"] = new JsonArray
+                    {
+                        new JsonObject
+                        {
+                            [BearerSecuritySchemeName] = new JsonArray()
+                        }
+                    };
+                }
+            }
+        }
+    }
+
+    private static bool RequiresBearerToken(JsonObject operation)
+    {
+        return operation["responses"] is JsonObject responses &&
+            responses.ContainsKey(StatusCodes.Status401Unauthorized.ToString());
     }
 
     private static string RewritePath(string path, string routePrefix)

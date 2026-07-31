@@ -51,19 +51,25 @@ public static class AuthenticationEndpoints
         group.MapGet("roles", GetRoles)
             .WithName(nameof(GetRoles))
             .WithSummary("Get a page of roles with permissions")
-            .Produces<ApiResponse<PagedListResponse<RoleResponse>>>();
+            .Produces<ApiResponse<PagedListResponse<RoleResponse>>>()
+            .Produces(StatusCodes.Status401Unauthorized)
+            .RequireAuthorization();
 
         group.MapGet("accounts", GetAccounts)
             .WithName(nameof(GetAccounts))
             .WithSummary("Get a page of accounts with linked user profile data")
-            .Produces<ApiResponse<PagedListResponse<AccountResponse>>>();
+            .Produces<ApiResponse<PagedListResponse<AccountResponse>>>()
+            .Produces(StatusCodes.Status401Unauthorized)
+            .RequireAuthorization();
 
         group.MapDelete("accounts/{accountId:guid}", DeleteAccount)
             .WithName(nameof(DeleteAccount))
             .WithSummary("Delete an account")
             .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status401Unauthorized)
             .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
-            .Produces<ApiResponse<object>>(StatusCodes.Status409Conflict);
+            .Produces<ApiResponse<object>>(StatusCodes.Status409Conflict)
+            .RequireAuthorization();
 
         return builder;
     }

@@ -70,6 +70,8 @@ public static class DependencyInjection
         services
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer();
+
+        services.AddAuthorization();
         
         services.Configure<AuthenticationOptions>(configuration.GetSection("Authentication"));
         services.ConfigureOptions<JwtBearerOptionsSetup>();

@@ -24,7 +24,9 @@ public static class ImageEndpoints
             .DisableAntiforgery()
             .Accepts<IFormFile>("multipart/form-data")
             .Produces<ApiResponse<ImageResponse>>(StatusCodes.Status201Created)
-            .Produces<ApiResponse<ImageResponse>>(StatusCodes.Status400BadRequest);
+            .Produces<ApiResponse<ImageResponse>>(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status401Unauthorized)
+            .RequireAuthorization();
 
         group.MapGet("{imageId:guid}", GetImage)
             .WithName(nameof(GetImage))
@@ -42,7 +44,9 @@ public static class ImageEndpoints
             .WithName(nameof(DeleteImage))
             .WithSummary("Delete an image")
             .Produces(StatusCodes.Status204NoContent)
-            .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
+            .RequireAuthorization();
 
         return builder;
     }

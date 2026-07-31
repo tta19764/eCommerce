@@ -34,7 +34,9 @@ public static class ProductEndpoints
             .WithName(nameof(CreateProduct))
             .WithSummary("Create a product")
             .Produces<ApiResponse<Guid>>(StatusCodes.Status201Created)
-            .Produces<ApiResponse<Guid>>(StatusCodes.Status400BadRequest);
+            .Produces<ApiResponse<Guid>>(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status401Unauthorized)
+            .RequireAuthorization();
 
         group.MapGet(string.Empty, GetProducts)
             .WithName(nameof(GetProducts))
@@ -52,21 +54,27 @@ public static class ProductEndpoints
             .WithName(nameof(UpdateProduct))
             .WithSummary("Update product details")
             .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status401Unauthorized)
             .Produces<ApiResponse<object>>(StatusCodes.Status400BadRequest)
-            .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
+            .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
+            .RequireAuthorization();
 
         group.MapDelete("{productId:guid}", DeleteProduct)
             .WithName(nameof(DeleteProduct))
             .WithSummary("Delete a product")
             .Produces(StatusCodes.Status204NoContent)
-            .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
+            .RequireAuthorization();
 
         group.MapPost("{productId:guid}/reviews", CreateProductReview)
             .WithName(nameof(CreateProductReview))
             .WithSummary("Create a product review")
             .Produces<ApiResponse<Guid>>(StatusCodes.Status201Created)
+            .Produces(StatusCodes.Status401Unauthorized)
             .Produces<ApiResponse<Guid>>(StatusCodes.Status400BadRequest)
-            .Produces<ApiResponse<Guid>>(StatusCodes.Status404NotFound);
+            .Produces<ApiResponse<Guid>>(StatusCodes.Status404NotFound)
+            .RequireAuthorization();
 
         group.MapGet("{productId:guid}/reviews", GetProductReviewsPage)
             .WithName(nameof(GetProductReviewsPage))

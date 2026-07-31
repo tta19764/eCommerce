@@ -27,13 +27,17 @@ public static class UserEndpoints
         group.MapGet("{userId:guid}", GetUser)
             .WithName(nameof(GetUser))
             .Produces<ApiResponse<UserResponse>>()
-            .Produces<ApiResponse<UserResponse>>(StatusCodes.Status404NotFound);
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces<ApiResponse<UserResponse>>(StatusCodes.Status404NotFound)
+            .RequireAuthorization();
 
         group.MapPut("{userId:guid}", UpdateUser)
             .WithName(nameof(UpdateUser))
             .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status401Unauthorized)
             .Produces<ApiResponse<object>>(StatusCodes.Status400BadRequest)
-            .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound);
+            .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
+            .RequireAuthorization();
 
         return builder;
     }

@@ -47,6 +47,8 @@ public static class ApplicationBuilderExtensions
         return app
             .UseMiddleware<ExceptionHandlingMiddleware>()
             .UseMiddleware<GatewayOnlyMiddleware>()
-            .UseMiddleware<RequestContextLoggingMiddleware>();
+            .UseMiddleware<RequestContextLoggingMiddleware>()
+            .UseAuthentication()
+            .UseAuthorization();
     }
 }
