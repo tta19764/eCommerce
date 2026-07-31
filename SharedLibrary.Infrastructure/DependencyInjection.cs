@@ -2,7 +2,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using SharedLibrary.Application.Authorization;
 using SharedLibrary.Application.Abstractions.Caching;
+using SharedLibrary.Infrastructure.Authorization;
 using SharedLibrary.Infrastructure.Options;
 using SharedLibrary.Infrastructure.Caching;
 using System.Reflection;
@@ -71,9 +75,22 @@ public static class DependencyInjection
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer();
 
-        services.AddAuthorization();
+        services.AddAuthorization(options =>
+        {
+            foreach (var permission in ApplicationPermissions.All)
+            {
+                options.AddPolicy(
+                    permission,
+                    policy => policy
+                        .RequireAuthenticatedUser()
+                        .AddRequirements(new PermissionRequirement(permission)));
+            }
+        });
+
+        services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
+        services.AddTransient<IClaimsTransformation, KeycloakRoleClaimsTransformation>();
         
-        services.Configure<AuthenticationOptions>(configuration.GetSection("Authentication"));
+        services.Configure<Options.AuthenticationOptions>(configuration.GetSection("Authentication"));
         services.ConfigureOptions<JwtBearerOptionsSetup>();
     }
 

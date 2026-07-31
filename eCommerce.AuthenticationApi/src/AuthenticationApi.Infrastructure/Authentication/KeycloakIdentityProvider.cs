@@ -4,6 +4,7 @@ using AuthenticationApi.Application.Abstractions;
 using AuthenticationApi.Domain.Accounts;
 using AuthenticationApi.Infrastructure.Authentication.Models;
 using Microsoft.Extensions.Options;
+using SharedLibrary.Application.Authorization;
 using SharedLibrary.Domain.Abstractions;
 
 namespace AuthenticationApi.Infrastructure.Authentication;
@@ -56,7 +57,17 @@ public sealed class KeycloakIdentityProvider(
         {
             var response = await adminClient.PostAsJsonAsync("users", user, cancellationToken);
 
-            return response.IsSuccessStatusCode
+            if (!response.IsSuccessStatusCode)
+            {
+                return Result.Failure<string>(AccountErrors.IdentityRegistrationFailed);
+            }
+
+            var roleAssignmentResult = await AssignRealmRoleAsync(
+                accountId,
+                ApplicationRoles.Customer,
+                cancellationToken);
+
+            return roleAssignmentResult.IsSuccess
                 ? Result.Success(accountId.ToString())
                 : Result.Failure<string>(AccountErrors.IdentityRegistrationFailed);
         }
@@ -155,5 +166,40 @@ public sealed class KeycloakIdentityProvider(
         {
             return Result.Failure<TokenResponse>(AccountErrors.InvalidCredentials);
         }
+    }
+
+    private async Task<Result> AssignRealmRoleAsync(
+        Guid accountId,
+        string roleName,
+        CancellationToken cancellationToken)
+    {
+        var role = await GetRealmRoleAsync(roleName, cancellationToken);
+
+        if (role is null)
+        {
+            return Result.Failure(AccountErrors.IdentityRegistrationFailed);
+        }
+
+        var response = await adminClient.PostAsJsonAsync(
+            $"users/{accountId}/role-mappings/realm",
+            new[] { role },
+            cancellationToken);
+
+        return response.IsSuccessStatusCode
+            ? Result.Success()
+            : Result.Failure(AccountErrors.IdentityRegistrationFailed);
+    }
+
+    private async Task<RoleRepresentationModel?> GetRealmRoleAsync(
+        string roleName,
+        CancellationToken cancellationToken)
+    {
+        var response = await adminClient.GetAsync(
+            $"roles/{Uri.EscapeDataString(roleName)}",
+            cancellationToken);
+
+        return response.IsSuccessStatusCode
+            ? await response.Content.ReadFromJsonAsync<RoleRepresentationModel>(cancellationToken)
+            : null;
     }
 }

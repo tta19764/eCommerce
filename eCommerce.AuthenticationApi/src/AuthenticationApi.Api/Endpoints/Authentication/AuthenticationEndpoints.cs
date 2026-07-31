@@ -10,6 +10,7 @@ using AuthenticationApi.Domain.Accounts;
 using MediatR;
 using SharedLibrary.Api.Contracts;
 using SharedLibrary.Api.Extensions;
+using SharedLibrary.Application.Authorization;
 using SharedLibrary.Application.Pagination;
 
 namespace AuthenticationApi.Api.Endpoints.Authentication;
@@ -53,14 +54,14 @@ public static class AuthenticationEndpoints
             .WithSummary("Get a page of roles with permissions")
             .Produces<ApiResponse<PagedListResponse<RoleResponse>>>()
             .Produces(StatusCodes.Status401Unauthorized)
-            .RequireAuthorization();
+            .RequireAuthorization(ApplicationPermissions.UserRead);
 
         group.MapGet("accounts", GetAccounts)
             .WithName(nameof(GetAccounts))
             .WithSummary("Get a page of accounts with linked user profile data")
             .Produces<ApiResponse<PagedListResponse<AccountResponse>>>()
             .Produces(StatusCodes.Status401Unauthorized)
-            .RequireAuthorization();
+            .RequireAuthorization(ApplicationPermissions.UserRead);
 
         group.MapDelete("accounts/{accountId:guid}", DeleteAccount)
             .WithName(nameof(DeleteAccount))
@@ -69,7 +70,7 @@ public static class AuthenticationEndpoints
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
             .Produces<ApiResponse<object>>(StatusCodes.Status409Conflict)
-            .RequireAuthorization();
+            .RequireAuthorization(ApplicationPermissions.UserUpdate);
 
         return builder;
     }

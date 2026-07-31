@@ -10,6 +10,7 @@ using ProductApi.Application.Reviews.CreateProductReview;
 using ProductApi.Application.Reviews.GetProductReviewsPage;
 using SharedLibrary.Api.Contracts;
 using SharedLibrary.Api.Extensions;
+using SharedLibrary.Application.Authorization;
 using SharedLibrary.Application.Pagination;
 
 namespace ProductApi.Api.Endpoints.Products;
@@ -36,7 +37,7 @@ public static class ProductEndpoints
             .Produces<ApiResponse<Guid>>(StatusCodes.Status201Created)
             .Produces<ApiResponse<Guid>>(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status401Unauthorized)
-            .RequireAuthorization();
+            .RequireAuthorization(ApplicationPermissions.ProductCreate);
 
         group.MapGet(string.Empty, GetProducts)
             .WithName(nameof(GetProducts))
@@ -57,7 +58,7 @@ public static class ProductEndpoints
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces<ApiResponse<object>>(StatusCodes.Status400BadRequest)
             .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
-            .RequireAuthorization();
+            .RequireAuthorization(ApplicationPermissions.ProductUpdate);
 
         group.MapDelete("{productId:guid}", DeleteProduct)
             .WithName(nameof(DeleteProduct))
@@ -65,7 +66,7 @@ public static class ProductEndpoints
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
-            .RequireAuthorization();
+            .RequireAuthorization(ApplicationPermissions.ProductDelete);
 
         group.MapPost("{productId:guid}/reviews", CreateProductReview)
             .WithName(nameof(CreateProductReview))
@@ -74,7 +75,7 @@ public static class ProductEndpoints
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces<ApiResponse<Guid>>(StatusCodes.Status400BadRequest)
             .Produces<ApiResponse<Guid>>(StatusCodes.Status404NotFound)
-            .RequireAuthorization();
+            .RequireAuthorization(ApplicationPermissions.ProductRead);
 
         group.MapGet("{productId:guid}/reviews", GetProductReviewsPage)
             .WithName(nameof(GetProductReviewsPage))

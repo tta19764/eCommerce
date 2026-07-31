@@ -7,6 +7,7 @@ using ImageApi.Application.Images.UploadImage;
 using MediatR;
 using SharedLibrary.Api.Contracts;
 using SharedLibrary.Api.Extensions;
+using SharedLibrary.Application.Authorization;
 
 namespace ImageApi.Api.Endpoints.Images;
 
@@ -26,7 +27,7 @@ public static class ImageEndpoints
             .Produces<ApiResponse<ImageResponse>>(StatusCodes.Status201Created)
             .Produces<ApiResponse<ImageResponse>>(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status401Unauthorized)
-            .RequireAuthorization();
+            .RequireAuthorization(ApplicationPermissions.ProductUpdate);
 
         group.MapGet("{imageId:guid}", GetImage)
             .WithName(nameof(GetImage))
@@ -46,7 +47,7 @@ public static class ImageEndpoints
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
-            .RequireAuthorization();
+            .RequireAuthorization(ApplicationPermissions.ProductUpdate);
 
         return builder;
     }

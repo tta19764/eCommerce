@@ -9,6 +9,7 @@ using OrderApi.Application.Orders.GetOrdersByClient;
 using OrderApi.Application.Orders.UpdateOrder;
 using SharedLibrary.Api.Contracts;
 using SharedLibrary.Api.Extensions;
+using SharedLibrary.Application.Authorization;
 using SharedLibrary.Application.Pagination;
 
 namespace OrderApi.Api.Endpoints.Orders;
@@ -26,26 +27,26 @@ public static class OrderEndpoints
             .Produces<ApiResponse<Guid>>(StatusCodes.Status201Created)
             .Produces<ApiResponse<Guid>>(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status401Unauthorized)
-            .RequireAuthorization();
+            .RequireAuthorization(ApplicationPermissions.OrderCreate);
 
         group.MapGet(string.Empty, GetOrders)
             .WithName(nameof(GetOrders))
             .Produces<ApiResponse<PagedListResponse<OrderResponse>>>()
             .Produces(StatusCodes.Status401Unauthorized)
-            .RequireAuthorization();
+            .RequireAuthorization(ApplicationPermissions.OrderRead);
 
         group.MapGet("{orderId:guid}", GetOrder)
             .WithName(nameof(GetOrder))
             .Produces<ApiResponse<OrderDetailsResponse>>()
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces<ApiResponse<OrderDetailsResponse>>(StatusCodes.Status404NotFound)
-            .RequireAuthorization();
+            .RequireAuthorization(ApplicationPermissions.OrderRead);
 
         group.MapGet("clients/{clientId:guid}", GetOrdersByClient)
             .WithName(nameof(GetOrdersByClient))
             .Produces<ApiResponse<PagedListResponse<OrderResponse>>>()
             .Produces(StatusCodes.Status401Unauthorized)
-            .RequireAuthorization();
+            .RequireAuthorization(ApplicationPermissions.OrderReadOwn);
 
         group.MapPut("{orderId:guid}", UpdateOrder)
             .WithName(nameof(UpdateOrder))
@@ -53,14 +54,14 @@ public static class OrderEndpoints
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces<ApiResponse<object>>(StatusCodes.Status400BadRequest)
             .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
-            .RequireAuthorization();
+            .RequireAuthorization(ApplicationPermissions.OrderUpdateStatus);
 
         group.MapDelete("{orderId:guid}", DeleteOrder)
             .WithName(nameof(DeleteOrder))
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
-            .RequireAuthorization();
+            .RequireAuthorization(ApplicationPermissions.OrderUpdateStatus);
 
         return builder;
     }

@@ -1,6 +1,7 @@
 using MediatR;
 using SharedLibrary.Api.Contracts;
 using SharedLibrary.Api.Extensions;
+using SharedLibrary.Application.Authorization;
 using UserApi.Api.Endpoints;
 using UserApi.Application.Users;
 using UserApi.Application.Users.GetUser;
@@ -29,7 +30,7 @@ public static class UserEndpoints
             .Produces<ApiResponse<UserResponse>>()
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces<ApiResponse<UserResponse>>(StatusCodes.Status404NotFound)
-            .RequireAuthorization();
+            .RequireAuthorization(ApplicationPermissions.UserRead);
 
         group.MapPut("{userId:guid}", UpdateUser)
             .WithName(nameof(UpdateUser))
@@ -37,7 +38,7 @@ public static class UserEndpoints
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces<ApiResponse<object>>(StatusCodes.Status400BadRequest)
             .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
-            .RequireAuthorization();
+            .RequireAuthorization(ApplicationPermissions.UserUpdate);
 
         return builder;
     }
