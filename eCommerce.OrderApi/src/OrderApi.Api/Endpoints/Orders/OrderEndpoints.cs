@@ -1,4 +1,6 @@
+using System.Security.Claims;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using OrderApi.Api.Endpoints;
 using OrderApi.Application.Orders;
 using OrderApi.Application.Orders.CreateOrder;
@@ -39,14 +41,22 @@ public static class OrderEndpoints
             .WithName(nameof(GetOrder))
             .Produces<ApiResponse<OrderDetailsResponse>>()
             .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden)
             .Produces<ApiResponse<OrderDetailsResponse>>(StatusCodes.Status404NotFound)
-            .RequireAuthorization(ApplicationPermissions.OrderRead);
+            .RequireAuthorization();
 
         group.MapGet("clients/{clientId:guid}", GetOrdersByClient)
             .WithName(nameof(GetOrdersByClient))
             .Produces<ApiResponse<PagedListResponse<OrderResponse>>>()
             .Produces(StatusCodes.Status401Unauthorized)
-            .RequireAuthorization(ApplicationPermissions.OrderReadOwn);
+            .RequireAuthorization(ApplicationPermissions.OrderRead);
+
+        group.MapGet("own", GetOwnOrders)
+            .WithName(nameof(GetOwnOrders))
+            .Produces<ApiResponse<PagedListResponse<OrderResponse>>>()
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden)
+            .RequireAuthorization();
 
         group.MapPut("{orderId:guid}", UpdateOrder)
             .WithName(nameof(UpdateOrder))
@@ -104,13 +114,24 @@ public static class OrderEndpoints
     public static async Task<IResult> GetOrder(
         Guid orderId,
         ISender sender,
+        ClaimsPrincipal user,
+        IAuthorizationService authorizationService,
         CancellationToken cancellationToken)
     {
         var result = await sender.Send(new GetOrderQuery(orderId), cancellationToken);
 
-        return result.IsSuccess
-            ? Results.Ok(result.MapToApiResponse())
-            : Results.NotFound(result.MapToApiResponse());
+        if (result.IsFailure)
+        {
+            return Results.NotFound(result.MapToApiResponse());
+        }
+
+        if (await HasPermissionAsync(user, authorizationService, ApplicationPermissions.OrderRead) ||
+            IsCurrentUser(user, result.Value.ClientId))
+        {
+            return Results.Ok(result.MapToApiResponse());
+        }
+
+        return Results.Forbid();
     }
 
     public static async Task<IResult> GetOrdersByClient(
@@ -121,6 +142,28 @@ public static class OrderEndpoints
     {
         var result = await sender.Send(
             new GetOrdersByClientIdQuery(clientId, request.Page, request.PageSize),
+            cancellationToken);
+
+        return result.IsSuccess
+            ? Results.Ok(result.MapToApiResponse())
+            : Results.BadRequest(result.MapToApiResponse());
+    }
+
+    public static async Task<IResult> GetOwnOrders(
+        [AsParameters] GetClientOrdersRequest request,
+        ISender sender,
+        ClaimsPrincipal user,
+        CancellationToken cancellationToken)
+    {
+        var currentUserId = GetCurrentUserId(user);
+
+        if (currentUserId is null)
+        {
+            return Results.Forbid();
+        }
+
+        var result = await sender.Send(
+            new GetOrdersByClientIdQuery(currentUserId.Value, request.Page, request.PageSize),
             cancellationToken);
 
         return result.IsSuccess
@@ -156,5 +199,31 @@ public static class OrderEndpoints
         return result.IsSuccess
             ? Results.NoContent()
             : Results.NotFound(result.MapToApiResponse());
+    }
+
+    private static async Task<bool> HasPermissionAsync(
+        ClaimsPrincipal user,
+        IAuthorizationService authorizationService,
+        string permission)
+    {
+        var result = await authorizationService.AuthorizeAsync(user, permission);
+        return result.Succeeded;
+    }
+
+    private static bool IsCurrentUser(ClaimsPrincipal user, Guid userId)
+    {
+        return GetCurrentUserId(user) == userId;
+    }
+
+    private static Guid? GetCurrentUserId(ClaimsPrincipal user)
+    {
+        var userId = user.FindFirstValue("user_id") ??
+            user.FindFirstValue("userId") ??
+            user.FindFirstValue(ClaimTypes.NameIdentifier) ??
+            user.FindFirstValue("sub");
+
+        return Guid.TryParse(userId, out var parsedUserId)
+            ? parsedUserId
+            : null;
     }
 }

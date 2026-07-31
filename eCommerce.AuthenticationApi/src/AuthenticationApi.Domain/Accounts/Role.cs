@@ -12,7 +12,6 @@ public sealed class Role
         1,
         "Customer",
         Permission.ProductRead,
-        Permission.OrderReadOwn,
         Permission.OrderCreate);
 
     public static readonly Role Admin = Create(

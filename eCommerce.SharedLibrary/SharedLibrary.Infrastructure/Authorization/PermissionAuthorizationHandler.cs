@@ -15,7 +15,6 @@ public sealed class PermissionAuthorizationHandler : AuthorizationHandler<Permis
             [ApplicationRoles.Customer] = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
             {
                 ApplicationPermissions.ProductRead,
-                ApplicationPermissions.OrderReadOwn,
                 ApplicationPermissions.OrderCreate
             },
             [ApplicationRoles.Admin] = ApplicationPermissions.All.ToHashSet(StringComparer.OrdinalIgnoreCase)

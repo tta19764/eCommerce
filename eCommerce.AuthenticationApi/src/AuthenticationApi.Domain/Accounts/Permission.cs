@@ -10,7 +10,6 @@ public sealed class Permission
     public static readonly Permission ProductCreate = new(2, "products:create");
     public static readonly Permission ProductUpdate = new(3, "products:update");
     public static readonly Permission ProductDelete = new(4, "products:delete");
-    public static readonly Permission OrderReadOwn = new(5, "orders:read-own");
     public static readonly Permission OrderCreate = new(6, "orders:create");
     public static readonly Permission OrderRead = new(7, "orders:read");
     public static readonly Permission OrderUpdateStatus = new(8, "orders:update-status");
@@ -38,7 +37,6 @@ public sealed class Permission
         ProductCreate,
         ProductUpdate,
         ProductDelete,
-        OrderReadOwn,
         OrderCreate,
         OrderRead,
         OrderUpdateStatus,
