@@ -21,7 +21,9 @@ public sealed class KeycloakRoleClaimsTransformation : IClaimsTransformation
             .Select(claim => claim.Value)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var role in ExtractKeycloakRoles(principal))
+        var keycloakRoles = ExtractKeycloakRoles(principal).ToArray();
+
+        foreach (var role in keycloakRoles)
         {
             if (existingRoles.Add(role))
             {
@@ -47,7 +49,7 @@ public sealed class KeycloakRoleClaimsTransformation : IClaimsTransformation
 
     private static IEnumerable<string> ExtractRealmRoles(ClaimsPrincipal principal)
     {
-        foreach (var claim in principal.FindAll("realm_access"))
+        foreach (var claim in principal.FindAll("realm_access").ToArray())
         {
             using var document = ParseJsonClaim(claim);
 
@@ -70,7 +72,7 @@ public sealed class KeycloakRoleClaimsTransformation : IClaimsTransformation
 
     private static IEnumerable<string> ExtractResourceRoles(ClaimsPrincipal principal)
     {
-        foreach (var claim in principal.FindAll("resource_access"))
+        foreach (var claim in principal.FindAll("resource_access").ToArray())
         {
             using var document = ParseJsonClaim(claim);
 
