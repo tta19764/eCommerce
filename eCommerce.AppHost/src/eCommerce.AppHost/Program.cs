@@ -7,6 +7,8 @@ var builder = DistributedApplication.CreateBuilder(args);
 // by Aspire and should be supplied from configuration outside source control for production.
 var postgresUser = builder.AddParameter("postgres-user");
 var postgresPassword = builder.AddParameter("postgres-password", secret: true);
+var pgAdminEmail = builder.AddParameter("pgadmin-email");
+var pgAdminPassword = builder.AddParameter("pgadmin-password", secret: true);
 var rabbitMqUser = builder.AddParameter("rabbitmq-user");
 var rabbitMqPassword = builder.AddParameter("rabbitmq-password", secret: true);
 var gatewaySignature = builder.AddParameter("gateway-signature", secret: true);
@@ -24,6 +26,16 @@ var keycloakAuthClientSecret = builder.AddParameter("keycloak-auth-client-secret
 var postgresPort = GetRequiredInt("AppHost:Postgres:Port");
 var postgresImageTag = GetRequired("AppHost:Postgres:ImageTag");
 var postgresDataVolume = GetRequired("AppHost:Postgres:DataVolume");
+
+// pgAdmin is a development-only database browser for inspecting the shared PostgreSQL server and
+// the per-service logical databases created below. The mounted servers.json pre-registers each app
+// database against the Compose/DCP network host name "postgres".
+var pgAdminImage = GetRequired("AppHost:PgAdmin:Image");
+var pgAdminPort = GetRequiredInt("AppHost:PgAdmin:Port");
+var pgAdminDataVolume = GetRequired("AppHost:PgAdmin:DataVolume");
+var pgAdminServersPath = Path.GetFullPath(GetRequired("AppHost:PgAdmin:ServersPath"), builder.AppHostDirectory);
+var pgAdminServerMode = GetRequired("AppHost:PgAdmin:ServerMode");
+var pgAdminMasterPasswordRequired = GetRequired("AppHost:PgAdmin:MasterPasswordRequired");
 
 // Each service owns its own database. Aspire creates the databases on the shared PostgreSQL
 // container and injects the selected database connection string into the matching project through
@@ -62,6 +74,7 @@ var keycloakDataVolume = GetRequired("AppHost:Keycloak:DataVolume");
 var seqImage = GetRequired("AppHost:Seq:Image");
 var seqPort = GetRequiredInt("AppHost:Seq:Port");
 var seqDataVolume = GetRequired("AppHost:Seq:DataVolume");
+var seqSinkName = GetRequired("AppHost:Seq:SinkName");
 var seqServerUrl = GetRequired("AppHost:Seq:ServerUrl");
 
 // Redis backs query caching for read-heavy endpoints. The services still fall back to in-memory
@@ -78,6 +91,12 @@ var redisConnectionString = GetRequired("AppHost:Redis:ConnectionString");
 var mailpitImage = GetRequired("AppHost:Mailpit:Image");
 var mailpitSmtpPort = GetRequiredInt("AppHost:Mailpit:SmtpPort");
 var mailpitUiPort = GetRequiredInt("AppHost:Mailpit:UiPort");
+
+// The Angular frontend runs as a host npm executable for development. This keeps startup fast,
+// uses the local node_modules folder, and avoids Docker bind-mount file watching issues on Windows.
+var webAppCommand = GetRequired("AppHost:WebApp:Command");
+var webAppSourcePath = Path.GetFullPath(GetRequired("AppHost:WebApp:SourcePath"), builder.AppHostDirectory);
+var webAppPort = GetRequiredInt("AppHost:WebApp:Port");
 
 // Authentication settings are injected into AuthenticationApi so local Keycloak URLs, issuer,
 // audience, and HTTPS metadata behavior are controlled from AppHost configuration.
@@ -108,6 +127,7 @@ var notificationSmtpTimeoutSeconds = GetRequired("AppHost:Notifications:Smtp:Tim
 // Project ports are pinned so the gateway, Swagger UI, and external tools can use stable localhost
 // URLs. Aspire still wires service references internally, but fixed ports make manual testing and
 // Keycloak redirect/client configuration predictable.
+var projectEnvironment = GetRequired("AppHost:Projects:Environment");
 var authenticationApiPort = GetRequiredInt("AppHost:Projects:AuthenticationApi:HttpPort");
 var authenticationApiHttpsPort = GetRequiredInt("AppHost:Projects:AuthenticationApi:HttpsPort");
 var productApiPort = GetRequiredInt("AppHost:Projects:ProductApi:HttpPort");
@@ -136,6 +156,17 @@ var userDb = postgres.AddDatabase("user-db", userDbName);
 var imageDb = postgres.AddDatabase("image-db", imageDbName);
 var authenticationDb = postgres.AddDatabase("authentication-db", authenticationDbName);
 var notificationDb = postgres.AddDatabase("notification-db", notificationDbName);
+
+var pgAdmin = builder.AddContainer("pgadmin", pgAdminImage)
+    .WithEnvironment("PGADMIN_DEFAULT_EMAIL", pgAdminEmail)
+    .WithEnvironment("PGADMIN_DEFAULT_PASSWORD", pgAdminPassword)
+    .WithEnvironment("PGADMIN_CONFIG_SERVER_MODE", pgAdminServerMode)
+    .WithEnvironment("PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED", pgAdminMasterPasswordRequired)
+    .WithHttpEndpoint(port: pgAdminPort, targetPort: 80, name: "http")
+    .WithBindMount(pgAdminServersPath, "/pgadmin4/servers.json", isReadOnly: true)
+    .WithVolume(pgAdminDataVolume, "/var/lib/pgadmin")
+    .WaitFor(postgres)
+    .WithExternalHttpEndpoints();
 
 // RabbitMQ backs service-to-service request/response messaging through MassTransit. Explicit local
 // credentials prevent accidental default guest mismatches and keep connection strings generated by
@@ -189,8 +220,11 @@ var mailpit = builder.AddContainer("mailpit", mailpitImage)
 var authenticationApi = builder.AddProject<Projects.AuthenticationApi_Api>("authentication-api")
     .WithHttpEndpoint(port: authenticationApiPort)
     .WithHttpsEndpoint(port: authenticationApiHttpsPort)
+    .WithEnvironment("ASPNETCORE_ENVIRONMENT", projectEnvironment)
+    .WithEnvironment("DOTNET_ENVIRONMENT", projectEnvironment)
     .WithEnvironment("Gateway__HeaderName", gatewayHeaderName)
     .WithEnvironment("Gateway__Signature", gatewaySignature)
+    .WithEnvironment("Serilog__WriteTo__1__Name", seqSinkName)
     .WithEnvironment("Serilog__WriteTo__1__Args__serverUrl", seqServerUrl)
     .WithEnvironment("ConnectionStrings__Redis", redisConnectionString)
     .WithReference(authenticationDb, "Database")
@@ -217,10 +251,17 @@ var authenticationApi = builder.AddProject<Projects.AuthenticationApi_Api>("auth
 var productApi = builder.AddProject<Projects.ProductApi_Api>("product-api")
     .WithHttpEndpoint(port: productApiPort)
     .WithHttpsEndpoint(port: productApiHttpsPort)
+    .WithEnvironment("ASPNETCORE_ENVIRONMENT", projectEnvironment)
+    .WithEnvironment("DOTNET_ENVIRONMENT", projectEnvironment)
     .WithEnvironment("Gateway__HeaderName", gatewayHeaderName)
     .WithEnvironment("Gateway__Signature", gatewaySignature)
+    .WithEnvironment("Serilog__WriteTo__1__Name", seqSinkName)
     .WithEnvironment("Serilog__WriteTo__1__Args__serverUrl", seqServerUrl)
     .WithEnvironment("ConnectionStrings__Redis", redisConnectionString)
+    .WithEnvironment("Authentication__Audience", authenticationAudience)
+    .WithEnvironment("Authentication__MetadataUrl", authenticationMetadataUrl)
+    .WithEnvironment("Authentication__RequireHttpsMetadata", authenticationRequireHttpsMetadata)
+    .WithEnvironment("Authentication__Issuer", authenticationIssuer)
     .WithReference(productDb, "Database")
     .WithReference(rabbitMq)
     .WaitFor(postgres)
@@ -233,10 +274,17 @@ var productApi = builder.AddProject<Projects.ProductApi_Api>("product-api")
 var orderApi = builder.AddProject<Projects.OrderApi_Api>("order-api")
     .WithHttpEndpoint(port: orderApiPort)
     .WithHttpsEndpoint(port: orderApiHttpsPort)
+    .WithEnvironment("ASPNETCORE_ENVIRONMENT", projectEnvironment)
+    .WithEnvironment("DOTNET_ENVIRONMENT", projectEnvironment)
     .WithEnvironment("Gateway__HeaderName", gatewayHeaderName)
     .WithEnvironment("Gateway__Signature", gatewaySignature)
+    .WithEnvironment("Serilog__WriteTo__1__Name", seqSinkName)
     .WithEnvironment("Serilog__WriteTo__1__Args__serverUrl", seqServerUrl)
     .WithEnvironment("ConnectionStrings__Redis", redisConnectionString)
+    .WithEnvironment("Authentication__Audience", authenticationAudience)
+    .WithEnvironment("Authentication__MetadataUrl", authenticationMetadataUrl)
+    .WithEnvironment("Authentication__RequireHttpsMetadata", authenticationRequireHttpsMetadata)
+    .WithEnvironment("Authentication__Issuer", authenticationIssuer)
     .WithReference(orderDb, "Database")
     .WithReference(rabbitMq)
     .WaitFor(postgres)
@@ -250,9 +298,16 @@ var orderApi = builder.AddProject<Projects.OrderApi_Api>("order-api")
 var userApi = builder.AddProject<Projects.UserApi_Api>("user-api")
     .WithHttpEndpoint(port: userApiPort)
     .WithHttpsEndpoint(port: userApiHttpsPort)
+    .WithEnvironment("ASPNETCORE_ENVIRONMENT", projectEnvironment)
+    .WithEnvironment("DOTNET_ENVIRONMENT", projectEnvironment)
     .WithEnvironment("Gateway__HeaderName", gatewayHeaderName)
     .WithEnvironment("Gateway__Signature", gatewaySignature)
+    .WithEnvironment("Serilog__WriteTo__1__Name", seqSinkName)
     .WithEnvironment("Serilog__WriteTo__1__Args__serverUrl", seqServerUrl)
+    .WithEnvironment("Authentication__Audience", authenticationAudience)
+    .WithEnvironment("Authentication__MetadataUrl", authenticationMetadataUrl)
+    .WithEnvironment("Authentication__RequireHttpsMetadata", authenticationRequireHttpsMetadata)
+    .WithEnvironment("Authentication__Issuer", authenticationIssuer)
     .WithReference(userDb, "Database")
     .WithReference(rabbitMq)
     .WaitFor(postgres)
@@ -264,9 +319,16 @@ var userApi = builder.AddProject<Projects.UserApi_Api>("user-api")
 var imageApi = builder.AddProject<Projects.ImageApi_Api>("image-api")
     .WithHttpEndpoint(port: imageApiPort)
     .WithHttpsEndpoint(port: imageApiHttpsPort)
+    .WithEnvironment("ASPNETCORE_ENVIRONMENT", projectEnvironment)
+    .WithEnvironment("DOTNET_ENVIRONMENT", projectEnvironment)
     .WithEnvironment("Gateway__HeaderName", gatewayHeaderName)
     .WithEnvironment("Gateway__Signature", gatewaySignature)
+    .WithEnvironment("Serilog__WriteTo__1__Name", seqSinkName)
     .WithEnvironment("Serilog__WriteTo__1__Args__serverUrl", seqServerUrl)
+    .WithEnvironment("Authentication__Audience", authenticationAudience)
+    .WithEnvironment("Authentication__MetadataUrl", authenticationMetadataUrl)
+    .WithEnvironment("Authentication__RequireHttpsMetadata", authenticationRequireHttpsMetadata)
+    .WithEnvironment("Authentication__Issuer", authenticationIssuer)
     .WithReference(imageDb, "Database")
     .WithReference(rabbitMq)
     .WaitFor(minio)
@@ -280,6 +342,9 @@ var imageApi = builder.AddProject<Projects.ImageApi_Api>("image-api")
 var notificationApi = builder.AddProject<Projects.NotificationApi_Api>("notification-api")
     .WithHttpEndpoint(port: notificationApiPort)
     .WithHttpsEndpoint(port: notificationApiHttpsPort)
+    .WithEnvironment("ASPNETCORE_ENVIRONMENT", projectEnvironment)
+    .WithEnvironment("DOTNET_ENVIRONMENT", projectEnvironment)
+    .WithEnvironment("Serilog__WriteTo__1__Name", seqSinkName)
     .WithEnvironment("Serilog__WriteTo__1__Args__serverUrl", seqServerUrl)
     .WithEnvironment("Email__FromAddress", notificationFromAddress)
     .WithEnvironment("Email__EmailConfirmationUrlTemplate", notificationEmailConfirmationUrlTemplate)
@@ -298,9 +363,11 @@ var notificationApi = builder.AddProject<Projects.NotificationApi_Api>("notifica
 // GatewayApi is the only externally exposed API entry point. It proxies to the backend service
 // HTTPS endpoints, adds the gateway signature on forwarded requests, and serves the combined
 // Swagger UI for the downstream APIs.
-builder.AddProject<Projects.GatewayApi_Api>("gateway-api")
+var gatewayApi = builder.AddProject<Projects.GatewayApi_Api>("gateway-api")
     .WithHttpEndpoint(port: gatewayApiPort)
     .WithHttpsEndpoint(port: gatewayApiHttpsPort)
+    .WithEnvironment("ASPNETCORE_ENVIRONMENT", projectEnvironment)
+    .WithEnvironment("DOTNET_ENVIRONMENT", projectEnvironment)
     .WithEnvironment("Gateway__HeaderName", gatewayHeaderName)
     .WithEnvironment("Gateway__Signature", gatewaySignature)
     .WithReference(authenticationApi)
@@ -315,6 +382,23 @@ builder.AddProject<Projects.GatewayApi_Api>("gateway-api")
     .WaitFor(userApi)
     .WaitFor(imageApi)
     .WaitFor(notificationApi)
+    .WithExternalHttpEndpoints();
+
+// WebApp runs Angular's development server as a normal local process. Install packages once in the
+// Angular project with npm install/npm ci, then AppHost can start and supervise the dev server.
+builder.AddExecutable(
+        "web-app",
+        webAppCommand,
+        webAppSourcePath,
+        "start",
+        "--",
+        "--host",
+        "localhost",
+        "--port",
+        webAppPort.ToString())
+    .WithHttpEndpoint(port: webAppPort, targetPort: webAppPort, name: "http", isProxied: false)
+    .WithEnvironment("NG_CLI_ANALYTICS", "false")
+    .WaitFor(gatewayApi)
     .WithExternalHttpEndpoints();
 
 await builder.Build().RunAsync();
