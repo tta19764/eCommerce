@@ -33,8 +33,6 @@ public sealed class KeycloakIdentityProvider(
     {
         var user = new UserRepresentationModel
         {
-            // Supplying the account id keeps the Keycloak subject aligned with local account/profile ids.
-            Id = accountId.ToString(),
             Username = email,
             Email = email,
             FirstName = firstName,
@@ -62,14 +60,25 @@ public sealed class KeycloakIdentityProvider(
                 return Result.Failure<string>(AccountErrors.IdentityRegistrationFailed);
             }
 
+            var identityId = await GetCreatedUserIdAsync(response, email, cancellationToken);
+
+            if (string.IsNullOrWhiteSpace(identityId))
+            {
+                return Result.Failure<string>(AccountErrors.IdentityRegistrationFailed);
+            }
+
             var roleAssignmentResult = await AssignRealmRoleAsync(
-                accountId,
+                identityId,
                 ApplicationRoles.Customer,
                 cancellationToken);
 
-            return roleAssignmentResult.IsSuccess
-                ? Result.Success(accountId.ToString())
-                : Result.Failure<string>(AccountErrors.IdentityRegistrationFailed);
+            if (roleAssignmentResult.IsFailure)
+            {
+                await DeleteAsync(identityId, cancellationToken);
+                return Result.Failure<string>(AccountErrors.IdentityRegistrationFailed);
+            }
+
+            return Result.Success(identityId);
         }
         catch (HttpRequestException)
         {
@@ -111,11 +120,11 @@ public sealed class KeycloakIdentityProvider(
         return await RequestTokenAsync(requestParameters, cancellationToken);
     }
 
-    public async Task<Result> DeleteAsync(Guid accountId, CancellationToken cancellationToken = default)
+    public async Task<Result> DeleteAsync(string identityId, CancellationToken cancellationToken = default)
     {
         try
         {
-            var response = await adminClient.DeleteAsync($"users/{accountId}", cancellationToken);
+            var response = await adminClient.DeleteAsync($"users/{Uri.EscapeDataString(identityId)}", cancellationToken);
 
             // Deleting an already-missing Keycloak user is idempotent from the service's perspective.
             return response.IsSuccessStatusCode || response.StatusCode == System.Net.HttpStatusCode.NotFound
@@ -169,7 +178,7 @@ public sealed class KeycloakIdentityProvider(
     }
 
     private async Task<Result> AssignRealmRoleAsync(
-        Guid accountId,
+        string identityId,
         string roleName,
         CancellationToken cancellationToken)
     {
@@ -181,7 +190,7 @@ public sealed class KeycloakIdentityProvider(
         }
 
         var response = await adminClient.PostAsJsonAsync(
-            $"users/{accountId}/role-mappings/realm",
+            $"users/{Uri.EscapeDataString(identityId)}/role-mappings/realm",
             new[] { role },
             cancellationToken);
 
@@ -201,5 +210,29 @@ public sealed class KeycloakIdentityProvider(
         return response.IsSuccessStatusCode
             ? await response.Content.ReadFromJsonAsync<RoleRepresentationModel>(cancellationToken)
             : null;
+    }
+
+    private async Task<string?> GetCreatedUserIdAsync(
+        HttpResponseMessage response,
+        string email,
+        CancellationToken cancellationToken)
+    {
+        var location = response.Headers.Location?.ToString();
+
+        if (!string.IsNullOrWhiteSpace(location))
+        {
+            var identityId = location.Split('/', StringSplitOptions.RemoveEmptyEntries).LastOrDefault();
+
+            if (!string.IsNullOrWhiteSpace(identityId))
+            {
+                return identityId;
+            }
+        }
+
+        var users = await adminClient.GetFromJsonAsync<UserRepresentationModel[]>(
+            $"users?email={Uri.EscapeDataString(email)}&exact=true",
+            cancellationToken);
+
+        return users?.SingleOrDefault()?.Id;
     }
 }

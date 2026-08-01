@@ -64,7 +64,7 @@ public sealed class RegisterCommandHandler(
 
         if (identityLinkResult.IsFailure)
         {
-            await identityProvider.DeleteAsync(accountId, cancellationToken);
+            await identityProvider.DeleteAsync(identityResult.Value, cancellationToken);
             return Result.Failure<Guid>(identityLinkResult.Error);
         }
 
@@ -90,7 +90,7 @@ public sealed class RegisterCommandHandler(
         {
             accountRepository.Delete(accountResult.Value);
             await unitOfWork.SaveChangesAsync(cancellationToken);
-            await identityProvider.DeleteAsync(accountId, cancellationToken);
+            await identityProvider.DeleteAsync(identityResult.Value, cancellationToken);
 
             logger.LogWarning(
                 "Profile creation failed for account {AccountId}: {ErrorCode}",
@@ -106,7 +106,7 @@ public sealed class RegisterCommandHandler(
         {
             accountRepository.Delete(accountResult.Value);
             await unitOfWork.SaveChangesAsync(cancellationToken);
-            await identityProvider.DeleteAsync(accountId, cancellationToken);
+            await identityProvider.DeleteAsync(identityResult.Value, cancellationToken);
 
             return Result.Failure<Guid>(profileLinkResult.Error);
         }

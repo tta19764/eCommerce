@@ -50,7 +50,7 @@ public sealed class DeleteAccountCommandHandler(
         accountRepository.Delete(account);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        var identityDeletion = await identityProvider.DeleteAsync(request.AccountId, cancellationToken);
+        var identityDeletion = await identityProvider.DeleteAsync(account.IdentityId, cancellationToken);
 
         if (identityDeletion.IsFailure)
         {

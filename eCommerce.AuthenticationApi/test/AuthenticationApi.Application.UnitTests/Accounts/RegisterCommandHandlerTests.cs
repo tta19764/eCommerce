@@ -28,6 +28,7 @@ public class RegisterCommandHandlerTests
         // Arrange
         CancellationToken cancellationToken = TestContext.Current.CancellationToken;
         var customerRole = Role.Customer;
+        const string identityId = "keycloak-user-id";
 
         _roleRepositoryMock.GetByNameAsync("Customer", cancellationToken).Returns(customerRole);
         _identityProviderMock
@@ -38,7 +39,7 @@ public class RegisterCommandHandlerTests
                 "John",
                 "Smith",
                 cancellationToken)
-            .Returns(callInfo => Result.Success(callInfo.Arg<Guid>().ToString()));
+            .Returns(Result.Success(identityId));
 
         _userProfileClientMock
             .GetResponse<CreateUserProfileResponse>(
@@ -80,7 +81,7 @@ public class RegisterCommandHandlerTests
         _accountRepositoryMock.Received(1).Add(Arg.Is<Account>(account =>
             account.Id == result.Value &&
             account.Email.Value == "JOHN.SMITH@EXAMPLE.COM" &&
-            account.IdentityId == result.Value.ToString() &&
+            account.IdentityId == identityId &&
             account.UserId == Guid.Parse("11111111-1111-1111-1111-111111111111") &&
             account.Roles.Any(accountRole => accountRole.RoleId == customerRole.Id)));
 

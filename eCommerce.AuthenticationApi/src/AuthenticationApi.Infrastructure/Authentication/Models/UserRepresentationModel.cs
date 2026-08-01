@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace AuthenticationApi.Infrastructure.Authentication.Models;
 
 /// <summary>
@@ -5,7 +7,8 @@ namespace AuthenticationApi.Infrastructure.Authentication.Models;
 /// </summary>
 public sealed class UserRepresentationModel
 {
-    public string Id { get; init; } = string.Empty;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Id { get; init; }
 
     public string Username { get; init; } = string.Empty;
 

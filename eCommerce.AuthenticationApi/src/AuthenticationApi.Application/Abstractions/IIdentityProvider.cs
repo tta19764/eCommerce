@@ -24,5 +24,5 @@ public interface IIdentityProvider
         string refreshToken,
         CancellationToken cancellationToken = default);
 
-    Task<Result> DeleteAsync(Guid accountId, CancellationToken cancellationToken = default);
+    Task<Result> DeleteAsync(string identityId, CancellationToken cancellationToken = default);
 }
