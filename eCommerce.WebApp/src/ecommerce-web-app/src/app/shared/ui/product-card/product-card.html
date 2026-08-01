@@ -1,0 +1,56 @@
+<article
+  class="flex h-full flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"
+>
+  <a
+    class="flex h-64 items-center justify-center overflow-hidden bg-slate-100"
+    [routerLink]="['/products', product().id]"
+  >
+    @if (imageUrl()) {
+      <img
+        class="h-full w-full object-cover"
+        [src]="imageUrl()"
+        [alt]="product().name"
+        loading="lazy"
+      />
+    } @else {
+      <span class="text-4xl font-bold text-slate-300">eC</span>
+    }
+  </a>
+
+  <div class="flex flex-1 flex-col p-5">
+    <div class="flex justify-between gap-3">
+      <h3 class="font-semibold">
+        <a class="hover:text-brand-600" [routerLink]="['/products', product().id]">
+          {{ product().name }}
+        </a>
+      </h3>
+      <strong class="whitespace-nowrap">
+        {{ product().price | currency: product().currency }}
+      </strong>
+    </div>
+    <p class="mt-2 line-clamp-2 text-sm text-slate-500">{{ product().description }}</p>
+
+    <div class="mt-auto pt-5">
+      <div class="mb-3 flex items-center justify-between text-sm">
+        <span class="text-slate-500">★ {{ product().rating || 'New' }}</span>
+        <span
+          class="rounded-full px-2 py-1 text-xs font-medium"
+          [class.bg-emerald-100]="product().quantity"
+          [class.text-emerald-700]="product().quantity"
+          [class.bg-slate-200]="!product().quantity"
+          [class.text-slate-600]="!product().quantity"
+        >
+          {{ product().quantity ? product().quantity + ' in stock' : 'Sold out' }}
+        </span>
+      </div>
+      <button
+        class="w-full rounded-lg bg-brand-600 px-4 py-2.5 font-semibold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+        type="button"
+        [disabled]="!product().quantity"
+        (click)="cart.add(product())"
+      >
+        Add to cart
+      </button>
+    </div>
+  </div>
+</article>

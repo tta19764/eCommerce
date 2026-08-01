@@ -1,0 +1,80 @@
+<section>
+  <div class="mb-6">
+    <h2 class="text-xl font-bold">Users</h2>
+    <p class="mt-1 text-sm text-slate-500">Review application accounts and deactivate access.</p>
+  </div>
+
+  @if (success()) {
+    <div class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-emerald-700">
+      {{ success() }}
+    </div>
+  }
+  @if (error()) {
+    <div class="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-red-700">
+      {{ error() }}
+    </div>
+  }
+
+  @if (loading()) {
+    <p class="text-slate-500">Loading users…</p>
+  } @else {
+    <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+          <thead class="bg-slate-100 text-xs uppercase text-slate-500">
+            <tr>
+              <th class="px-4 py-3">User</th>
+              <th class="px-4 py-3">Role</th>
+              <th class="px-4 py-3">Created</th>
+              <th class="px-4 py-3">Status</th>
+              <th class="px-4 py-3 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200">
+            @for (account of accounts(); track account.id) {
+              <tr>
+                <td class="px-4 py-3">
+                  <strong class="block">{{ account.user?.fullName || account.email }}</strong>
+                  <span class="text-slate-500">{{ account.email }}</span>
+                </td>
+                <td class="px-4 py-3">
+                  <span
+                    class="rounded-full px-2 py-1 text-xs font-semibold"
+                    [class.bg-purple-100]="applicationRole(account) === 'Admin'"
+                    [class.text-purple-700]="applicationRole(account) === 'Admin'"
+                    [class.bg-blue-100]="applicationRole(account) === 'Customer'"
+                    [class.text-blue-700]="applicationRole(account) === 'Customer'"
+                  >
+                    {{ applicationRole(account) }}
+                  </span>
+                </td>
+                <td class="px-4 py-3 text-slate-500">
+                  {{ account.createdAtUtc | date: 'mediumDate' }}
+                </td>
+                <td class="px-4 py-3">
+                  <span
+                    class="font-medium"
+                    [class.text-emerald-600]="account.isActive"
+                    [class.text-slate-400]="!account.isActive"
+                  >
+                    {{ account.isActive ? 'Active' : 'Inactive' }}
+                  </span>
+                </td>
+                <td class="px-4 py-3 text-right">
+                  <button
+                    class="font-semibold text-red-600 hover:text-red-800 disabled:text-slate-300"
+                    type="button"
+                    [disabled]="!account.isActive"
+                    (click)="remove(account)"
+                  >
+                    Deactivate
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</section>

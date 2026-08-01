@@ -1,0 +1,103 @@
+<section class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+  <a
+    class="mb-6 inline-block text-sm font-semibold text-brand-600 hover:text-brand-700"
+    routerLink="/"
+  >
+    ← Back to products
+  </a>
+
+  @if (loading()) {
+    <p class="text-slate-500">Loading product…</p>
+  } @else if (failed() || !product()) {
+    <div class="rounded-lg bg-amber-50 p-4 text-amber-800">
+      <h1 class="font-bold">Product not found</h1>
+      <p>This product may no longer be available.</p>
+    </div>
+  } @else {
+    <div class="grid gap-10 lg:grid-cols-[1.35fr_0.65fr]">
+      <div>
+        @if (product()!.imageIds.length) {
+          <div class="grid gap-4 sm:grid-cols-2">
+            @for (image of product()!.imageIds; track image) {
+              <img
+                class="w-full rounded-xl border border-slate-200 bg-white object-cover"
+                [src]="imageUrl(image)"
+                [alt]="product()!.name"
+              />
+            }
+          </div>
+        } @else {
+          <div
+            class="flex min-h-96 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-3xl font-bold text-slate-300"
+          >
+            eCommerce
+          </div>
+        }
+      </div>
+
+      <div
+        class="self-start rounded-xl border border-slate-200 bg-white p-6 shadow-sm lg:sticky lg:top-24"
+      >
+        <div class="flex items-center gap-2 text-sm">
+          <span class="rounded-full bg-brand-100 px-2 py-1 font-semibold text-brand-700">
+            Product
+          </span>
+          <span class="text-slate-500">
+            ★ {{ product()!.rating || 'New' }} · {{ product()!.reviewsCount }} reviews
+          </span>
+        </div>
+        <h1 class="mt-4 text-3xl font-bold">{{ product()!.name }}</h1>
+        <p class="mt-2 text-xl font-semibold">
+          {{ product()!.price | currency: product()!.currency }}
+        </p>
+        <p class="mt-4 text-slate-600">{{ product()!.description }}</p>
+        <div
+          class="mt-5 rounded-lg p-3 text-sm"
+          [class.bg-emerald-50]="product()!.quantity"
+          [class.text-emerald-700]="product()!.quantity"
+          [class.bg-slate-100]="!product()!.quantity"
+          [class.text-slate-600]="!product()!.quantity"
+        >
+          {{ product()!.quantity ? product()!.quantity + ' available' : 'Currently unavailable' }}
+        </div>
+        <div class="mt-5 flex gap-2">
+          <div class="flex items-center rounded-lg border border-slate-300">
+            <button class="px-3 py-2" type="button" (click)="decreaseQuantity()">−</button>
+            <span class="min-w-8 text-center">{{ quantity() }}</span>
+            <button class="px-3 py-2" type="button" (click)="increaseQuantity()">+</button>
+          </div>
+          <button
+            class="flex-1 rounded-lg bg-brand-600 px-4 py-2 font-semibold text-white hover:bg-brand-700 disabled:bg-slate-300"
+            type="button"
+            [disabled]="!product()!.quantity"
+            (click)="cart.add(product()!, quantity())"
+          >
+            Add to cart
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-12 border-t border-slate-200 pt-8">
+      <h2 class="text-2xl font-bold">Customer reviews</h2>
+      @if (!reviews().length) {
+        <p class="mt-4 rounded-lg bg-blue-50 p-4 text-blue-700">
+          There are no reviews for this product yet.
+        </p>
+      }
+      <div class="mt-5 divide-y divide-slate-200 rounded-xl border border-slate-200 bg-white">
+        @for (review of reviews(); track review.id) {
+          <article class="p-5">
+            <div class="flex justify-between">
+              <span class="text-amber-500">{{ '★'.repeat(review.rating) }}</span>
+              <time class="text-sm text-slate-500">
+                {{ review.createdAtUtc | date: 'mediumDate' }}
+              </time>
+            </div>
+            <p class="mt-2">{{ review.comment }}</p>
+          </article>
+        }
+      </div>
+    </div>
+  }
+</section>

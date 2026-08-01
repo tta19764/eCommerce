@@ -1,0 +1,52 @@
+<section class="border-b border-slate-200 bg-white">
+  <div class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+    <span class="rounded-full bg-brand-100 px-3 py-1 text-sm font-semibold text-brand-700">
+      eCommerce catalog
+    </span>
+    <h1 class="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">Find your next product</h1>
+    <p class="mt-4 max-w-2xl text-lg text-slate-600">
+      Browse available products, check stock and ratings, and add items to your cart.
+    </p>
+  </div>
+</section>
+
+<section class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+  <div class="mb-6 flex items-end justify-between border-b border-slate-200 pb-4">
+    <div>
+      <h2 class="text-2xl font-bold">Products</h2>
+      <p class="mt-1 text-sm text-slate-500">Available from the product service</p>
+    </div>
+    <span class="rounded-full bg-slate-200 px-3 py-1 text-sm">{{ total() }} products</span>
+  </div>
+
+  @if (loading()) {
+    <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+      @for (item of [1, 2, 3, 4]; track item) {
+        <div class="h-96 animate-pulse rounded-xl bg-slate-200"></div>
+      }
+    </div>
+  } @else if (error()) {
+    <div
+      class="flex items-center justify-between rounded-lg border border-red-200 bg-red-50 p-4 text-red-800"
+    >
+      <span>{{ error() }}</span>
+      <button
+        class="rounded-lg bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-700"
+        type="button"
+        (click)="load()"
+      >
+        Try again
+      </button>
+    </div>
+  } @else if (!products().length) {
+    <div class="rounded-lg border border-blue-200 bg-blue-50 p-4 text-blue-800">
+      No products have been added yet.
+    </div>
+  } @else {
+    <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+      @for (product of products(); track product.id) {
+        <app-product-card [product]="product" />
+      }
+    </div>
+  }
+</section>
