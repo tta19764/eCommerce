@@ -58,6 +58,14 @@ eCommerce.AppHost/src/eCommerce.AppHost/appsettings.Development.json
 
 Service runtime values are passed through environment variables and Aspire references. Secrets should come from user secrets, environment variables, or deployment configuration rather than non-development appsettings.
 
+SMTP credentials are supplied as AppHost parameters, not committed development settings:
+
+| Value | Environment variable | User-secrets key |
+| --- | --- | --- |
+| Sender address | `Parameters__notification-from-address` | `Parameters:notification-from-address` |
+| SMTP username | `Parameters__notification-smtp-user-name` | `Parameters:notification-smtp-user-name` |
+| SMTP password | `Parameters__notification-smtp-password` | `Parameters:notification-smtp-password` |
+
 ## Frontend Integration
 
 The Angular app should use the gateway URL from its environment configuration and should not know direct service ports.

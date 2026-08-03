@@ -18,6 +18,9 @@ var keycloakAdminUser = builder.AddParameter("keycloak-admin-user");
 var keycloakAdminPassword = builder.AddParameter("keycloak-admin-password", secret: true);
 var keycloakAdminClientSecret = builder.AddParameter("keycloak-admin-client-secret", secret: true);
 var keycloakAuthClientSecret = builder.AddParameter("keycloak-auth-client-secret", secret: true);
+var notificationFromAddress = builder.AddParameter("notification-from-address");
+var notificationSmtpUserName = builder.AddParameter("notification-smtp-user-name");
+var notificationSmtpPassword = builder.AddParameter("notification-smtp-password", secret: true);
 
 // Infrastructure configuration is read once at startup and then passed into the Aspire resources.
 // Keeping these values in configuration avoids hard-coded container image tags, host ports, and
@@ -61,6 +64,11 @@ var minioImage = GetRequired("AppHost:Minio:Image");
 var minioApiPort = GetRequiredInt("AppHost:Minio:ApiPort");
 var minioConsolePort = GetRequiredInt("AppHost:Minio:ConsolePort");
 var minioDataVolume = GetRequired("AppHost:Minio:DataVolume");
+var minioServiceUrl = GetRequired("AppHost:Minio:ServiceUrl");
+var minioBucketName = GetRequired("AppHost:Minio:BucketName");
+var minioRegion = GetRequired("AppHost:Minio:Region");
+var minioForcePathStyle = GetRequired("AppHost:Minio:ForcePathStyle");
+var minioPresignedUrlExpiryMinutes = GetRequired("AppHost:Minio:PresignedUrlExpiryMinutes");
 
 // Keycloak is run as an actual local identity provider rather than mocked auth. AuthenticationApi
 // uses the admin client to create/delete users and the auth client for login/token flows.
@@ -116,15 +124,12 @@ var keycloakAuthClientId = GetRequired("AppHost:Authentication:Keycloak:AuthClie
 // Notification settings are passed to NotificationApi so background email content and SMTP delivery
 // stay environment-specific. Production should override the same keys with a real SMTP host and
 // credentials from a secure configuration source.
-var notificationFromAddress = GetRequired("AppHost:Notifications:FromAddress");
 var notificationEmailConfirmationUrlTemplate = GetRequired("AppHost:Notifications:EmailConfirmationUrlTemplate");
 var notificationSmtpHost = GetRequired("AppHost:Notifications:Smtp:Host");
 var notificationSmtpPort = GetRequired("AppHost:Notifications:Smtp:Port");
 var notificationSmtpEnableSsl = GetRequired("AppHost:Notifications:Smtp:EnableSsl");
 var notificationSmtpFromName = GetRequired("AppHost:Notifications:Smtp:FromName");
 var notificationSmtpTimeoutSeconds = GetRequired("AppHost:Notifications:Smtp:TimeoutSeconds");
-var notificationSmtpUserName = GetRequired("AppHost:Notifications:Smtp:UserName");
-var notificationSmtpPassword = GetRequired("AppHost:Notifications:Smtp:Password");
 
 // Project ports are pinned so the gateway, Swagger UI, and external tools can use stable localhost
 // URLs. Aspire still wires service references internally, but fixed ports make manual testing and
@@ -183,6 +188,7 @@ var minio = builder.AddContainer("minio", minioImage)
     .WithArgs("server", "/data", "--console-address", ":9001")
     .WithEnvironment("MINIO_ROOT_USER", minioRootUser)
     .WithEnvironment("MINIO_ROOT_PASSWORD", minioRootPassword)
+    .WithEndpointProxySupport(false)
     .WithHttpEndpoint(port: minioApiPort, targetPort: 9000, name: "api")
     .WithHttpEndpoint(port: minioConsolePort, targetPort: 9001, name: "console")
     .WithVolume(minioDataVolume, "/data");
@@ -331,6 +337,13 @@ var imageApi = builder.AddProject<Projects.ImageApi_Api>("image-api")
     .WithEnvironment("Authentication__MetadataUrl", authenticationMetadataUrl)
     .WithEnvironment("Authentication__RequireHttpsMetadata", authenticationRequireHttpsMetadata)
     .WithEnvironment("Authentication__Issuer", authenticationIssuer)
+    .WithEnvironment("S3Storage__ServiceUrl", minioServiceUrl)
+    .WithEnvironment("S3Storage__AccessKey", minioRootUser)
+    .WithEnvironment("S3Storage__SecretKey", minioRootPassword)
+    .WithEnvironment("S3Storage__BucketName", minioBucketName)
+    .WithEnvironment("S3Storage__Region", minioRegion)
+    .WithEnvironment("S3Storage__ForcePathStyle", minioForcePathStyle)
+    .WithEnvironment("S3Storage__PresignedUrlExpiryMinutes", minioPresignedUrlExpiryMinutes)
     .WithReference(imageDb, "Database")
     .WithReference(rabbitMq)
     .WaitFor(minio)

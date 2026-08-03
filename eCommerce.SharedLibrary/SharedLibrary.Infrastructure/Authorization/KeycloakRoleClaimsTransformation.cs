@@ -9,6 +9,10 @@ namespace SharedLibrary.Infrastructure.Authorization;
 /// </summary>
 public sealed class KeycloakRoleClaimsTransformation : IClaimsTransformation
 {
+    /// <summary>
+    /// Executes the TransformAsync operation.
+    /// </summary>
+    /// <param name="principal">The principal value.</param>
     public Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
     {
         if (principal.Identity is not ClaimsIdentity identity)

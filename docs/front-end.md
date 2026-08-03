@@ -54,9 +54,10 @@ src/app/
 | Feature | Routes | Description |
 | --- | --- | --- |
 | Catalog | `/`, `/products/:id` | Product browsing, product details, reviews, image rendering |
-| Cart | `/cart` | Local cart state and order creation workflow |
+| Cart | `/cart` | Local cart state and claim-based own-order creation workflow |
 | Auth | `/login`, `/register`, `/confirm-email` | Login, public registration, email confirmation |
-| Orders | `/orders` | Authenticated user order history |
+| Orders | `/orders` | Authenticated user order history and own-order cancellation |
+| Profile | Future profile route | Current user's own profile through `/user-api/v1/users/own` |
 | Admin | `/admin/products`, `/admin/users` | Admin-only product and user/account management |
 
 ## Backend Integration Rules
@@ -88,7 +89,8 @@ https://localhost:7059/image-api/v1/images/{imageId}/content
 | --- | --- |
 | Authentication | Auth forms, token storage, route guards, email confirmation page |
 | Catalog | Product cards, product details, reviews, image display |
-| Cart and Orders | Cart state, checkout command, order history |
+| Cart and Orders | Cart state, checkout through `/order-api/v1/orders/own`, order history, cancellation through `/order-api/v1/orders/{orderId}/cancel` |
+| Profile | Own-profile read/update contract through `/user-api/v1/users/own` |
 | Administration | Product management, image uploads, account/user management |
 
 ## Contracts

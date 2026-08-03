@@ -4,6 +4,9 @@ using Microsoft.Extensions.Options;
 
 namespace GatewayApi.Api.OpenApi;
 
+/// <summary>
+/// Defines the SwaggerDocumentProxy class used by this slice.
+/// </summary>
 public sealed class SwaggerDocumentProxy(
     IHttpClientFactory httpClientFactory,
     IOptions<SwaggerServiceOptions> options,
@@ -11,6 +14,12 @@ public sealed class SwaggerDocumentProxy(
 {
     private const string BearerSecuritySchemeName = "Bearer";
 
+    /// <summary>
+    /// Executes the GetSwaggerDocumentAsync operation.
+    /// </summary>
+    /// <param name="serviceName">The serviceName value.</param>
+    /// <param name="context">The context value.</param>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
     public async Task<IResult> GetSwaggerDocumentAsync(
         string serviceName,
         HttpContext context,

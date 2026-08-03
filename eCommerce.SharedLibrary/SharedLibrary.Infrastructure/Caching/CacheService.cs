@@ -41,6 +41,11 @@ internal sealed class CacheService(IDistributedCache distributedCache) : ICacheS
         return distributedCache.SetStringAsync(key, json, options, cancellationToken);
     }
 
+    /// <summary>
+    /// Executes the RemoveAsync operation.
+    /// </summary>
+    /// <param name="key">The key value.</param>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
     public Task RemoveAsync(string key, CancellationToken cancellationToken = default)
     {
         return distributedCache.RemoveAsync(key, cancellationToken);

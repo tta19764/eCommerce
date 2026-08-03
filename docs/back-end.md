@@ -58,9 +58,9 @@ Not every service has every project type. Message projects are used where other 
 | Slice | Service | Main Responsibility |
 | --- | --- | --- |
 | Authentication | `AuthenticationApi` | Accounts, tokens, Keycloak users, roles, permissions, email confirmation |
-| Catalog | `ProductApi` | Products, descriptions, images, reviews, ratings |
-| Orders | `OrderApi` | Order creation, ownership, admin reads, status changes |
-| Users | `UserApi` | User profiles linked to auth accounts |
+| Catalog | `ProductApi` | Products, descriptions, images, reviews, ratings, inventory adjustments |
+| Orders | `OrderApi` | Claim-based own-order creation, explicit client order creation, ownership, cancellation, admin reads, status changes |
+| Users | `UserApi` | Own-profile reads/updates and admin profile management linked to auth accounts |
 | Images | `ImageApi` | Image metadata and binary content |
 | Notifications | `NotificationApi` | Email confirmation jobs and SMTP delivery |
 | Gateway | `GatewayApi` | Browser-facing reverse proxy and Swagger aggregation |

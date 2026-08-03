@@ -14,6 +14,12 @@ internal sealed class QueryCachingBehavior<TRequest, TResponse>(
     : IPipelineBehavior<TRequest, Result<TResponse>>
     where TRequest : ICachedQuery<TResponse>
 {
+    /// <summary>
+    /// Executes the Handle operation.
+    /// </summary>
+    /// <param name="request">The request value.</param>
+    /// <param name="next">The next value.</param>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
     public async Task<Result<TResponse>> Handle(
         TRequest request,
         RequestHandlerDelegate<Result<TResponse>> next,

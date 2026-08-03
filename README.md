@@ -14,9 +14,9 @@ Detailed documentation lives in [docs](./docs):
 | [Back-End](./docs/back-end.md) | Backend structure, shared patterns, services, and vertical slices |
 | [Front-End](./docs/front-end.md) | Angular app structure, route areas, API clients, and integration rules |
 | [Authentication Slice](./docs/vertical-slices/authentication.md) | Accounts, Keycloak, roles, permissions, login, refresh, confirmation |
-| [Catalog Slice](./docs/vertical-slices/catalog.md) | Products, descriptions, images, reviews, ratings, and catalog caching |
-| [Orders Slice](./docs/vertical-slices/orders.md) | Order creation, ownership, admin reads, status changes, and caching |
-| [Users Slice](./docs/vertical-slices/users.md) | User profiles, account linkage, profile updates, and image references |
+| [Catalog Slice](./docs/vertical-slices/catalog.md) | Products, descriptions, images, reviews, ratings, inventory adjustments, and catalog caching |
+| [Orders Slice](./docs/vertical-slices/orders.md) | Claim-based checkout, explicit client order creation, ownership, admin reads, status changes, cancellation, and caching |
+| [Users Slice](./docs/vertical-slices/users.md) | Own-profile workflows, user profiles, account linkage, profile updates, and image references |
 | [Images Slice](./docs/vertical-slices/images.md) | Image metadata, object storage, upload, download, and deletion |
 | [Notifications Slice](./docs/vertical-slices/notifications.md) | Email confirmation, SMTP, durable jobs, retries, and Quartz |
 | [Gateway And AppHost](./docs/vertical-slices/gateway-apphost.md) | Gateway routing, Aspire orchestration, and local infrastructure |
@@ -30,9 +30,9 @@ The backend is split into microservices:
 | Service | Responsibility |
 | --- | --- |
 | `AuthenticationApi` | Accounts, Keycloak integration, tokens, roles, permissions, email confirmation |
-| `ProductApi` | Products, descriptions, inventory, image IDs, reviews, ratings |
-| `OrderApi` | Orders, order items, ownership checks, admin order workflows |
-| `UserApi` | User profile records linked to authentication accounts |
+| `ProductApi` | Products, descriptions, inventory, image IDs, reviews, ratings, order-driven stock changes |
+| `OrderApi` | Orders, order items, claim-based customer checkout, ownership checks, cancellation, admin order workflows |
+| `UserApi` | Own-profile endpoints and user profile records linked to authentication accounts |
 | `ImageApi` | Image metadata and binary content backed by MinIO |
 | `NotificationApi` | Durable notification jobs and SMTP email delivery |
 | `GatewayApi` | Browser-facing gateway, reverse proxy, Swagger aggregation |
@@ -102,3 +102,11 @@ eCommerce.AppHost/src/eCommerce.AppHost/appsettings.Development.json
 ```
 
 Secrets and production values should come from configuration providers, user secrets, environment variables, or deployment settings rather than committed non-development appsettings.
+
+SMTP sender and credential values are intentionally not committed. For local AppHost runs, provide:
+
+```text
+Parameters__notification-from-address
+Parameters__notification-smtp-user-name
+Parameters__notification-smtp-password
+```

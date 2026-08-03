@@ -6,6 +6,10 @@ internal sealed class ProxySignatureTransformer(
     string headerName,
     string signature) : RequestTransform
 {
+    /// <summary>
+    /// Executes the ApplyAsync operation.
+    /// </summary>
+    /// <param name="context">The context value.</param>
     public override ValueTask ApplyAsync(RequestTransformContext context)
     {
         if (!string.IsNullOrWhiteSpace(headerName) &&

@@ -1,5 +1,8 @@
 namespace GatewayApi.Api.OpenApi;
 
+/// <summary>
+/// Defines the SwaggerServiceDescriptor class used by this slice.
+/// </summary>
 public sealed class SwaggerServiceDescriptor
 {
     public string Name { get; init; } = string.Empty;

@@ -15,7 +15,8 @@ public sealed class PermissionAuthorizationHandler : AuthorizationHandler<Permis
             [ApplicationRoles.Customer] = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
             {
                 ApplicationPermissions.ProductRead,
-                ApplicationPermissions.OrderCreate
+                ApplicationPermissions.OrderCreate,
+                ApplicationPermissions.ImageUpload
             },
             [ApplicationRoles.Admin] = ApplicationPermissions.All.ToHashSet(StringComparer.OrdinalIgnoreCase)
         };
@@ -24,6 +25,8 @@ public sealed class PermissionAuthorizationHandler : AuthorizationHandler<Permis
         AuthorizationHandlerContext context,
         PermissionRequirement requirement)
     {
+        // Keycloak roles stay coarse-grained. This local map expands them into the fine-grained
+        // endpoint permissions used by the services without requiring every permission as a token claim.
         if (context.User.Claims
             .Where(IsRoleClaim)
             .Select(claim => claim.Value)

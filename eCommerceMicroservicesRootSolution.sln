@@ -185,6 +185,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "app", "app", "{0C5045B4-892
 		eCommerce.WebApp\src\ecommerce-web-app\src\app\app.ts = eCommerce.WebApp\src\ecommerce-web-app\src\app\app.ts
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthenticationApi.Messages", "eCommerce.AuthenticationApi\src\AuthenticationApi.Messages\AuthenticationApi.Messages.csproj", "{3326627D-AEA2-4FCC-9528-FF9642B298D2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -747,6 +749,18 @@ Global
 		{7511A654-14FA-44C9-A241-BD24BFFCCCCB}.Release|x64.Build.0 = Release|Any CPU
 		{7511A654-14FA-44C9-A241-BD24BFFCCCCB}.Release|x86.ActiveCfg = Release|Any CPU
 		{7511A654-14FA-44C9-A241-BD24BFFCCCCB}.Release|x86.Build.0 = Release|Any CPU
+		{3326627D-AEA2-4FCC-9528-FF9642B298D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3326627D-AEA2-4FCC-9528-FF9642B298D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3326627D-AEA2-4FCC-9528-FF9642B298D2}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3326627D-AEA2-4FCC-9528-FF9642B298D2}.Debug|x64.Build.0 = Debug|Any CPU
+		{3326627D-AEA2-4FCC-9528-FF9642B298D2}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3326627D-AEA2-4FCC-9528-FF9642B298D2}.Debug|x86.Build.0 = Debug|Any CPU
+		{3326627D-AEA2-4FCC-9528-FF9642B298D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3326627D-AEA2-4FCC-9528-FF9642B298D2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3326627D-AEA2-4FCC-9528-FF9642B298D2}.Release|x64.ActiveCfg = Release|Any CPU
+		{3326627D-AEA2-4FCC-9528-FF9642B298D2}.Release|x64.Build.0 = Release|Any CPU
+		{3326627D-AEA2-4FCC-9528-FF9642B298D2}.Release|x86.ActiveCfg = Release|Any CPU
+		{3326627D-AEA2-4FCC-9528-FF9642B298D2}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -817,5 +831,6 @@ Global
 		{00C06861-4A78-4B08-908E-2743D16FE113} = {DB1DF386-A7DC-4B0C-9335-19D93F5E1D68}
 		{4E92B185-30B7-4E1A-B4FD-8B7652687515} = {DB1DF386-A7DC-4B0C-9335-19D93F5E1D68}
 		{0C5045B4-8925-4524-A7C9-9FC55B864E1C} = {4E92B185-30B7-4E1A-B4FD-8B7652687515}
+		{3326627D-AEA2-4FCC-9528-FF9642B298D2} = {EA93CBC7-61E8-2DB9-A558-94864378ACE8}
 	EndGlobalSection
 EndGlobal

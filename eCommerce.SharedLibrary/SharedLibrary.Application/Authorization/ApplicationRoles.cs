@@ -16,6 +16,9 @@ public readonly record struct ApplicationRoles
 
     public string Name => field ?? string.Empty;
 
+    /// <summary>
+    /// Executes the ToString operation.
+    /// </summary>
     public override string ToString()
     {
         return Name;
