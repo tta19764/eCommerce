@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using OrderApi.Application.Orders.Notifications;
 using SharedLibrary.Application;
 
 namespace OrderApi.Application;
@@ -14,6 +15,9 @@ public static class DependencyInjection
     /// <param name="services">The services value.</param>
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
-        return services.AddSharedApplication(typeof(DependencyInjection).Assembly);
+        services.AddSharedApplication(typeof(DependencyInjection).Assembly);
+        services.AddScoped<OrderStatusChangedNotificationDispatcher>();
+
+        return services;
     }
 }
