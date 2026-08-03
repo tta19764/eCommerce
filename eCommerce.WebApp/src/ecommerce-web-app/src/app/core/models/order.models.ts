@@ -1,8 +1,10 @@
 export type OrderStatus = 'Pending' | 'Confirmed' | 'Paid' | 'Shipped' | 'Completed' | 'Cancelled';
+
 export interface OrderItemRequest {
   productId: string;
   quantity: number;
 }
+
 export interface OrderItem {
   id: string;
   productId: string;
@@ -12,6 +14,7 @@ export interface OrderItem {
   quantity: number;
   totalPrice: number;
 }
+
 export interface Order {
   id: string;
   clientId: string;

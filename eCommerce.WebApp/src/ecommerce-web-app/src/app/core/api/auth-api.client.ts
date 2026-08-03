@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { map } from 'rxjs';
 import { environment } from '../../../environments/environment';
@@ -19,6 +19,24 @@ export class AuthApiClient {
 
   register(request: RegisterRequest) {
     return this.http.post<ApiResponse<string>>(`${this.url}/register`, request).pipe(map(apiData));
+  }
+
+  registerAdmin(request: RegisterRequest) {
+    return this.http
+      .post<ApiResponse<string>>(`${this.url}/register/admin`, request)
+      .pipe(map(apiData));
+  }
+
+  confirmEmail(accountId: string, email: string) {
+    const params = new HttpParams().set('accountId', accountId).set('email', email);
+
+    return this.http.get<ApiResponse<null>>(`${this.url}/confirm-email`, { params }).pipe(
+      map((response) => {
+        if (response.error) {
+          throw new Error(response.error.name);
+        }
+      }),
+    );
   }
 
   refresh(refreshToken: string) {

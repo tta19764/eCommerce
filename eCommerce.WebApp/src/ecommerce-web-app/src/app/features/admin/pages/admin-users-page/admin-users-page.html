@@ -1,7 +1,18 @@
 <section>
-  <div class="mb-6">
-    <h2 class="text-xl font-bold">Users</h2>
-    <p class="mt-1 text-sm text-slate-500">Review application accounts and deactivate access.</p>
+  <div class="mb-6 flex items-center justify-between gap-4">
+    <div>
+      <h2 class="text-xl font-bold">Users</h2>
+      <p class="mt-1 text-sm text-slate-500">
+        Review application accounts, create administrators, and deactivate access.
+      </p>
+    </div>
+    <button
+      class="shrink-0 rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
+      type="button"
+      (click)="formOpen.set(!formOpen())"
+    >
+      {{ formOpen() ? 'Close form' : 'Add administrator' }}
+    </button>
   </div>
 
   @if (success()) {
@@ -13,6 +24,60 @@
     <div class="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-red-700">
       {{ error() }}
     </div>
+  }
+
+  @if (formOpen()) {
+    <form
+      class="mb-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+      [formGroup]="form"
+      (ngSubmit)="createAdmin()"
+    >
+      <h3 class="text-lg font-bold">New administrator</h3>
+      <p class="mt-1 text-sm text-slate-500">
+        This form uses the protected administrator registration endpoint.
+      </p>
+
+      <div class="mt-5 grid gap-5 md:grid-cols-2">
+        <label class="text-sm font-medium">
+          First name
+          <input
+            class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
+            formControlName="firstName"
+          />
+        </label>
+        <label class="text-sm font-medium">
+          Last name
+          <input
+            class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
+            formControlName="lastName"
+          />
+        </label>
+        <label class="text-sm font-medium">
+          Email address
+          <input
+            class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
+            type="email"
+            formControlName="email"
+          />
+        </label>
+        <label class="text-sm font-medium">
+          Temporary password
+          <input
+            class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
+            type="password"
+            formControlName="password"
+          />
+        </label>
+      </div>
+
+      <button
+        class="mt-5 rounded-lg bg-brand-600 px-5 py-2.5 font-semibold text-white disabled:bg-slate-300"
+        type="submit"
+        [disabled]="saving()"
+      >
+        {{ saving() ? 'Creating…' : 'Create administrator' }}
+      </button>
+    </form>
   }
 
   @if (loading()) {

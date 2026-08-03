@@ -1,15 +1,18 @@
+@let currentProduct = product();
+@let imageSource = imageUrl();
+
 <article
   class="flex h-full flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"
 >
   <a
     class="flex h-64 items-center justify-center overflow-hidden bg-slate-100"
-    [routerLink]="['/products', product().id]"
+    [routerLink]="['/products', currentProduct.id]"
   >
-    @if (imageUrl()) {
+    @if (imageSource) {
       <img
         class="h-full w-full object-cover"
-        [src]="imageUrl()"
-        [alt]="product().name"
+        [src]="imageSource"
+        [alt]="currentProduct.name"
         loading="lazy"
       />
     } @else {
@@ -20,34 +23,34 @@
   <div class="flex flex-1 flex-col p-5">
     <div class="flex justify-between gap-3">
       <h3 class="font-semibold">
-        <a class="hover:text-brand-600" [routerLink]="['/products', product().id]">
-          {{ product().name }}
+        <a class="hover:text-brand-600" [routerLink]="['/products', currentProduct.id]">
+          {{ currentProduct.name }}
         </a>
       </h3>
       <strong class="whitespace-nowrap">
-        {{ product().price | currency: product().currency }}
+        {{ currentProduct.price | currency: currentProduct.currency }}
       </strong>
     </div>
-    <p class="mt-2 line-clamp-2 text-sm text-slate-500">{{ product().description }}</p>
+    <p class="mt-2 line-clamp-2 text-sm text-slate-500">{{ currentProduct.description }}</p>
 
     <div class="mt-auto pt-5">
       <div class="mb-3 flex items-center justify-between text-sm">
-        <span class="text-slate-500">★ {{ product().rating || 'New' }}</span>
+        <span class="text-slate-500">★ {{ currentProduct.rating || 'New' }}</span>
         <span
           class="rounded-full px-2 py-1 text-xs font-medium"
-          [class.bg-emerald-100]="product().quantity"
-          [class.text-emerald-700]="product().quantity"
-          [class.bg-slate-200]="!product().quantity"
-          [class.text-slate-600]="!product().quantity"
+          [class.bg-emerald-100]="currentProduct.quantity"
+          [class.text-emerald-700]="currentProduct.quantity"
+          [class.bg-slate-200]="!currentProduct.quantity"
+          [class.text-slate-600]="!currentProduct.quantity"
         >
-          {{ product().quantity ? product().quantity + ' in stock' : 'Sold out' }}
+          {{ currentProduct.quantity ? currentProduct.quantity + ' in stock' : 'Sold out' }}
         </span>
       </div>
       <button
         class="w-full rounded-lg bg-brand-600 px-4 py-2.5 font-semibold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-slate-300"
         type="button"
-        [disabled]="!product().quantity"
-        (click)="cart.add(product())"
+        [disabled]="!currentProduct.quantity"
+        (click)="cart.add(currentProduct)"
       >
         Add to cart
       </button>

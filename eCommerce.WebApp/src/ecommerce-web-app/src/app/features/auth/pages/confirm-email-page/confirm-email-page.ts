@@ -1,26 +1,52 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { AuthApiClient } from '../../../../core/api/auth-api.client';
+
+type ConfirmationState = 'loading' | 'success' | 'invalid';
 
 @Component({
   selector: 'app-confirm-email-page',
   imports: [RouterLink],
-  template: `<section class="mx-auto max-w-2xl px-4 py-16 text-center">
-    <div class="rounded-xl border border-blue-200 bg-blue-50 p-8 text-blue-900">
-      <h1 class="text-2xl font-bold">Thank you, {{ email }}.</h1>
-      <p class="mt-3">
-        Your confirmation link reached the eCommerce application. The backend confirmation endpoint
-        is not yet exposed, so no further action is required here.
-      </p>
-      <a
-        class="mt-6 inline-block rounded-lg bg-brand-600 px-4 py-2 font-semibold text-white"
-        routerLink="/login"
-      >
-        Continue to sign in
-      </a>
-    </div>
-  </section>`,
+  templateUrl: './confirm-email-page.html',
+  styleUrl: './confirm-email-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConfirmEmailPage {
-  protected readonly email = inject(ActivatedRoute).snapshot.queryParamMap.get('email') ?? 'friend';
+  private readonly api = inject(AuthApiClient);
+  private readonly route = inject(ActivatedRoute);
+
+  protected readonly state = signal<ConfirmationState>('loading');
+  protected readonly message = signal('');
+
+  constructor() {
+    const accountId = this.route.snapshot.queryParamMap.get('accountId');
+    const email = this.route.snapshot.queryParamMap.get('email');
+
+    if (!accountId || !email) {
+      this.state.set('invalid');
+      this.message.set('The confirmation link is missing the required account information.');
+      return;
+    }
+
+    this.api.confirmEmail(accountId, email).subscribe({
+      next: () => this.state.set('success'),
+      error: (error) => {
+        this.state.set('invalid');
+        this.message.set(this.confirmationErrorMessage(error));
+      },
+    });
+  }
+
+  private confirmationErrorMessage(error: unknown): string {
+    if (error instanceof HttpErrorResponse && error.status === 404) {
+      return 'The account for this confirmation link was not found.';
+    }
+
+    if (error instanceof HttpErrorResponse && error.status === 400) {
+      return 'This confirmation link is invalid or has expired.';
+    }
+
+    return 'Email confirmation is temporarily unavailable. Please try again later.';
+  }
 }

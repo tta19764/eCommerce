@@ -8,7 +8,7 @@ import { AuthStore } from '../../../../core/auth/auth.store';
   selector: 'app-register-page',
   imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './register-page.html',
-  styleUrl: '../auth-page.scss',
+  styleUrl: './register-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RegisterPage {

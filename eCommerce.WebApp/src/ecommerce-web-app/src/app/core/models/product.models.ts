@@ -9,6 +9,7 @@ export interface Product {
   rating: number;
   reviewsCount: number;
 }
+
 export interface ProductReview {
   id: string;
   productId: string;
@@ -17,6 +18,7 @@ export interface ProductReview {
   comment: string;
   createdAtUtc: string;
 }
+
 export interface ProductUpsertRequest {
   name: string;
   description: string;

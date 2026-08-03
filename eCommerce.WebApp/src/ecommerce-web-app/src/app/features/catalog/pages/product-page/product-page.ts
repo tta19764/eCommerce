@@ -17,15 +17,46 @@ import { CartStore } from '../../../cart/data-access/cart.store';
 export class ProductPage {
   private readonly api = inject(ProductsApiClient);
   private readonly images = inject(ImagesApiClient);
+  private readonly route = inject(ActivatedRoute);
+
   protected readonly cart = inject(CartStore);
   protected readonly product = signal<Product | null>(null);
   protected readonly reviews = signal<ProductReview[]>([]);
   protected readonly loading = signal(true);
   protected readonly failed = signal(false);
   protected readonly quantity = signal(1);
+
   constructor() {
-    const id = inject(ActivatedRoute).snapshot.paramMap.get('id')!;
-    forkJoin({ product: this.api.getById(id), reviews: this.api.getReviews(id) }).subscribe({
+    this.loadProduct();
+  }
+
+  protected imageUrl(imageId: string): string {
+    return this.images.contentUrl(imageId);
+  }
+
+  protected decreaseQuantity(): void {
+    this.quantity.update((value) => Math.max(1, value - 1));
+  }
+
+  protected increaseQuantity(): void {
+    const availableQuantity = this.product()?.quantity ?? 1;
+
+    this.quantity.update((value) => Math.min(availableQuantity, value + 1));
+  }
+
+  private loadProduct(): void {
+    const productId = this.route.snapshot.paramMap.get('id');
+
+    if (!productId) {
+      this.failed.set(true);
+      this.loading.set(false);
+      return;
+    }
+
+    forkJoin({
+      product: this.api.getById(productId),
+      reviews: this.api.getReviews(productId),
+    }).subscribe({
       next: ({ product, reviews }) => {
         this.product.set(product);
         this.reviews.set(reviews.items);
@@ -36,14 +67,5 @@ export class ProductPage {
         this.loading.set(false);
       },
     });
-  }
-  protected imageUrl(id: string) {
-    return this.images.contentUrl(id);
-  }
-  protected decreaseQuantity() {
-    this.quantity.update((value) => Math.max(1, value - 1));
-  }
-  protected increaseQuantity() {
-    this.quantity.update((value) => Math.min(this.product()?.quantity ?? 1, value + 1));
   }
 }

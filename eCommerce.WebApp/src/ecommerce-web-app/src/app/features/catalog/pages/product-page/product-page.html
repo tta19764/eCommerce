@@ -14,15 +14,17 @@
       <p>This product may no longer be available.</p>
     </div>
   } @else {
+    @let currentProduct = product()!;
+
     <div class="grid gap-10 lg:grid-cols-[1.35fr_0.65fr]">
       <div>
-        @if (product()!.imageIds.length) {
+        @if (currentProduct.imageIds.length) {
           <div class="grid gap-4 sm:grid-cols-2">
-            @for (image of product()!.imageIds; track image) {
+            @for (image of currentProduct.imageIds; track image) {
               <img
                 class="w-full rounded-xl border border-slate-200 bg-white object-cover"
                 [src]="imageUrl(image)"
-                [alt]="product()!.name"
+                [alt]="currentProduct.name"
               />
             }
           </div>
@@ -43,22 +45,26 @@
             Product
           </span>
           <span class="text-slate-500">
-            ★ {{ product()!.rating || 'New' }} · {{ product()!.reviewsCount }} reviews
+            ★ {{ currentProduct.rating || 'New' }} · {{ currentProduct.reviewsCount }} reviews
           </span>
         </div>
-        <h1 class="mt-4 text-3xl font-bold">{{ product()!.name }}</h1>
+        <h1 class="mt-4 text-3xl font-bold">{{ currentProduct.name }}</h1>
         <p class="mt-2 text-xl font-semibold">
-          {{ product()!.price | currency: product()!.currency }}
+          {{ currentProduct.price | currency: currentProduct.currency }}
         </p>
-        <p class="mt-4 text-slate-600">{{ product()!.description }}</p>
+        <p class="mt-4 text-slate-600">{{ currentProduct.description }}</p>
         <div
           class="mt-5 rounded-lg p-3 text-sm"
-          [class.bg-emerald-50]="product()!.quantity"
-          [class.text-emerald-700]="product()!.quantity"
-          [class.bg-slate-100]="!product()!.quantity"
-          [class.text-slate-600]="!product()!.quantity"
+          [class.bg-emerald-50]="currentProduct.quantity"
+          [class.text-emerald-700]="currentProduct.quantity"
+          [class.bg-slate-100]="!currentProduct.quantity"
+          [class.text-slate-600]="!currentProduct.quantity"
         >
-          {{ product()!.quantity ? product()!.quantity + ' available' : 'Currently unavailable' }}
+          {{
+            currentProduct.quantity
+              ? currentProduct.quantity + ' available'
+              : 'Currently unavailable'
+          }}
         </div>
         <div class="mt-5 flex gap-2">
           <div class="flex items-center rounded-lg border border-slate-300">
@@ -69,8 +75,8 @@
           <button
             class="flex-1 rounded-lg bg-brand-600 px-4 py-2 font-semibold text-white hover:bg-brand-700 disabled:bg-slate-300"
             type="button"
-            [disabled]="!product()!.quantity"
-            (click)="cart.add(product()!, quantity())"
+            [disabled]="!currentProduct.quantity"
+            (click)="cart.add(currentProduct, quantity())"
           >
             Add to cart
           </button>

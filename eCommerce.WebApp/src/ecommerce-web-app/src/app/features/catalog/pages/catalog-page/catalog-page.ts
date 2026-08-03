@@ -12,17 +12,21 @@ import { ProductCard } from '../../../../shared/ui/product-card/product-card';
 })
 export class CatalogPage {
   private readonly api = inject(ProductsApiClient);
+
   protected readonly products = signal<Product[]>([]);
   protected readonly loading = signal(true);
   protected readonly error = signal('');
   protected readonly page = signal(1);
   protected readonly total = signal(0);
+
   constructor() {
     this.load();
   }
-  protected load(page = 1) {
+
+  protected load(page = 1): void {
     this.loading.set(true);
     this.error.set('');
+
     this.api.getPage({ page, pageSize: 12 }).subscribe({
       next: (result) => {
         this.products.set(result.items);

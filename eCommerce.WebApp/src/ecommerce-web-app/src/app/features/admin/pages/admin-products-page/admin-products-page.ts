@@ -9,6 +9,7 @@ import { Product } from '../../../../core/models/product.models';
   selector: 'app-admin-products-page',
   imports: [CurrencyPipe, ReactiveFormsModule],
   templateUrl: './admin-products-page.html',
+  styleUrl: './admin-products-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AdminProductsPage {

@@ -14,16 +14,20 @@ export interface ImageResource {
   status: string;
   createdAtUtc: string;
 }
+
 @Injectable({ providedIn: 'root' })
 export class ImagesApiClient {
   private readonly http = inject(HttpClient);
   private readonly url = `${environment.gatewayUrl}/image-api/v1/images`;
+
   contentUrl(id: string) {
     return `${this.url}/${id}/content`;
   }
+
   upload(file: File) {
     const form = new FormData();
     form.append('file', file);
+
     return this.http.post<ApiResponse<ImageResource>>(this.url, form).pipe(map(apiData));
   }
 }
