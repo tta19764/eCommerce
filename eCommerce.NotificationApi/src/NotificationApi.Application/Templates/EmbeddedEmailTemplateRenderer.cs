@@ -12,6 +12,9 @@ public sealed class EmbeddedEmailTemplateRenderer : IEmailTemplateRenderer
     private const string EmailConfirmationResourceName =
         "NotificationApi.Application.Templates.EmailConfirmation.html";
 
+    private const string OrderStatusChangedResourceName =
+        "NotificationApi.Application.Templates.OrderStatusChanged.html";
+
     /// <inheritdoc />
     public string RenderEmailConfirmation(
         string firstName,
@@ -28,6 +31,25 @@ public sealed class EmbeddedEmailTemplateRenderer : IEmailTemplateRenderer
                 ["lastName"] = lastName,
                 ["fullName"] = string.IsNullOrWhiteSpace(fullName) ? firstName : fullName,
                 ["confirmationUrl"] = confirmationUrl,
+                ["year"] = DateTime.UtcNow.Year.ToString()
+            });
+    }
+
+    /// <inheritdoc />
+    public string RenderOrderStatusChanged(
+        string fullName,
+        Guid orderId,
+        string status,
+        DateTime changedAtUtc)
+    {
+        return RenderTemplate(
+            OrderStatusChangedResourceName,
+            new Dictionary<string, string>
+            {
+                ["fullName"] = string.IsNullOrWhiteSpace(fullName) ? "Customer" : fullName,
+                ["orderId"] = orderId.ToString(),
+                ["status"] = status,
+                ["changedAtUtc"] = changedAtUtc.ToString("yyyy-MM-dd HH:mm 'UTC'"),
                 ["year"] = DateTime.UtcNow.Year.ToString()
             });
     }

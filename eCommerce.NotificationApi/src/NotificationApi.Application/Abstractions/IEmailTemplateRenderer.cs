@@ -16,4 +16,18 @@ public interface IEmailTemplateRenderer
         string firstName,
         string lastName,
         string confirmationUrl);
+
+    /// <summary>
+    /// Renders the order status change template.
+    /// </summary>
+    /// <param name="fullName">The recipient display name.</param>
+    /// <param name="orderId">The order identifier.</param>
+    /// <param name="status">The new order status.</param>
+    /// <param name="changedAtUtc">The UTC status change timestamp.</param>
+    /// <returns>The rendered HTML body.</returns>
+    string RenderOrderStatusChanged(
+        string fullName,
+        Guid orderId,
+        string status,
+        DateTime changedAtUtc);
 }
