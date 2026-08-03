@@ -123,6 +123,8 @@ var notificationSmtpPort = GetRequired("AppHost:Notifications:Smtp:Port");
 var notificationSmtpEnableSsl = GetRequired("AppHost:Notifications:Smtp:EnableSsl");
 var notificationSmtpFromName = GetRequired("AppHost:Notifications:Smtp:FromName");
 var notificationSmtpTimeoutSeconds = GetRequired("AppHost:Notifications:Smtp:TimeoutSeconds");
+var notificationSmtpUserName = GetRequired("AppHost:Notifications:Smtp:UserName");
+var notificationSmtpPassword = GetRequired("AppHost:Notifications:Smtp:Password");
 
 // Project ports are pinned so the gateway, Swagger UI, and external tools can use stable localhost
 // URLs. Aspire still wires service references internally, but fixed ports make manual testing and
@@ -353,6 +355,8 @@ var notificationApi = builder.AddProject<Projects.NotificationApi_Api>("notifica
     .WithEnvironment("Smtp__EnableSsl", notificationSmtpEnableSsl)
     .WithEnvironment("Smtp__FromName", notificationSmtpFromName)
     .WithEnvironment("Smtp__TimeoutSeconds", notificationSmtpTimeoutSeconds)
+    .WithEnvironment("Smtp__UserName", notificationSmtpUserName)
+    .WithEnvironment("Smtp__Password", notificationSmtpPassword)
     .WithReference(notificationDb, "Database")
     .WithReference(rabbitMq)
     .WaitFor(postgres)
