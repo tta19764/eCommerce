@@ -48,6 +48,14 @@ public class OrderItem : Entity
         Quantity = Quantity.Increase(quantity);
     }
 
+    /// <summary>
+    /// Executes the Create operation.
+    /// </summary>
+    /// <param name="orderId">The orderId value.</param>
+    /// <param name="productId">The productId value.</param>
+    /// <param name="productName">The productName value.</param>
+    /// <param name="unitPrice">The unitPrice value.</param>
+    /// <param name="quantity">The quantity value.</param>
     public static OrderItem Create(
         Guid orderId,
         Guid productId,

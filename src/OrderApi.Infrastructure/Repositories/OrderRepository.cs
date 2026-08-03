@@ -96,6 +96,12 @@ public class OrderRepository(OrderDbContext dbContext) : Repository<Order, Order
             .ToListAsync(cancellationToken);
     }
 
+    /// <summary>
+    /// Executes the CountAsync operation.
+    /// </summary>
+    /// <param name="minOrderPrice">The minOrderPrice value.</param>
+    /// <param name="maxOrderPrice">The maxOrderPrice value.</param>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
     public async Task<int> CountAsync(
         decimal? minOrderPrice = null,
         decimal? maxOrderPrice = null,
@@ -109,6 +115,11 @@ public class OrderRepository(OrderDbContext dbContext) : Repository<Order, Order
         return await query.CountAsync(cancellationToken);
     }
 
+    /// <summary>
+    /// Executes the CountByClientIdAsync operation.
+    /// </summary>
+    /// <param name="clientId">The clientId value.</param>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
     public Task<int> CountByClientIdAsync(Guid clientId, CancellationToken cancellationToken = default)
     {
         return DbSet

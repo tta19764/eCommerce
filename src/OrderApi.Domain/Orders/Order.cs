@@ -85,6 +85,10 @@ public class Order : Entity
         return Result.Success();
     }
 
+    /// <summary>
+    /// Executes the ReplaceItems operation.
+    /// </summary>
+    /// <param name="items">The items value.</param>
     public Result ReplaceItems(IEnumerable<OrderItem> items)
     {
         if (Status != OrderStatus.Pending)
