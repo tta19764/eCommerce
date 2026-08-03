@@ -1,20 +1,31 @@
-using Amazon.S3;
-using Amazon.S3.Model;
 using ImageApi.Application.Abstractions;
 using ImageApi.Domain.Images;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Minio;
+using Minio.DataModel.Args;
+using Minio.Exceptions;
 using SharedLibrary.Domain.Abstractions;
 
 namespace ImageApi.Infrastructure.Storage;
 
+/// <summary>
+/// Defines the S3ImageStorage class used by this slice.
+/// </summary>
 public sealed class S3ImageStorage(
-    IAmazonS3 s3Client,
-    IOptions<S3StorageOptions> options) : IImageStorage
+    IMinioClient minioClient,
+    IOptions<S3StorageOptions> options,
+    ILogger<S3ImageStorage> logger) : IImageStorage
 {
     private readonly S3StorageOptions _options = options.Value;
 
     public string BucketName => _options.BucketName;
 
+    /// <summary>
+    /// Executes the CreateStorageKey operation.
+    /// </summary>
+    /// <param name="imageId">The imageId value.</param>
+    /// <param name="fileName">The fileName value.</param>
     public string CreateStorageKey(Guid imageId, string fileName)
     {
         var extension = Path.GetExtension(fileName);
@@ -24,6 +35,13 @@ public sealed class S3ImageStorage(
             : $"images/{imageId:N}{extension.ToLowerInvariant()}";
     }
 
+    /// <summary>
+    /// Executes the UploadAsync operation.
+    /// </summary>
+    /// <param name="storageKey">The storageKey value.</param>
+    /// <param name="stream">The stream value.</param>
+    /// <param name="contentType">The contentType value.</param>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
     public async Task<Result> UploadAsync(
         string storageKey,
         Stream stream,
@@ -34,38 +52,75 @@ public sealed class S3ImageStorage(
         {
             await EnsureBucketExistsAsync(cancellationToken);
 
-            await s3Client.PutObjectAsync(
-                new PutObjectRequest
-                {
-                    BucketName = _options.BucketName,
-                    Key = storageKey,
-                    InputStream = stream,
-                    ContentType = contentType
-                },
-                cancellationToken);
+            // Use the MinIO SDK directly. The AWS S3 SDK enables AWS-specific signing paths
+            // that do not reliably authenticate against the local MinIO development container.
+            var putObjectArgs = new PutObjectArgs()
+                .WithBucket(_options.BucketName)
+                .WithObject(storageKey)
+                .WithStreamData(stream)
+                .WithObjectSize(stream.Length)
+                .WithContentType(contentType);
+
+            await minioClient.PutObjectAsync(putObjectArgs, cancellationToken);
 
             return Result.Success();
         }
-        catch (AmazonS3Exception)
+        catch (MinioException exception)
         {
+            logger.LogError(
+                exception,
+                "S3 upload failed for bucket {BucketName}, key {StorageKey}, service URL {ServiceUrl}",
+                _options.BucketName,
+                storageKey,
+                _options.ServiceUrl);
+
             return Result.Failure(ImageErrors.StorageFailure);
         }
     }
 
+    /// <summary>
+    /// Executes the DownloadAsync operation.
+    /// </summary>
+    /// <param name="storageKey">The storageKey value.</param>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
     public async Task<Result<StoredImage>> DownloadAsync(string storageKey, CancellationToken cancellationToken = default)
     {
         try
         {
-            var response = await s3Client.GetObjectAsync(_options.BucketName, storageKey, cancellationToken);
+            var stream = new MemoryStream();
+            var contentType = string.Empty;
 
-            return new StoredImage(response.ResponseStream, response.Headers.ContentType);
+            // MinIO returns data through a callback. Copy it to a stream owned by ImageApi so
+            // endpoint code can safely return the content after this SDK call is complete.
+            var getObjectArgs = new GetObjectArgs()
+                .WithBucket(_options.BucketName)
+                .WithObject(storageKey)
+                .WithCallbackStream(sourceStream => sourceStream.CopyTo(stream));
+
+            var objectStat = await minioClient.GetObjectAsync(getObjectArgs, cancellationToken);
+            contentType = objectStat.ContentType;
+            stream.Position = 0;
+
+            return new StoredImage(stream, contentType);
         }
-        catch (AmazonS3Exception)
+        catch (MinioException exception)
         {
+            logger.LogError(
+                exception,
+                "S3 download failed for bucket {BucketName}, key {StorageKey}, service URL {ServiceUrl}",
+                _options.BucketName,
+                storageKey,
+                _options.ServiceUrl);
+
             return Result.Failure<StoredImage>(ImageErrors.StorageFailure);
         }
     }
 
+    /// <summary>
+    /// Executes the GetReadUrlAsync operation.
+    /// </summary>
+    /// <param name="storageKey">The storageKey value.</param>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
     public Task<Result<string>> GetReadUrlAsync(string storageKey, CancellationToken cancellationToken = default)
     {
         if (!string.IsNullOrWhiteSpace(_options.PublicBaseUrl))
@@ -76,47 +131,71 @@ public sealed class S3ImageStorage(
 
         try
         {
-            var url = s3Client.GetPreSignedURL(new GetPreSignedUrlRequest
-            {
-                BucketName = _options.BucketName,
-                Key = storageKey,
-                Expires = DateTime.UtcNow.AddMinutes(_options.PresignedUrlExpiryMinutes)
-            });
+            var presignedGetObjectArgs = new PresignedGetObjectArgs()
+                .WithBucket(_options.BucketName)
+                .WithObject(storageKey)
+                .WithExpiry((int)TimeSpan.FromMinutes(_options.PresignedUrlExpiryMinutes).TotalSeconds);
+
+            var url = minioClient.PresignedGetObjectAsync(presignedGetObjectArgs).GetAwaiter().GetResult();
 
             return Task.FromResult(Result.Success(url));
         }
-        catch (AmazonS3Exception)
+        catch (MinioException exception)
         {
+            logger.LogError(
+                exception,
+                "S3 read URL generation failed for bucket {BucketName}, key {StorageKey}, service URL {ServiceUrl}",
+                _options.BucketName,
+                storageKey,
+                _options.ServiceUrl);
+
             return Task.FromResult(Result.Failure<string>(ImageErrors.StorageFailure));
         }
     }
 
+    /// <summary>
+    /// Executes the DeleteAsync operation.
+    /// </summary>
+    /// <param name="storageKey">The storageKey value.</param>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
     public async Task<Result> DeleteAsync(string storageKey, CancellationToken cancellationToken = default)
     {
         try
         {
-            await s3Client.DeleteObjectAsync(_options.BucketName, storageKey, cancellationToken);
+            var removeObjectArgs = new RemoveObjectArgs()
+                .WithBucket(_options.BucketName)
+                .WithObject(storageKey);
+
+            await minioClient.RemoveObjectAsync(removeObjectArgs, cancellationToken);
 
             return Result.Success();
         }
-        catch (AmazonS3Exception)
+        catch (MinioException exception)
         {
+            logger.LogError(
+                exception,
+                "S3 delete failed for bucket {BucketName}, key {StorageKey}, service URL {ServiceUrl}",
+                _options.BucketName,
+                storageKey,
+                _options.ServiceUrl);
+
             return Result.Failure(ImageErrors.StorageFailure);
         }
     }
 
     private async Task EnsureBucketExistsAsync(CancellationToken cancellationToken)
     {
-        var buckets = await s3Client.ListBucketsAsync(cancellationToken);
+        var bucketExistsArgs = new BucketExistsArgs()
+            .WithBucket(_options.BucketName);
 
-        if (buckets.Buckets.Any(bucket => bucket.BucketName == _options.BucketName))
+        if (await minioClient.BucketExistsAsync(bucketExistsArgs, cancellationToken))
         {
             return;
         }
 
-        await s3Client.PutBucketAsync(new PutBucketRequest
-        {
-            BucketName = _options.BucketName
-        }, cancellationToken);
+        var makeBucketArgs = new MakeBucketArgs()
+            .WithBucket(_options.BucketName);
+
+        await minioClient.MakeBucketAsync(makeBucketArgs, cancellationToken);
     }
 }

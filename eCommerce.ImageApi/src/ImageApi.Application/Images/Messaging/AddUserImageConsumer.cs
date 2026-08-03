@@ -14,6 +14,10 @@ public sealed class AddUserImageConsumer(
     IUnitOfWork unitOfWork,
     ILogger<AddUserImageConsumer> logger) : IConsumer<AddUserImageRequest>
 {
+    /// <summary>
+    /// Executes the Consume operation.
+    /// </summary>
+    /// <param name="context">The context value.</param>
     public async Task Consume(ConsumeContext<AddUserImageRequest> context)
     {
         var image = context.Message.TemporaryImageId == Guid.Empty

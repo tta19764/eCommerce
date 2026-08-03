@@ -6,12 +6,20 @@ using SharedLibrary.Domain.Abstractions;
 
 namespace ImageApi.Application.Images.DeleteImage;
 
+/// <summary>
+/// Defines the DeleteImageCommandHandler class used by this slice.
+/// </summary>
 public sealed class DeleteImageCommandHandler(
     IImageRepository imageRepository,
     IUnitOfWork unitOfWork,
     IImageStorage imageStorage,
     ILogger<DeleteImageCommandHandler> logger) : ICommandHandler<DeleteImageCommand>
 {
+    /// <summary>
+    /// Executes the Handle operation.
+    /// </summary>
+    /// <param name="request">The request value.</param>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
     public async Task<Result> Handle(DeleteImageCommand request, CancellationToken cancellationToken)
     {
         var image = await imageRepository.GetByIdAsync(request.ImageId, cancellationToken);

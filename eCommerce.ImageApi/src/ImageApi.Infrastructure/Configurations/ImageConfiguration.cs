@@ -4,8 +4,15 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace ImageApi.Infrastructure.Configurations;
 
+/// <summary>
+/// Defines the ImageConfiguration class used by this slice.
+/// </summary>
 public sealed class ImageConfiguration : IEntityTypeConfiguration<Image>
 {
+    /// <summary>
+    /// Executes the Configure operation.
+    /// </summary>
+    /// <param name="builder">The builder value.</param>
     public void Configure(EntityTypeBuilder<Image> builder)
     {
         builder.HasKey(image => image.Id);

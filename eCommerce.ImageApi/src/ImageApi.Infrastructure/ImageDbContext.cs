@@ -4,6 +4,9 @@ using SharedLibrary.Domain.Abstractions;
 
 namespace ImageApi.Infrastructure;
 
+/// <summary>
+/// Defines the ImageDbContext class used by this slice.
+/// </summary>
 public sealed class ImageDbContext(DbContextOptions<ImageDbContext> options) : DbContext(options), IUnitOfWork
 {
     public DbSet<Image> Images { get; set; }

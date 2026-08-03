@@ -3,6 +3,9 @@ using System.Globalization;
 
 namespace ImageApi.Api.Endpoints;
 
+/// <summary>
+/// Defines the ImageApiApiVersions class used by this slice.
+/// </summary>
 public static class ImageApiApiVersions
 {
     private const int V1Major = 1;

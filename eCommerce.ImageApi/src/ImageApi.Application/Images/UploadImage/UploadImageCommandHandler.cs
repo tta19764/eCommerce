@@ -6,6 +6,9 @@ using SharedLibrary.Domain.Abstractions;
 
 namespace ImageApi.Application.Images.UploadImage;
 
+/// <summary>
+/// Defines the UploadImageCommandHandler class used by this slice.
+/// </summary>
 public sealed class UploadImageCommandHandler(
     IImageRepository imageRepository,
     IUnitOfWork unitOfWork,
@@ -22,6 +25,11 @@ public sealed class UploadImageCommandHandler(
         "image/gif"
     ];
 
+    /// <summary>
+    /// Executes the Handle operation.
+    /// </summary>
+    /// <param name="request">The request value.</param>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
     public async Task<Result<ImageResponse>> Handle(UploadImageCommand request, CancellationToken cancellationToken)
     {
         if (request.Size <= 0)

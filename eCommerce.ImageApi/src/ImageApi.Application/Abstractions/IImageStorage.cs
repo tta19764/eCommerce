@@ -2,6 +2,9 @@ using SharedLibrary.Domain.Abstractions;
 
 namespace ImageApi.Application.Abstractions;
 
+/// <summary>
+/// Defines the IImageStorage interface used by this slice.
+/// </summary>
 public interface IImageStorage
 {
     string BucketName { get; }

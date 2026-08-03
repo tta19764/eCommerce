@@ -3,8 +3,15 @@ using ImageApi.Api.Endpoints;
 
 namespace ImageApi.Api.Extensions;
 
+/// <summary>
+/// Defines the ServiceCollectionExtensions class used by this slice.
+/// </summary>
 public static class ServiceCollectionExtensions
 {
+    /// <summary>
+    /// Executes the AddApi operation.
+    /// </summary>
+    /// <param name="services">The services value.</param>
     public static IServiceCollection AddApi(this IServiceCollection services)
     {
         services.AddOpenApi();

@@ -50,6 +50,15 @@ public sealed class Image : Entity
     /// </summary>
     public ImageStatus Status { get; private set; }
 
+    /// <summary>
+    /// Executes the Create operation.
+    /// </summary>
+    /// <param name="id">The id value.</param>
+    /// <param name="fileName">The fileName value.</param>
+    /// <param name="contentType">The contentType value.</param>
+    /// <param name="size">The size value.</param>
+    /// <param name="storageKey">The storageKey value.</param>
+    /// <param name="bucketName">The bucketName value.</param>
     public static Result<Image> Create(
         Guid id,
         string fileName,

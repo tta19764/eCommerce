@@ -2,6 +2,9 @@ using SharedLibrary.Domain.Abstractions;
 
 namespace ImageApi.Domain.Images;
 
+/// <summary>
+/// Defines the ImageErrors class used by this slice.
+/// </summary>
 public static class ImageErrors
 {
     public static readonly Error InvalidId = new("Image.InvalidId", "Image id must not be empty");

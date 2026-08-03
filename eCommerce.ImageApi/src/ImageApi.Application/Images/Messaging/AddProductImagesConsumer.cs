@@ -14,6 +14,10 @@ public sealed class AddProductImagesConsumer(
     IUnitOfWork unitOfWork,
     ILogger<AddProductImagesConsumer> logger) : IConsumer<AddProductImagesRequest>
 {
+    /// <summary>
+    /// Executes the Consume operation.
+    /// </summary>
+    /// <param name="context">The context value.</param>
     public async Task Consume(ConsumeContext<AddProductImagesRequest> context)
     {
         var missingImageIds = new List<Guid>();

@@ -11,8 +11,15 @@ using SharedLibrary.Application.Authorization;
 
 namespace ImageApi.Api.Endpoints.Images;
 
+/// <summary>
+/// Defines the ImageEndpoints class used by this slice.
+/// </summary>
 public static class ImageEndpoints
 {
+    /// <summary>
+    /// Executes the MapImageEndpoints operation.
+    /// </summary>
+    /// <param name="builder">The builder value.</param>
     public static IEndpointRouteBuilder MapImageEndpoints(this IEndpointRouteBuilder builder)
     {
         var group = builder.MapGroup("images")
@@ -27,7 +34,7 @@ public static class ImageEndpoints
             .Produces<ApiResponse<ImageResponse>>(StatusCodes.Status201Created)
             .Produces<ApiResponse<ImageResponse>>(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status401Unauthorized)
-            .RequireAuthorization(ApplicationPermissions.ProductUpdate);
+            .RequireAuthorization(ApplicationPermissions.ImageUpload);
 
         group.MapGet("{imageId:guid}", GetImage)
             .WithName(nameof(GetImage))
@@ -52,6 +59,12 @@ public static class ImageEndpoints
         return builder;
     }
 
+    /// <summary>
+    /// Executes the UploadImage operation.
+    /// </summary>
+    /// <param name="file">The file value.</param>
+    /// <param name="sender">The sender value.</param>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
     public static async Task<IResult> UploadImage(
         IFormFile file,
         ISender sender,
@@ -70,6 +83,12 @@ public static class ImageEndpoints
             : Results.BadRequest(result.MapToApiResponse());
     }
 
+    /// <summary>
+    /// Executes the GetImage operation.
+    /// </summary>
+    /// <param name="imageId">The imageId value.</param>
+    /// <param name="sender">The sender value.</param>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
     public static async Task<IResult> GetImage(
         Guid imageId,
         ISender sender,
@@ -82,6 +101,12 @@ public static class ImageEndpoints
             : Results.NotFound(result.MapToApiResponse());
     }
 
+    /// <summary>
+    /// Executes the DownloadImage operation.
+    /// </summary>
+    /// <param name="imageId">The imageId value.</param>
+    /// <param name="sender">The sender value.</param>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
     public static async Task<IResult> DownloadImage(
         Guid imageId,
         ISender sender,
@@ -94,6 +119,12 @@ public static class ImageEndpoints
             : Results.NotFound(result.MapToApiResponse());
     }
 
+    /// <summary>
+    /// Executes the DeleteImage operation.
+    /// </summary>
+    /// <param name="imageId">The imageId value.</param>
+    /// <param name="sender">The sender value.</param>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
     public static async Task<IResult> DeleteImage(
         Guid imageId,
         ISender sender,
