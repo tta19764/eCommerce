@@ -224,7 +224,7 @@ Current backend permissions:
 | --- | --- |
 | `products:read` | Read products and create product reviews |
 | `products:create` | Create products |
-| `products:update` | Update products and manage image uploads |
+| `products:update` | Update products and delete images |
 | `products:delete` | Delete products |
 | `orders:create` | Create orders |
 | `orders:read` | Admin order reads |
@@ -232,12 +232,13 @@ Current backend permissions:
 | `users:read` | Read users, accounts, roles |
 | `users:update` | Update users and delete accounts |
 | `accounts:create-admin` | Create administrator accounts |
+| `images:upload` | Upload product and profile images |
 
 Role-to-permission mapping:
 
 | Role | Permissions |
 | --- | --- |
-| `Customer` | `products:read`, `orders:create` |
+| `Customer` | `products:read`, `orders:create`, `images:upload` |
 | `Admin` | All permissions |
 
 The backend authorizes from token role claims. Keycloak tokens must contain realm roles as role claims. The app can use decoded roles for UI visibility, but the backend remains the source of truth.
@@ -245,9 +246,12 @@ The backend authorizes from token role claims. Keycloak tokens must contain real
 Important ownership note for orders:
 
 - `GetOrder` allows access to admins or the order owner.
-- `GetOwnOrders` uses the current authenticated user ID from claims.
-- The current claim lookup accepts `user_id`, `userId`, `nameidentifier`, or `sub`.
-- Keycloak `sub` currently represents the auth account ID. Orders store `clientId`. If the frontend sends a User API profile ID as `clientId`, the token must also include that same profile ID as `user_id` or `userId`, otherwise owner checks will fail with `403`.
+- `GetOwnOrders` resolves the current authenticated Keycloak identity through Authentication API and uses the linked User API profile ID.
+- Customer checkout uses `CreateOwnOrder` and must not send a `clientId`; the backend resolves the Keycloak identity from claims, asks Authentication API for the linked `userId`, and uses that as the order owner.
+- Admin order confirmation reserves inventory by decrementing Product API quantities. Cancelling an already confirmed/paid order restores the quantities.
+- `CreateOrder` accepts an explicit `clientId` and is reserved for permission-based backend/admin workflows.
+- The current identity lookup accepts `identity_id`, `IdentityId`, `nameidentifier`, or `sub`.
+- Orders store `clientId` as the linked User API profile ID. The browser should never send that ID for own-order workflows.
 
 ## Authentication API
 
@@ -353,6 +357,7 @@ type ProductResponse = {
   currency: string;
   quantity: number;
   imageIds: string[];
+  displayImageId: string | null;
   rating: number;
   reviewsCount: number;
 };
@@ -395,8 +400,11 @@ type CreateProductRequest = {
   currencyCode: string;
   quantity: number;
   imageIds?: string[] | null;
+  displayImageId?: string | null;
 };
 ```
+
+`displayImageId` must be either `null` or one of the supplied `imageIds`. If `imageIds` contains values and `displayImageId` is omitted, the backend uses the first image ID as the display image.
 
 Response:
 
@@ -423,8 +431,11 @@ type UpdateProductRequest = {
   currencyCode: string;
   quantity: number;
   imageIds?: string[] | null;
+  displayImageId?: string | null;
 };
 ```
+
+`displayImageId` must be one of `imageIds` when supplied. Use it for product cards, cart rows, and the first image in product detail galleries.
 
 Returns `204` on success.
 
@@ -505,14 +516,42 @@ type OrderStatus =
   | "Cancelled";
 ```
 
+### POST Own Order
+
+```http
+POST /order-api/v1/orders/own
+Authorization: Bearer {customerAccessToken}
+```
+
+Requires `orders:create`. This is the frontend checkout endpoint. Do not send `clientId`; the backend resolves the order owner from token claims.
+
+Request:
+
+```ts
+type CreateOwnOrderRequest = {
+  items: OrderItemRequest[];
+};
+
+type OrderItemRequest = {
+  productId: string;
+  quantity: number;
+};
+```
+
+Response:
+
+```ts
+ApiResponse<string> // orderId
+```
+
 ### POST Order
 
 ```http
 POST /order-api/v1/orders
-Authorization: Bearer {customerOrAdminAccessToken}
+Authorization: Bearer {accessTokenWithOrdersCreate}
 ```
 
-Requires `orders:create`.
+Requires `orders:create`. This endpoint accepts an explicit `clientId` and is for permission-based backend/admin workflows, not normal customer checkout.
 
 Request:
 
@@ -520,11 +559,6 @@ Request:
 type CreateOrderRequest = {
   clientId: string;
   items: OrderItemRequest[];
-};
-
-type OrderItemRequest = {
-  productId: string;
-  quantity: number;
 };
 ```
 
@@ -581,7 +615,7 @@ GET /order-api/v1/orders/own?page=1&pageSize=10
 Authorization: Bearer {accessToken}
 ```
 
-Requires any authenticated user. The backend resolves the owner ID from token claims and returns `403` if no valid user ID claim exists.
+Requires any authenticated user. The backend resolves the Keycloak identity from token claims, asks Authentication API for the linked user ID, and returns `403` if no linked user exists.
 
 Response:
 
@@ -611,7 +645,7 @@ GET /order-api/v1/orders/{orderId}
 Authorization: Bearer {accessToken}
 ```
 
-Requires any authenticated user. Returns the order only when the current user is an admin or the order owner.
+Requires any authenticated user. Returns the order only when the current user is an admin or the resolved order owner.
 
 Response:
 
@@ -637,6 +671,51 @@ type UpdateOrderRequest = {
   items: OrderItemRequest[];
 };
 ```
+
+Returns `204` on success.
+
+### PATCH Order Status
+
+```http
+PATCH /order-api/v1/orders/{orderId}/status
+Authorization: Bearer {adminAccessToken}
+```
+
+Requires `orders:update-status`. This is the admin workflow for order state transitions.
+
+Request:
+
+```ts
+type UpdateOrderStatusRequest = {
+  status: OrderStatus;
+};
+```
+
+Rules:
+
+- `Confirmed` is allowed only from `Pending` and decrements Product API quantities for every order item.
+- `Paid` is allowed only from `Confirmed`.
+- `Shipped` is allowed only from `Paid`.
+- `Completed` is allowed only from `Shipped`.
+- `Cancelled` is allowed until the order has shipped. If the order was already confirmed or paid, Product API quantities are restored.
+- If Product API reports missing products or insufficient quantity, the order status is not saved.
+
+Returns `204` on success.
+
+### POST Cancel Own Order
+
+```http
+POST /order-api/v1/orders/{orderId}/cancel
+Authorization: Bearer {customerAccessToken}
+```
+
+Requires any authenticated user. The backend resolves the current user through Authentication API and cancels the order only if that user owns it.
+
+Rules:
+
+- Pending orders are cancelled without inventory changes because stock has not been reserved yet.
+- Confirmed or paid orders restore product quantities.
+- Shipped, completed, or already cancelled orders return a bad-request response.
 
 Returns `204` on success.
 
@@ -681,6 +760,21 @@ type UserResponse = {
 ApiResponse<UserResponse>
 ```
 
+### GET Own Profile
+
+```http
+GET /user-api/v1/users/own
+Authorization: Bearer {accessToken}
+```
+
+Requires any authenticated user. The backend reads the token identity id (`identity_id`, `IdentityId`, `nameidentifier`, or `sub`), asks Authentication API for the linked profile `userId`, and returns `403` if no linked profile exists.
+
+Response:
+
+```ts
+ApiResponse<UserResponse>
+```
+
 ### PUT User
 
 ```http
@@ -704,6 +798,25 @@ The backend allows image-only updates. `firstName` and `lastName` may be omitted
 
 Returns `204` on success.
 
+### PUT Own Profile
+
+```http
+PUT /user-api/v1/users/own
+Authorization: Bearer {accessToken}
+```
+
+Requires any authenticated user. The frontend must not send a profile ID in the route or body. The backend reads the token identity id and asks Authentication API for the linked profile `userId`.
+
+Request:
+
+```ts
+type UpdateOwnProfileRequest = UpdateUserRequest;
+```
+
+The backend allows image-only updates. `firstName` and `lastName` may be omitted or sent as `null` when only changing the profile image.
+
+Returns `204` on success.
+
 ## Image API
 
 Base prefix:
@@ -714,15 +827,17 @@ Base prefix:
 
 Images are uploaded before attaching them to products or users. The product and user APIs store image IDs, not raw image bytes.
 
+Uploaded images remain temporary until the frontend sends the returned ID to a product or user create/update endpoint. ImageApi runs a background cleanup job that removes old temporary images from both MinIO and `image_db`, so upload and attach the image as part of the same save flow.
+
 ### POST Image
 
 ```http
 POST /image-api/v1/images
-Authorization: Bearer {adminAccessToken}
+Authorization: Bearer {accessTokenWithImagesUpload}
 Content-Type: multipart/form-data
 ```
 
-Requires `products:update`.
+Requires `images:upload`. Customers use this for profile pictures; admins also use it while managing product images.
 
 Form field:
 
@@ -771,7 +886,7 @@ Public. Returns the raw image file stream with its content type.
 Frontend usage:
 
 ```html
-<img [src]="imageContentUrl(product.imageIds[0])" alt="" />
+<img [src]="imageContentUrl(product.displayImageId ?? product.imageIds[0])" alt="" />
 ```
 
 ```ts
@@ -857,11 +972,14 @@ For route guards:
 - Use decoded token roles for UI routing.
 - Treat backend `403` as authoritative.
 - Show admin screens only for `Admin`.
-- Show customer order creation for authenticated users with `Customer` or `Admin`, but expect only users with `orders:create` to succeed.
+- Show customer order creation for authenticated users with `Customer` or `Admin`, but call `POST /order-api/v1/orders/own` and send only cart items. Never send the current user id from the browser during checkout.
+- Show customer cancellation through `POST /order-api/v1/orders/{orderId}/cancel` only for orders that can still be cancelled.
+- Show admin status controls through `PATCH /order-api/v1/orders/{orderId}/status`; refreshing product pages after confirmation/cancellation is recommended because inventory quantities may change.
 
 For images:
 
 - Upload first through Image API.
 - Store the returned `imageResponse.id`.
 - Send image IDs to product or user update/create requests.
+- For profile pictures, upload with `POST /image-api/v1/images`, then call `PUT /user-api/v1/users/own` with `{ imageId }`.
 - Render images using `/image-api/v1/images/{imageId}/content`.

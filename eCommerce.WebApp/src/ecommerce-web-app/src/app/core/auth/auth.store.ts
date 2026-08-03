@@ -5,6 +5,7 @@ import { AuthUser, LoginRequest, RegisterRequest, TokenResponse } from '../model
 
 const STORAGE_KEY = 'ecommerce.session';
 
+// Only claims used by the UI are represented here; Keycloak may include many more.
 interface AccessTokenPayload {
   sub: string;
   email?: string;
@@ -18,6 +19,7 @@ interface AccessTokenPayload {
 @Injectable({ providedIn: 'root' })
 export class AuthStore {
   private readonly api = inject(AuthApiClient);
+  // Session storage survives refreshes but is cleared when the browser session ends.
   private readonly tokens = signal<TokenResponse | null>(this.restore());
 
   readonly user = computed(() => this.decodeUser(this.tokens()?.accessToken));
@@ -69,6 +71,7 @@ export class AuthStore {
     }
 
     try {
+      // JWT decoding is used for UI state only and is not an authorization decision.
       const payload = JSON.parse(this.decodeBase64Url(token.split('.')[1])) as AccessTokenPayload;
       const roles = payload.realm_access?.roles ?? payload.roles ?? [];
 
@@ -84,6 +87,7 @@ export class AuthStore {
   }
 
   private resolveApplicationRole(roles: string[]): 'Admin' | 'Customer' {
+    // Hide Keycloak infrastructure roles by reducing them to one application role.
     return roles.some((role) => role.toLowerCase() === 'admin') ? 'Admin' : 'Customer';
   }
 

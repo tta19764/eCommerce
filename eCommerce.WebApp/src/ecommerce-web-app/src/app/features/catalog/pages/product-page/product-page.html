@@ -20,7 +20,7 @@
       <div>
         @if (currentProduct.imageIds.length) {
           <div class="grid gap-4 sm:grid-cols-2">
-            @for (image of currentProduct.imageIds; track image) {
+            @for (image of orderedImageIds(currentProduct); track image) {
               <img
                 class="w-full rounded-xl border border-slate-200 bg-white object-cover"
                 [src]="imageUrl(image)"
@@ -60,25 +60,38 @@
           [class.bg-slate-100]="!currentProduct.quantity"
           [class.text-slate-600]="!currentProduct.quantity"
         >
-          {{
-            currentProduct.quantity
-              ? currentProduct.quantity + ' available'
-              : 'Currently unavailable'
-          }}
+          {{ currentProduct.quantity ? 'In stock' : 'Out of stock' }}
         </div>
         <div class="mt-5 flex gap-2">
-          <div class="flex items-center rounded-lg border border-slate-300">
-            <button class="px-3 py-2" type="button" (click)="decreaseQuantity()">−</button>
-            <span class="min-w-8 text-center">{{ quantity() }}</span>
-            <button class="px-3 py-2" type="button" (click)="increaseQuantity()">+</button>
-          </div>
+          @if (choosingQuantity() && currentProduct.quantity) {
+            <div class="flex items-center rounded-lg border border-slate-300">
+              <button
+                class="px-3 py-2 font-bold disabled:text-slate-300"
+                type="button"
+                aria-label="Decrease quantity"
+                [disabled]="quantity() === 1"
+                (click)="decreaseQuantity()"
+              >
+                −
+              </button>
+              <span class="min-w-8 text-center font-semibold">{{ quantity() }}</span>
+              <button
+                class="px-3 py-2 font-bold"
+                type="button"
+                aria-label="Increase quantity"
+                (click)="increaseQuantity()"
+              >
+                +
+              </button>
+            </div>
+          }
           <button
             class="flex-1 rounded-lg bg-brand-600 px-4 py-2 font-semibold text-white hover:bg-brand-700 disabled:bg-slate-300"
             type="button"
             [disabled]="!currentProduct.quantity"
-            (click)="cart.add(currentProduct, quantity())"
+            (click)="addToCart()"
           >
-            Add to cart
+            {{ currentProduct.quantity ? 'Add to cart' : 'Out of stock' }}
           </button>
         </div>
       </div>

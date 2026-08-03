@@ -6,6 +6,7 @@ import { ImagesApiClient } from '../../../../core/api/images-api.client';
 import { OrdersApiClient } from '../../../../core/api/orders-api.client';
 import { AuthStore } from '../../../../core/auth/auth.store';
 import { OrderItemRequest } from '../../../../core/models/order.models';
+import { Product } from '../../../../core/models/product.models';
 import { CartStore } from '../../data-access/cart.store';
 
 @Component({
@@ -25,7 +26,9 @@ export class CartPage {
   protected readonly submitting = signal(false);
   protected readonly error = signal('');
 
-  protected imageUrl(imageId?: string): string | null {
+  protected imageUrl(product: Product): string | null {
+    const imageId = product.displayImageId ?? product.imageIds[0];
+
     return imageId ? this.images.contentUrl(imageId) : null;
   }
 
@@ -35,19 +38,11 @@ export class CartPage {
       return;
     }
 
-    const clientId = this.auth.user()?.userId;
-
-    if (!clientId) {
-      this.error.set(
-        'Your account is missing the customer profile identifier required to place an order.',
-      );
-      return;
-    }
-
     this.submitting.set(true);
     this.error.set('');
 
-    this.orders.create(clientId, this.orderItems()).subscribe({
+    // The own-order endpoint derives clientId from the authenticated user's claims.
+    this.orders.createOwn(this.orderItems()).subscribe({
       next: () => {
         this.cart.clear();
         this.router.navigate(['/orders']);

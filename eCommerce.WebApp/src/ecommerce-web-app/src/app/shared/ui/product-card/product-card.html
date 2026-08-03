@@ -43,17 +43,41 @@
           [class.bg-slate-200]="!currentProduct.quantity"
           [class.text-slate-600]="!currentProduct.quantity"
         >
-          {{ currentProduct.quantity ? currentProduct.quantity + ' in stock' : 'Sold out' }}
+          {{ currentProduct.quantity ? 'In stock' : 'Out of stock' }}
         </span>
       </div>
-      <button
-        class="w-full rounded-lg bg-brand-600 px-4 py-2.5 font-semibold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-slate-300"
-        type="button"
-        [disabled]="!currentProduct.quantity"
-        (click)="cart.add(currentProduct)"
-      >
-        Add to cart
-      </button>
+      <div class="flex gap-2">
+        @if (choosingQuantity() && currentProduct.quantity) {
+          <div class="flex items-center rounded-lg border border-slate-300">
+            <button
+              class="px-3 py-2.5 font-bold disabled:text-slate-300"
+              type="button"
+              aria-label="Decrease quantity"
+              [disabled]="quantity() === 1"
+              (click)="decreaseQuantity()"
+            >
+              −
+            </button>
+            <span class="min-w-7 text-center font-semibold">{{ quantity() }}</span>
+            <button
+              class="px-3 py-2.5 font-bold"
+              type="button"
+              aria-label="Increase quantity"
+              (click)="increaseQuantity()"
+            >
+              +
+            </button>
+          </div>
+        }
+        <button
+          class="flex-1 rounded-lg bg-brand-600 px-4 py-2.5 font-semibold text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+          type="button"
+          [disabled]="!currentProduct.quantity"
+          (click)="addToCart()"
+        >
+          {{ currentProduct.quantity ? 'Add to cart' : 'Out of stock' }}
+        </button>
+      </div>
     </div>
   </div>
 </article>

@@ -25,6 +25,7 @@ export class ProductPage {
   protected readonly loading = signal(true);
   protected readonly failed = signal(false);
   protected readonly quantity = signal(1);
+  protected readonly choosingQuantity = signal(false);
 
   constructor() {
     this.loadProduct();
@@ -32,6 +33,17 @@ export class ProductPage {
 
   protected imageUrl(imageId: string): string {
     return this.images.contentUrl(imageId);
+  }
+
+  protected orderedImageIds(product: Product): string[] {
+    if (!product.displayImageId) {
+      return product.imageIds;
+    }
+
+    return [
+      product.displayImageId,
+      ...product.imageIds.filter((imageId) => imageId !== product.displayImageId),
+    ];
   }
 
   protected decreaseQuantity(): void {
@@ -42,6 +54,23 @@ export class ProductPage {
     const availableQuantity = this.product()?.quantity ?? 1;
 
     this.quantity.update((value) => Math.min(availableQuantity, value + 1));
+  }
+
+  protected addToCart(): void {
+    const product = this.product();
+
+    if (!product?.quantity) {
+      return;
+    }
+
+    if (!this.choosingQuantity()) {
+      this.choosingQuantity.set(true);
+      return;
+    }
+
+    this.cart.add(product, this.quantity());
+    this.quantity.set(1);
+    this.choosingQuantity.set(false);
   }
 
   private loadProduct(): void {

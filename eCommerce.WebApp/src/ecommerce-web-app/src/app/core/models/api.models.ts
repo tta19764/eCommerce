@@ -1,3 +1,4 @@
+// Shared response contracts returned by the API Gateway.
 export interface ApiError {
   code: string;
   name: string;

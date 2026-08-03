@@ -1,5 +1,5 @@
 import { CurrencyPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ImagesApiClient } from '../../../core/api/images-api.client';
 import { Product } from '../../../core/models/product.models';
@@ -16,8 +16,35 @@ export class ProductCard {
   readonly product = input.required<Product>();
   private readonly images = inject(ImagesApiClient);
   protected readonly cart = inject(CartStore);
+  protected readonly choosingQuantity = signal(false);
+  protected readonly quantity = signal(1);
+
   protected imageUrl() {
-    const id = this.product().imageIds[0];
+    const product = this.product();
+    const id = product.displayImageId ?? product.imageIds[0];
     return id ? this.images.contentUrl(id) : null;
+  }
+
+  protected decreaseQuantity(): void {
+    this.quantity.update((value) => Math.max(1, value - 1));
+  }
+
+  protected increaseQuantity(): void {
+    this.quantity.update((value) => Math.min(this.product().quantity, value + 1));
+  }
+
+  protected addToCart(): void {
+    if (!this.product().quantity) {
+      return;
+    }
+
+    if (!this.choosingQuantity()) {
+      this.choosingQuantity.set(true);
+      return;
+    }
+
+    this.cart.add(this.product(), this.quantity());
+    this.quantity.set(1);
+    this.choosingQuantity.set(false);
   }
 }

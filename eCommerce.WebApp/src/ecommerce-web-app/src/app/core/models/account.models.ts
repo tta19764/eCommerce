@@ -1,3 +1,4 @@
+// Authentication account contracts used by the admin portal.
 export interface Permission {
   id: number;
   name: string;

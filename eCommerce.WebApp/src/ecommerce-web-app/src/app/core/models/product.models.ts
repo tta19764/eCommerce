@@ -1,3 +1,4 @@
+// Product API contracts used by the catalog and product administration pages.
 export interface Product {
   id: string;
   name: string;
@@ -6,6 +7,7 @@ export interface Product {
   currency: string;
   quantity: number;
   imageIds: string[];
+  displayImageId: string | null;
   rating: number;
   reviewsCount: number;
 }
@@ -26,4 +28,5 @@ export interface ProductUpsertRequest {
   currencyCode: string;
   quantity: number;
   imageIds?: string[] | null;
+  displayImageId?: string | null;
 }

@@ -18,10 +18,12 @@ export class AuthApiClient {
   }
 
   register(request: RegisterRequest) {
+    // Public registration always creates a Customer account.
     return this.http.post<ApiResponse<string>>(`${this.url}/register`, request).pipe(map(apiData));
   }
 
   registerAdmin(request: RegisterRequest) {
+    // This protected endpoint is available only to an existing administrator.
     return this.http
       .post<ApiResponse<string>>(`${this.url}/register/admin`, request)
       .pipe(map(apiData));
@@ -30,6 +32,7 @@ export class AuthApiClient {
   confirmEmail(accountId: string, email: string) {
     const params = new HttpParams().set('accountId', accountId).set('email', email);
 
+    // A successful command intentionally returns null data inside the standard envelope.
     return this.http.get<ApiResponse<null>>(`${this.url}/confirm-email`, { params }).pipe(
       map((response) => {
         if (response.error) {

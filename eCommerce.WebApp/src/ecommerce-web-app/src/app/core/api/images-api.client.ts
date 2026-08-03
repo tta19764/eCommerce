@@ -21,10 +21,12 @@ export class ImagesApiClient {
   private readonly url = `${environment.gatewayUrl}/image-api/v1/images`;
 
   contentUrl(id: string) {
+    // Raw image content is public and can be used directly as an img src.
     return `${this.url}/${id}/content`;
   }
 
   upload(file: File) {
+    // Image IDs returned here are attached later through product or user requests.
     const form = new FormData();
     form.append('file', file);
 

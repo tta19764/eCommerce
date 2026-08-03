@@ -1,8 +1,13 @@
+// Order API contracts shared by customer and administrator workflows.
 export type OrderStatus = 'Pending' | 'Confirmed' | 'Paid' | 'Shipped' | 'Completed' | 'Cancelled';
 
 export interface OrderItemRequest {
   productId: string;
   quantity: number;
+}
+
+export interface UpdateOrderStatusRequest {
+  status: OrderStatus;
 }
 
 export interface OrderItem {

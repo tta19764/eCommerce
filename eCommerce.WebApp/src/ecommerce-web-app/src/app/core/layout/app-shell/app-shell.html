@@ -29,6 +29,13 @@
         @if (auth.isAuthenticated()) {
           <a
             class="rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-950"
+            routerLink="/profile"
+            routerLinkActive="bg-brand-50 text-brand-700"
+          >
+            My profile
+          </a>
+          <a
+            class="rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-950"
             routerLink="/orders"
             routerLinkActive="bg-brand-50 text-brand-700"
           >
@@ -38,9 +45,9 @@
         @if (auth.isAdmin()) {
           <a
             class="rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-700"
-            routerLink="/admin"
+            [routerLink]="isAdminPortal() ? '/' : '/admin'"
           >
-            Admin portal
+            {{ isAdminPortal() ? 'Store Page' : 'Admin Portal' }}
           </a>
         }
       </div>

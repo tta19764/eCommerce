@@ -38,6 +38,7 @@ export class ProductsApiClient {
   }
 
   update(id: string, request: ProductUpsertRequest) {
+    // Admin mutations should be followed by a refetch because product pages are cached.
     return this.http.put<void>(`${this.url}/${id}`, request);
   }
 

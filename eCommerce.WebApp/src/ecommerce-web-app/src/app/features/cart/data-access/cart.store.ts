@@ -10,6 +10,7 @@ const CART_KEY = 'ecommerce.cart';
 
 @Injectable({ providedIn: 'root' })
 export class CartStore {
+  // Cart state is local browser data and is revalidated by the backend during checkout.
   private readonly state = signal<CartItem[]>(this.restore());
 
   readonly items = this.state.asReadonly();
@@ -20,10 +21,16 @@ export class CartStore {
   readonly currency = computed(() => this.state()[0]?.product.currency ?? 'USD');
 
   add(product: Product, quantity = 1): void {
+    // Customer-facing controls and the store both reject products known to be unavailable.
+    if (product.quantity < 1) {
+      return;
+    }
+
     const items = [...this.state()];
     const existing = items.find((item) => item.product.id === product.id);
 
     if (existing) {
+      // Prevent the UI quantity from exceeding the last known product stock.
       existing.quantity = Math.min(existing.quantity + quantity, product.quantity);
     } else {
       items.push({
@@ -55,6 +62,7 @@ export class CartStore {
 
   private save(items: CartItem[]): void {
     this.state.set(items);
+    // Persist only cart contents; pricing and availability remain server-authoritative.
     localStorage.setItem(CART_KEY, JSON.stringify(items));
   }
 

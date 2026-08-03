@@ -1,3 +1,4 @@
+// Authentication API request and token contracts.
 export interface LoginRequest {
   email: string;
   password: string;

@@ -9,6 +9,7 @@ import { apiData } from './api-base';
 @Injectable({ providedIn: 'root' })
 export class AccountsApiClient {
   private readonly http = inject(HttpClient);
+  // Account administration is exposed by Authentication API, not User API.
   private readonly url = `${environment.gatewayUrl}/auth-api/v1/auth/accounts`;
 
   getPage(query: PageQuery = {}) {
@@ -20,6 +21,7 @@ export class AccountsApiClient {
   }
 
   delete(accountId: string) {
+    // The backend performs the account deactivation/soft-delete semantics.
     return this.http.delete<void>(`${this.url}/${accountId}`);
   }
 }

@@ -41,6 +41,13 @@ export const routes: Routes = [
     title: 'Orders · eCommerce',
   },
   {
+    path: 'profile',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/profile/pages/profile-page/profile-page').then((m) => m.ProfilePage),
+    title: 'My profile · eCommerce',
+  },
+  {
     path: 'confirm-email',
     loadComponent: () =>
       import('./features/auth/pages/confirm-email-page/confirm-email-page').then(

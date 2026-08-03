@@ -10,6 +10,8 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
   const isApi = request.url.startsWith(environment.gatewayUrl);
   const isAuth = /\/auth\/(login|register|refresh)$/.test(request.url);
   const isPublicAuthRequest = isAuth || request.url.includes('/auth/confirm-email');
+
+  // Authentication endpoints must not receive a stale access token.
   const outgoing =
     isApi && token && !isPublicAuthRequest
       ? request.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
@@ -19,6 +21,8 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
       if (error.status !== 401 || isPublicAuthRequest || !auth.refreshToken()) {
         return throwError(() => error);
       }
+
+      // Retry the original request once with the newly issued access token.
       const refresh = auth.refresh();
       if (!refresh) return throwError(() => error);
       return refresh.pipe(
