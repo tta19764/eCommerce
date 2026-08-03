@@ -50,6 +50,14 @@ public sealed class AccountRepository(AuthenticationDbContext dbContext)
             .FirstOrDefaultAsync(account => account.IdentityId == identityId, cancellationToken);
     }
 
+    /// <inheritdoc />
+    public async Task<Account?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        return await DbSet
+            .AsNoTracking()
+            .FirstOrDefaultAsync(account => account.UserId == userId, cancellationToken);
+    }
+
     public new async Task<IReadOnlyCollection<Account>> GetPageAsync(
         int page,
         int pageSize,

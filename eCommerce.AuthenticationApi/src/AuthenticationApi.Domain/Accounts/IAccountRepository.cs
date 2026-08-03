@@ -11,6 +11,14 @@ public interface IAccountRepository
 
     Task<Account?> GetByIdentityIdAsync(string identityId, CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Gets an account by the linked user profile identifier.
+    /// </summary>
+    /// <param name="userId">The linked user profile identifier.</param>
+    /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
+    /// <returns>The matching account when found; otherwise, <c>null</c>.</returns>
+    Task<Account?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
+
     Task<IReadOnlyCollection<Account>> GetPageAsync(
         int page,
         int pageSize,
