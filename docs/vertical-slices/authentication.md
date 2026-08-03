@@ -55,11 +55,15 @@ Login validates the local account first, including active status and email confi
 | `GET /auth-api/v1/auth/accounts` | `users:read` | Page accounts with user profile data |
 | `DELETE /auth-api/v1/auth/accounts/{accountId}` | `users:update` | Delete account |
 
+## Messaging Contracts
+
+`AuthenticationApi` handles `GetAccountUserIdByIdentityIdRequest` from services that receive only the Keycloak identity id in token claims. It resolves the account by `IdentityId` and returns the linked User API profile `UserId`.
+
 ## Roles And Permissions
 
 | Role | Permissions |
 | --- | --- |
-| `Customer` | `products:read`, `orders:create` |
+| `Customer` | `products:read`, `orders:create`, `images:upload` |
 | `Admin` | All configured application permissions |
 
 Important permissions:
@@ -69,6 +73,7 @@ Important permissions:
 | `accounts:create-admin` | Create administrator accounts |
 | `users:read` | Read users, accounts, roles |
 | `users:update` | Update users and delete accounts |
+| `images:upload` | Upload product and profile images |
 
 ## Persistence
 

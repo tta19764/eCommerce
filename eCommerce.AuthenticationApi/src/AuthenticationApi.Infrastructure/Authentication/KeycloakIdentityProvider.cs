@@ -23,6 +23,15 @@ public sealed class KeycloakIdentityProvider(
 
     private readonly KeycloakOptions _options = options.Value;
 
+    /// <summary>
+    /// Executes the RegisterAsync operation.
+    /// </summary>
+    /// <param name="accountId">The accountId value.</param>
+    /// <param name="email">The email value.</param>
+    /// <param name="password">The password value.</param>
+    /// <param name="firstName">The firstName value.</param>
+    /// <param name="lastName">The lastName value.</param>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
     public async Task<Result<string>> RegisterAsync(
         Guid accountId,
         string email,
@@ -41,6 +50,16 @@ public sealed class KeycloakIdentityProvider(
             cancellationToken);
     }
 
+    /// <summary>
+    /// Executes the RegisterAsync operation.
+    /// </summary>
+    /// <param name="accountId">The accountId value.</param>
+    /// <param name="email">The email value.</param>
+    /// <param name="password">The password value.</param>
+    /// <param name="firstName">The firstName value.</param>
+    /// <param name="lastName">The lastName value.</param>
+    /// <param name="roleName">The roleName value.</param>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
     public async Task<Result<string>> RegisterAsync(
         Guid accountId,
         string email,
@@ -105,6 +124,12 @@ public sealed class KeycloakIdentityProvider(
         }
     }
 
+    /// <summary>
+    /// Executes the LoginAsync operation.
+    /// </summary>
+    /// <param name="email">The email value.</param>
+    /// <param name="password">The password value.</param>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
     public async Task<Result<TokenResponse>> LoginAsync(
         string email,
         string password,
@@ -124,6 +149,11 @@ public sealed class KeycloakIdentityProvider(
         return await RequestTokenAsync(requestParameters, cancellationToken);
     }
 
+    /// <summary>
+    /// Executes the RefreshTokenAsync operation.
+    /// </summary>
+    /// <param name="refreshToken">The refreshToken value.</param>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
     public async Task<Result<TokenResponse>> RefreshTokenAsync(
         string refreshToken,
         CancellationToken cancellationToken = default)
@@ -139,6 +169,11 @@ public sealed class KeycloakIdentityProvider(
         return await RequestTokenAsync(requestParameters, cancellationToken);
     }
 
+    /// <summary>
+    /// Executes the DeleteAsync operation.
+    /// </summary>
+    /// <param name="identityId">The identityId value.</param>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
     public async Task<Result> DeleteAsync(string identityId, CancellationToken cancellationToken = default)
     {
         try
@@ -156,6 +191,11 @@ public sealed class KeycloakIdentityProvider(
         }
     }
 
+    /// <summary>
+    /// Executes the ConfirmEmailAsync operation.
+    /// </summary>
+    /// <param name="identityId">The identityId value.</param>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
     public async Task<Result> ConfirmEmailAsync(string identityId, CancellationToken cancellationToken = default)
     {
         try

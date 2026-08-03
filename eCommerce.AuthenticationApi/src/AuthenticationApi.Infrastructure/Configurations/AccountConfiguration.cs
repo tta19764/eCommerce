@@ -9,6 +9,10 @@ namespace AuthenticationApi.Infrastructure.Configurations;
 /// </summary>
 public sealed class AccountConfiguration : IEntityTypeConfiguration<Account>
 {
+    /// <summary>
+    /// Executes the Configure operation.
+    /// </summary>
+    /// <param name="builder">The builder value.</param>
     public void Configure(EntityTypeBuilder<Account> builder)
     {
         builder.HasKey(account => account.Id);

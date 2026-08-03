@@ -22,6 +22,11 @@ public sealed class RegisterAdminCommandHandler(
     IPublishEndpoint publishEndpoint,
     ILogger<RegisterAdminCommandHandler> logger) : ICommandHandler<RegisterAdminCommand, Guid>
 {
+    /// <summary>
+    /// Executes the Handle operation.
+    /// </summary>
+    /// <param name="request">The request value.</param>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
     public async Task<Result<Guid>> Handle(RegisterAdminCommand request, CancellationToken cancellationToken)
     {
         var normalizedEmail = request.Email.Trim().ToUpperInvariant();

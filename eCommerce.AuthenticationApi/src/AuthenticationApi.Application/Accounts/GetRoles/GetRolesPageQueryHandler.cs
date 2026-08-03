@@ -11,6 +11,11 @@ namespace AuthenticationApi.Application.Accounts.GetRoles;
 public sealed class GetRolesPageQueryHandler(IRoleRepository roleRepository)
     : IQueryHandler<GetRolesPageQuery, PagedListResponse<RoleResponse>>
 {
+    /// <summary>
+    /// Executes the Handle operation.
+    /// </summary>
+    /// <param name="request">The request value.</param>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
     public async Task<Result<PagedListResponse<RoleResponse>>> Handle(
         GetRolesPageQuery request,
         CancellationToken cancellationToken)

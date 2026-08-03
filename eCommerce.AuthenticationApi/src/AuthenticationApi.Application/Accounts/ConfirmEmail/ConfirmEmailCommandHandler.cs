@@ -13,6 +13,11 @@ public sealed class ConfirmEmailCommandHandler(
     IUnitOfWork unitOfWork,
     IIdentityProvider identityProvider) : ICommandHandler<ConfirmEmailCommand>
 {
+    /// <summary>
+    /// Executes the Handle operation.
+    /// </summary>
+    /// <param name="request">The request value.</param>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
     public async Task<Result> Handle(ConfirmEmailCommand request, CancellationToken cancellationToken)
     {
         var account = await accountRepository.GetByIdAsync(request.AccountId, cancellationToken);

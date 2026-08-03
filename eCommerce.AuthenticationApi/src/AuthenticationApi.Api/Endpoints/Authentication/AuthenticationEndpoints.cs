@@ -94,6 +94,12 @@ public static class AuthenticationEndpoints
         return builder;
     }
 
+    /// <summary>
+    /// Executes the Register operation.
+    /// </summary>
+    /// <param name="command">The command value.</param>
+    /// <param name="sender">The sender value.</param>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
     public static async Task<IResult> Register(
         RegisterCommand command,
         ISender sender,
@@ -109,6 +115,12 @@ public static class AuthenticationEndpoints
             : Results.BadRequest(result.MapToApiResponse());
     }
 
+    /// <summary>
+    /// Executes the RegisterAdmin operation.
+    /// </summary>
+    /// <param name="command">The command value.</param>
+    /// <param name="sender">The sender value.</param>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
     public static async Task<IResult> RegisterAdmin(
         RegisterAdminCommand command,
         ISender sender,
@@ -124,6 +136,12 @@ public static class AuthenticationEndpoints
             : Results.BadRequest(result.MapToApiResponse());
     }
 
+    /// <summary>
+    /// Executes the Login operation.
+    /// </summary>
+    /// <param name="command">The command value.</param>
+    /// <param name="sender">The sender value.</param>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
     public static async Task<IResult> Login(
         LoginCommand command,
         ISender sender,
@@ -136,6 +154,12 @@ public static class AuthenticationEndpoints
             : Results.Unauthorized();
     }
 
+    /// <summary>
+    /// Executes the Refresh operation.
+    /// </summary>
+    /// <param name="command">The command value.</param>
+    /// <param name="sender">The sender value.</param>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
     public static async Task<IResult> Refresh(
         RefreshTokenCommand command,
         ISender sender,
@@ -148,6 +172,13 @@ public static class AuthenticationEndpoints
             : Results.Unauthorized();
     }
 
+    /// <summary>
+    /// Executes the ConfirmEmail operation.
+    /// </summary>
+    /// <param name="accountId">The accountId value.</param>
+    /// <param name="email">The email value.</param>
+    /// <param name="sender">The sender value.</param>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
     public static async Task<IResult> ConfirmEmail(
         Guid accountId,
         string email,
@@ -171,6 +202,13 @@ public static class AuthenticationEndpoints
             : Results.BadRequest(result.MapToApiResponse());
     }
 
+    /// <summary>
+    /// Executes the GetRoles operation.
+    /// </summary>
+    /// <param name="sender">The sender value.</param>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
+    /// <param name="page">The page value.</param>
+    /// <param name="pageSize">The pageSize value.</param>
     public static async Task<IResult> GetRoles(
         ISender sender,
         CancellationToken cancellationToken,
@@ -182,6 +220,13 @@ public static class AuthenticationEndpoints
         return Results.Ok(result.MapToApiResponse());
     }
 
+    /// <summary>
+    /// Executes the GetAccounts operation.
+    /// </summary>
+    /// <param name="sender">The sender value.</param>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
+    /// <param name="page">The page value.</param>
+    /// <param name="pageSize">The pageSize value.</param>
     public static async Task<IResult> GetAccounts(
         ISender sender,
         CancellationToken cancellationToken,
@@ -193,6 +238,12 @@ public static class AuthenticationEndpoints
         return Results.Ok(result.MapToApiResponse());
     }
 
+    /// <summary>
+    /// Executes the DeleteAccount operation.
+    /// </summary>
+    /// <param name="accountId">The accountId value.</param>
+    /// <param name="sender">The sender value.</param>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
     public static async Task<IResult> DeleteAccount(
         Guid accountId,
         ISender sender,

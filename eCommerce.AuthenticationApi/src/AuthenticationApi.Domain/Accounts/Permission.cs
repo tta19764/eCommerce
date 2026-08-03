@@ -16,6 +16,7 @@ public sealed class Permission(int id, string name)
     public static readonly Permission UserRead = new(9, "users:read");
     public static readonly Permission UserUpdate = new(10, "users:update");
     public static readonly Permission AccountCreateAdmin = new(11, "accounts:create-admin");
+    public static readonly Permission ImageUpload = new(12, "images:upload");
 
     private Permission() : this(0, string.Empty)
     {
@@ -36,6 +37,7 @@ public sealed class Permission(int id, string name)
         OrderUpdateStatus,
         UserRead,
         UserUpdate,
-        AccountCreateAdmin
+        AccountCreateAdmin,
+        ImageUpload
     ];
 }

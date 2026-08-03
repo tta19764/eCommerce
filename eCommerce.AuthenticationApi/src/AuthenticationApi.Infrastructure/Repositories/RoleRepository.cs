@@ -8,6 +8,11 @@ namespace AuthenticationApi.Infrastructure.Repositories;
 /// </summary>
 public sealed class RoleRepository(AuthenticationDbContext dbContext) : IRoleRepository
 {
+    /// <summary>
+    /// Executes the GetByNameAsync operation.
+    /// </summary>
+    /// <param name="name">The name value.</param>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
     public async Task<Role?> GetByNameAsync(string name, CancellationToken cancellationToken = default)
     {
         return await dbContext.Roles
@@ -16,6 +21,12 @@ public sealed class RoleRepository(AuthenticationDbContext dbContext) : IRoleRep
             .FirstOrDefaultAsync(role => role.Name == name, cancellationToken);
     }
 
+    /// <summary>
+    /// Executes the GetPageAsync operation.
+    /// </summary>
+    /// <param name="page">The page value.</param>
+    /// <param name="pageSize">The pageSize value.</param>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
     public async Task<IReadOnlyCollection<Role>> GetPageAsync(
         int page,
         int pageSize,
@@ -31,6 +42,10 @@ public sealed class RoleRepository(AuthenticationDbContext dbContext) : IRoleRep
             .ToListAsync(cancellationToken);
     }
 
+    /// <summary>
+    /// Executes the CountAsync operation.
+    /// </summary>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
     public async Task<int> CountAsync(CancellationToken cancellationToken = default)
     {
         return await dbContext.Roles.CountAsync(cancellationToken);

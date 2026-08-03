@@ -8,6 +8,10 @@ namespace AuthenticationApi.Infrastructure;
 /// </summary>
 public static class AuthenticationDataSeeder
 {
+    /// <summary>
+    /// Executes the SeedAsync operation.
+    /// </summary>
+    /// <param name="serviceProvider">The serviceProvider value.</param>
     public static async Task SeedAsync(IServiceProvider serviceProvider)
     {
         using var scope = serviceProvider.CreateScope();

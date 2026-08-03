@@ -18,6 +18,11 @@ public sealed class DeleteAccountCommandHandler(
     IRequestClient<DeleteUserProfileRequest> userProfileClient,
     ILogger<DeleteAccountCommandHandler> logger) : ICommandHandler<DeleteAccountCommand>
 {
+    /// <summary>
+    /// Executes the Handle operation.
+    /// </summary>
+    /// <param name="request">The request value.</param>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
     public async Task<Result> Handle(DeleteAccountCommand request, CancellationToken cancellationToken)
     {
         var account = await accountRepository.GetByIdAsync(request.AccountId, cancellationToken);

@@ -24,6 +24,11 @@ public sealed class AccountRole : Entity
 
     public Role Role { get; private set; } = null!;
 
+    /// <summary>
+    /// Executes the Create operation.
+    /// </summary>
+    /// <param name="accountId">The accountId value.</param>
+    /// <param name="roleId">The roleId value.</param>
     public static AccountRole Create(Guid accountId, int roleId)
     {
         return new AccountRole(accountId, roleId);

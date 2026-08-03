@@ -20,6 +20,11 @@ public sealed class AccountRepository(AuthenticationDbContext dbContext)
             .FirstOrDefaultAsync(account => account.Id == id, cancellationToken);
     }
 
+    /// <summary>
+    /// Executes the GetByEmailAsync operation.
+    /// </summary>
+    /// <param name="email">The email value.</param>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
     public async Task<Account?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
         return await DbSet
@@ -30,6 +35,11 @@ public sealed class AccountRepository(AuthenticationDbContext dbContext)
             .FirstOrDefaultAsync(account => account.Email.Value == email, cancellationToken);
     }
 
+    /// <summary>
+    /// Executes the GetByIdentityIdAsync operation.
+    /// </summary>
+    /// <param name="identityId">The identityId value.</param>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
     public async Task<Account?> GetByIdentityIdAsync(string identityId, CancellationToken cancellationToken = default)
     {
         return await DbSet
@@ -57,6 +67,10 @@ public sealed class AccountRepository(AuthenticationDbContext dbContext)
             .ToListAsync(cancellationToken);
     }
 
+    /// <summary>
+    /// Executes the CountAsync operation.
+    /// </summary>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
     public override async Task<int> CountAsync(CancellationToken cancellationToken = default)
     {
         return await DbSet.CountAsync(cancellationToken);

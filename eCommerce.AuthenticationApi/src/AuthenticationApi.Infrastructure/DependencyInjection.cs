@@ -15,6 +15,11 @@ namespace AuthenticationApi.Infrastructure;
 /// </summary>
 public static class DependencyInjection
 {
+    /// <summary>
+    /// Executes the AddInfrastructure operation.
+    /// </summary>
+    /// <param name="services">The services value.</param>
+    /// <param name="configuration">The configuration value.</param>
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSharedInfrastructure<AuthenticationDbContext>(configuration);

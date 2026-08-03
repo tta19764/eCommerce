@@ -3,6 +3,7 @@ using System;
 using AuthenticationApi.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AuthenticationApi.Infrastructure.Migrations
 {
     [DbContext(typeof(AuthenticationDbContext))]
-    partial class AuthenticationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260803110414_AddAdminRegistrationPermission")]
+    partial class AddAdminRegistrationPermission
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -147,11 +150,6 @@ namespace AuthenticationApi.Infrastructure.Migrations
                         {
                             Id = 11,
                             Name = "accounts:create-admin"
-                        },
-                        new
-                        {
-                            Id = 12,
-                            Name = "images:upload"
                         });
                 });
 
@@ -212,11 +210,6 @@ namespace AuthenticationApi.Infrastructure.Migrations
                         },
                         new
                         {
-                            RoleId = 1,
-                            PermissionId = 12
-                        },
-                        new
-                        {
                             RoleId = 2,
                             PermissionId = 1
                         },
@@ -264,11 +257,6 @@ namespace AuthenticationApi.Infrastructure.Migrations
                         {
                             RoleId = 2,
                             PermissionId = 11
-                        },
-                        new
-                        {
-                            RoleId = 2,
-                            PermissionId = 12
                         });
                 });
 

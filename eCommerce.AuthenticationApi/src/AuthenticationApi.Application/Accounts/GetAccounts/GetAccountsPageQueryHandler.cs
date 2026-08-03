@@ -15,6 +15,11 @@ public sealed class GetAccountsPageQueryHandler(
     IRequestClient<GetUserDetailsRequest> userDetailsClient)
     : IQueryHandler<GetAccountsPageQuery, PagedListResponse<AccountResponse>>
 {
+    /// <summary>
+    /// Executes the Handle operation.
+    /// </summary>
+    /// <param name="request">The request value.</param>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
     public async Task<Result<PagedListResponse<AccountResponse>>> Handle(
         GetAccountsPageQuery request,
         CancellationToken cancellationToken)

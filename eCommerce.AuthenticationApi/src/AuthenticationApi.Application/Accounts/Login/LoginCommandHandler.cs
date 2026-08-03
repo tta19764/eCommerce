@@ -12,6 +12,11 @@ public sealed class LoginCommandHandler(
     IAccountRepository accountRepository,
     IIdentityProvider identityProvider) : ICommandHandler<LoginCommand, TokenResponse>
 {
+    /// <summary>
+    /// Executes the Handle operation.
+    /// </summary>
+    /// <param name="request">The request value.</param>
+    /// <param name="cancellationToken">The cancellationToken value.</param>
     public async Task<Result<TokenResponse>> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
         var normalizedEmail = request.Email.Trim().ToUpperInvariant();

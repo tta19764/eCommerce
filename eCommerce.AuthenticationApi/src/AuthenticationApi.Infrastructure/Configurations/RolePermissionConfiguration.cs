@@ -9,6 +9,10 @@ namespace AuthenticationApi.Infrastructure.Configurations;
 /// </summary>
 public sealed class RolePermissionConfiguration : IEntityTypeConfiguration<RolePermission>
 {
+    /// <summary>
+    /// Executes the Configure operation.
+    /// </summary>
+    /// <param name="builder">The builder value.</param>
     public void Configure(EntityTypeBuilder<RolePermission> builder)
     {
         builder.HasKey(rolePermission => new { rolePermission.RoleId, rolePermission.PermissionId });
