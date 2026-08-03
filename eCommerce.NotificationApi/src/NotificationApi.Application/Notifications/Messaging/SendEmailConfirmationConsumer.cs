@@ -17,6 +17,10 @@ public sealed class SendEmailConfirmationConsumer(
     IOptions<NotificationEmailOptions> emailOptions,
     IEmailTemplateRenderer emailTemplateRenderer) : IConsumer<SendEmailConfirmationRequest>
 {
+    /// <summary>
+    /// Executes the Consume operation.
+    /// </summary>
+    /// <param name="context">The context value.</param>
     public async Task Consume(ConsumeContext<SendEmailConfirmationRequest> context)
     {
         var message = context.Message;

@@ -38,6 +38,36 @@ Notification settings are injected from AppHost and service configuration:
 
 Development can use Mailpit for local SMTP capture or a real SMTP provider such as Gmail with an app password.
 
+## Secrets
+
+Do not store real SMTP sender addresses, usernames, or passwords in committed appsettings files. AppHost reads them as Aspire parameters, so local development should supply them through environment variables or user secrets.
+
+AppHost parameter keys:
+
+| Value | Environment variable | User-secrets key |
+| --- | --- | --- |
+| Sender address | `Parameters__notification-from-address` | `Parameters:notification-from-address` |
+| SMTP username | `Parameters__notification-smtp-user-name` | `Parameters:notification-smtp-user-name` |
+| SMTP password | `Parameters__notification-smtp-password` | `Parameters:notification-smtp-password` |
+
+PowerShell environment example:
+
+```powershell
+Set-Item -Path Env:'Parameters__notification-from-address' -Value '<sender-email>'
+Set-Item -Path Env:'Parameters__notification-smtp-user-name' -Value '<smtp-user-name>'
+Set-Item -Path Env:'Parameters__notification-smtp-password' -Value '<gmail-app-password-without-spaces>'
+```
+
+Use the exact double-underscore names from the table when setting persistent environment variables. For Gmail, use an app password without spaces.
+
+When running `NotificationApi` directly without AppHost, use service configuration keys instead:
+
+| Value | Environment variable |
+| --- | --- |
+| Sender address | `Email__FromAddress` |
+| SMTP username | `Smtp__UserName` |
+| SMTP password | `Smtp__Password` |
+
 ## Frontend Mapping
 
 The frontend does not call NotificationApi directly. It receives the email link and then calls the Authentication API confirmation endpoint.
