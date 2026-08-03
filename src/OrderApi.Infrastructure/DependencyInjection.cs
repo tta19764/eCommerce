@@ -1,7 +1,9 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OrderApi.Domain.Orders;
+using OrderApi.Infrastructure.Outbox;
 using OrderApi.Infrastructure.Repositories;
+using Quartz;
 using SharedLibrary.Domain.Abstractions;
 using SharedLibrary.Infrastructure;
 
@@ -24,8 +26,24 @@ public static class DependencyInjection
 
         AddPersistence(services);
         services.AddSharedMessaging(configuration, typeof(OrderApi.Application.DependencyInjection).Assembly);
+        AddBackgroundJobs(services, configuration);
 
         return services;
+    }
+
+    private static void AddBackgroundJobs(IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<ProcessOutboxMessagesOptions>(
+            configuration.GetSection(ProcessOutboxMessagesOptions.SectionName));
+
+        services.AddQuartz();
+
+        services.AddQuartzHostedService(options =>
+        {
+            options.WaitForJobsToComplete = true;
+        });
+
+        services.ConfigureOptions<ProcessOutboxMessagesJobSettings>();
     }
 
     private static void AddPersistence(IServiceCollection services)
