@@ -82,7 +82,7 @@ namespace OrderApi.Infrastructure.Migrations
                     b.ToTable("OrderItems");
                 });
 
-            modelBuilder.Entity("OrderApi.Infrastructure.Outbox.OutboxMessage", b =>
+            modelBuilder.Entity("SharedLibrary.Infrastructure.Outbox.OutboxMessage", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");

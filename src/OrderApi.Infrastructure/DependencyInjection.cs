@@ -1,11 +1,10 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OrderApi.Domain.Orders;
-using OrderApi.Infrastructure.Outbox;
 using OrderApi.Infrastructure.Repositories;
-using Quartz;
 using SharedLibrary.Domain.Abstractions;
 using SharedLibrary.Infrastructure;
+using SharedLibrary.Infrastructure.Outbox;
 
 namespace OrderApi.Infrastructure;
 
@@ -33,17 +32,7 @@ public static class DependencyInjection
 
     private static void AddBackgroundJobs(IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<ProcessOutboxMessagesOptions>(
-            configuration.GetSection(ProcessOutboxMessagesOptions.SectionName));
-
-        services.AddQuartz();
-
-        services.AddQuartzHostedService(options =>
-        {
-            options.WaitForJobsToComplete = true;
-        });
-
-        services.ConfigureOptions<ProcessOutboxMessagesJobSettings>();
+        services.AddOutboxMessageProcessing<OrderDbContext>(configuration);
     }
 
     private static void AddPersistence(IServiceCollection services)

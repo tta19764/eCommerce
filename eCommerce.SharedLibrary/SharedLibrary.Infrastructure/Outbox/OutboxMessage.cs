@@ -1,4 +1,4 @@
-namespace OrderApi.Infrastructure.Outbox;
+namespace SharedLibrary.Infrastructure.Outbox;
 
 /// <summary>
 /// Durable representation of a domain event waiting to be published.

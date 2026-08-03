@@ -6,17 +6,19 @@ using Newtonsoft.Json;
 using Quartz;
 using SharedLibrary.Domain.Abstractions;
 
-namespace OrderApi.Infrastructure.Outbox;
+namespace SharedLibrary.Infrastructure.Outbox;
 
 /// <summary>
-/// Quartz job that publishes persisted order domain events.
+/// Quartz job that publishes persisted domain events from a service outbox table.
 /// </summary>
+/// <typeparam name="TContext">The service DbContext type that owns the outbox table.</typeparam>
 [DisallowConcurrentExecution]
-internal sealed class ProcessOutboxMessagesJob(
-    OrderDbContext dbContext,
+public sealed class ProcessOutboxMessagesJob<TContext>(
+    TContext dbContext,
     IPublisher publisher,
     IOptions<ProcessOutboxMessagesOptions> options,
-    ILogger<ProcessOutboxMessagesJob> logger) : IJob
+    ILogger<ProcessOutboxMessagesJob<TContext>> logger) : IJob
+    where TContext : DbContext, IOutboxDbContext
 {
     private static readonly JsonSerializerSettings JsonSerializerSettings = new()
     {
@@ -41,7 +43,7 @@ internal sealed class ProcessOutboxMessagesJob(
         {
             await dbContext.SaveChangesAsync(context.CancellationToken);
 
-            logger.LogInformation("Processed {ProcessedOutboxMessageCount} order outbox messages", messages.Count);
+            logger.LogInformation("Processed {ProcessedOutboxMessageCount} outbox messages", messages.Count);
         }
     }
 
@@ -64,7 +66,7 @@ internal sealed class ProcessOutboxMessagesJob(
         }
         catch (Exception exception)
         {
-            logger.LogError(exception, "Failed to process order outbox message {OutboxMessageId}", message.Id);
+            logger.LogError(exception, "Failed to process outbox message {OutboxMessageId}", message.Id);
             message.MarkFailed(exception.ToString());
         }
     }

@@ -1,9 +1,9 @@
-namespace OrderApi.Infrastructure.Outbox;
+namespace SharedLibrary.Infrastructure.Outbox;
 
 /// <summary>
-/// Configuration values that control order outbox processing.
+/// Configuration values that control outbox message processing.
 /// </summary>
-internal sealed class ProcessOutboxMessagesOptions
+public sealed class ProcessOutboxMessagesOptions
 {
     /// <summary>
     /// Configuration section used to bind this options object.

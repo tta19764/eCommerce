@@ -1,21 +1,15 @@
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using OrderApi.Domain.Orders;
-using OrderApi.Infrastructure.Outbox;
 using SharedLibrary.Domain.Abstractions;
+using SharedLibrary.Infrastructure.Outbox;
 
 namespace OrderApi.Infrastructure;
 
 /// <summary>
 /// EF Core database context and unit of work for order persistence.
 /// </summary>
-public class OrderDbContext(DbContextOptions<OrderDbContext> options) : DbContext(options), IUnitOfWork
+public class OrderDbContext(DbContextOptions<OrderDbContext> options) : DbContext(options), IUnitOfWork, IOutboxDbContext
 {
-    private static readonly JsonSerializerSettings JsonSerializerSettings = new()
-    {
-        TypeNameHandling = TypeNameHandling.All
-    };
-
     /// <summary>
     /// Orders table.
     /// </summary>
@@ -38,6 +32,7 @@ public class OrderDbContext(DbContextOptions<OrderDbContext> options) : DbContex
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(OrderDbContext).Assembly);
+        modelBuilder.ApplyOutboxMessageConfiguration();
 
         base.OnModelCreating(modelBuilder);
     }
@@ -49,33 +44,8 @@ public class OrderDbContext(DbContextOptions<OrderDbContext> options) : DbContex
     /// <returns>The number of state entries written to the database.</returns>
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        AddDomainEventsAsOutboxMessages();
+        this.AddDomainEventsAsOutboxMessages(this);
 
         return await base.SaveChangesAsync(cancellationToken);
-    }
-
-    private void AddDomainEventsAsOutboxMessages()
-    {
-        var outboxMessages = ChangeTracker
-            .Entries<Entity>()
-            .Select(entry => entry.Entity)
-            .SelectMany(entity =>
-            {
-                var domainEvents = entity.GetDomainEvents();
-
-                entity.ClearDomainEvents();
-
-                return domainEvents;
-            })
-            .Select(domainEvent => OutboxMessage.Create(
-                domainEvent.GetType().FullName ?? domainEvent.GetType().Name,
-                JsonConvert.SerializeObject(domainEvent, JsonSerializerSettings),
-                DateTime.UtcNow))
-            .ToArray();
-
-        if (outboxMessages.Length > 0)
-        {
-            OutboxMessages.AddRange(outboxMessages);
-        }
     }
 }
