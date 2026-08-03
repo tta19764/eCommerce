@@ -1,3 +1,6 @@
+using System.Security.Claims;
+using AuthenticationApi.Messages.Accounts;
+using MassTransit;
 using MediatR;
 using SharedLibrary.Api.Contracts;
 using SharedLibrary.Api.Extensions;
@@ -32,6 +35,14 @@ public static class UserEndpoints
             .Produces<ApiResponse<UserResponse>>(StatusCodes.Status404NotFound)
             .RequireAuthorization(ApplicationPermissions.UserRead);
 
+        group.MapGet("own", GetOwnProfile)
+            .WithName(nameof(GetOwnProfile))
+            .Produces<ApiResponse<UserResponse>>()
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden)
+            .Produces<ApiResponse<UserResponse>>(StatusCodes.Status404NotFound)
+            .RequireAuthorization();
+
         group.MapPut("{userId:guid}", UpdateUser)
             .WithName(nameof(UpdateUser))
             .Produces(StatusCodes.Status204NoContent)
@@ -39,6 +50,15 @@ public static class UserEndpoints
             .Produces<ApiResponse<object>>(StatusCodes.Status400BadRequest)
             .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
             .RequireAuthorization(ApplicationPermissions.UserUpdate);
+
+        group.MapPut("own", UpdateOwnProfile)
+            .WithName(nameof(UpdateOwnProfile))
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden)
+            .Produces<ApiResponse<object>>(StatusCodes.Status400BadRequest)
+            .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
+            .RequireAuthorization();
 
         return builder;
     }
@@ -56,6 +76,33 @@ public static class UserEndpoints
         CancellationToken cancellationToken)
     {
         var result = await sender.Send(new GetUserQuery(userId), cancellationToken);
+
+        return result.IsSuccess
+            ? Results.Ok(result.MapToApiResponse())
+            : Results.NotFound(result.MapToApiResponse());
+    }
+
+    /// <summary>
+    /// Gets the current user's profile using the user identifier from token claims.
+    /// </summary>
+    /// <param name="sender">The MediatR sender.</param>
+    /// <param name="user">The authenticated user principal.</param>
+    /// <param name="cancellationToken">The request cancellation token.</param>
+    /// <returns>An HTTP result containing the current user's profile or an error.</returns>
+    public static async Task<IResult> GetOwnProfile(
+        ISender sender,
+        IRequestClient<GetAccountUserIdByIdentityIdRequest> accountClient,
+        ClaimsPrincipal user,
+        CancellationToken cancellationToken)
+    {
+        var currentUserId = await GetCurrentUserIdAsync(user, accountClient, cancellationToken);
+
+        if (currentUserId is null)
+        {
+            return Results.Forbid();
+        }
+
+        var result = await sender.Send(new GetUserQuery(currentUserId.Value), cancellationToken);
 
         return result.IsSuccess
             ? Results.Ok(result.MapToApiResponse())
@@ -88,5 +135,54 @@ public static class UserEndpoints
         return result.Error.Code.EndsWith(".NotFound", StringComparison.Ordinal)
             ? Results.NotFound(result.MapToApiResponse())
             : Results.BadRequest(result.MapToApiResponse());
+    }
+
+    /// <summary>
+    /// Updates the current user's profile using the user identifier from token claims.
+    /// </summary>
+    /// <param name="request">The update-user request body.</param>
+    /// <param name="sender">The MediatR sender.</param>
+    /// <param name="user">The authenticated user principal.</param>
+    /// <param name="cancellationToken">The request cancellation token.</param>
+    /// <returns>An HTTP result indicating the update outcome.</returns>
+    public static async Task<IResult> UpdateOwnProfile(
+        UpdateUserRequest request,
+        ISender sender,
+        IRequestClient<GetAccountUserIdByIdentityIdRequest> accountClient,
+        ClaimsPrincipal user,
+        CancellationToken cancellationToken)
+    {
+        var currentUserId = await GetCurrentUserIdAsync(user, accountClient, cancellationToken);
+
+        if (currentUserId is null)
+        {
+            return Results.Forbid();
+        }
+
+        return await UpdateUser(currentUserId.Value, request, sender, cancellationToken);
+    }
+
+    private static async Task<Guid?> GetCurrentUserIdAsync(
+        ClaimsPrincipal user,
+        IRequestClient<GetAccountUserIdByIdentityIdRequest> accountClient,
+        CancellationToken cancellationToken)
+    {
+        var identityId = user.FindFirstValue("identity_id") ??
+            user.FindFirstValue("IdentityId") ??
+            user.FindFirstValue(ClaimTypes.NameIdentifier) ??
+            user.FindFirstValue("sub");
+
+        if (string.IsNullOrWhiteSpace(identityId))
+        {
+            return null;
+        }
+
+        var response = await accountClient.GetResponse<GetAccountUserIdByIdentityIdResponse>(
+            new GetAccountUserIdByIdentityIdRequest(identityId),
+            cancellationToken);
+
+        return response.Message.Found
+            ? response.Message.UserId
+            : null;
     }
 }

@@ -17,6 +17,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\..\eCommerce.AuthenticationApi\src\AuthenticationApi.Messages\AuthenticationApi.Messages.csproj" />
       <ProjectReference Include="..\..\..\eCommerce.SharedLibrary\SharedLibrary.Api\SharedLibrary.Api.csproj" />
       <ProjectReference Include="..\UserApi.Application\UserApi.Application.csproj" />
       <ProjectReference Include="..\UserApi.Infrastructure\UserApi.Infrastructure.csproj" />

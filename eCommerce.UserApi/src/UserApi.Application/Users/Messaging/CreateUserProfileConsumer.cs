@@ -14,6 +14,10 @@ public sealed class CreateUserProfileConsumer(
     IUnitOfWork unitOfWork,
     ILogger<CreateUserProfileConsumer> logger) : IConsumer<CreateUserProfileRequest>
 {
+    /// <summary>
+    /// Executes the Consume operation.
+    /// </summary>
+    /// <param name="context">The context value.</param>
     public async Task Consume(ConsumeContext<CreateUserProfileRequest> context)
     {
         var userResult = User.Create(

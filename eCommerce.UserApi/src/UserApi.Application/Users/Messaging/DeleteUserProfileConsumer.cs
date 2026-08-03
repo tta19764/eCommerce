@@ -10,6 +10,10 @@ namespace UserApi.Application.Users.Messaging;
 /// </summary>
 public sealed class DeleteUserProfileConsumer(ISender sender) : IConsumer<DeleteUserProfileRequest>
 {
+    /// <summary>
+    /// Executes the Consume operation.
+    /// </summary>
+    /// <param name="context">The context value.</param>
     public async Task Consume(ConsumeContext<DeleteUserProfileRequest> context)
     {
         var result = await sender.Send(new DeleteUserCommand(context.Message.UserId), context.CancellationToken);

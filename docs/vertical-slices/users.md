@@ -20,9 +20,15 @@ The users slice owns profile data linked to authentication accounts. Authenticat
 
 `AuthenticationApi` sends a `CreateUserProfileRequest` through MassTransit after a Keycloak account has been created. `UserApi` creates the profile and returns the profile ID. Authentication stores that ID on the account.
 
-### Profile Update
+### Own Profile
 
-Admins can update user profile details. The current update model supports changing the image without requiring first and last name changes.
+Authenticated users can read and update their own profile through `/users/own`. The backend reads the identity id from token claims and requests the linked profile `UserId` from `AuthenticationApi`, so the frontend does not send a user ID for self-service profile workflows.
+
+Profile pictures use the Image API first. The frontend uploads the file through `POST /image-api/v1/images`, then calls `PUT /user-api/v1/users/own` with the returned `imageId`.
+
+### Admin Profile Update
+
+Admins can read and update user profile details by explicit user ID. The current update model supports changing the image without requiring first and last name changes.
 
 ### Account Pages With User Data
 
@@ -32,6 +38,8 @@ Admins can update user profile details. The current update model supports changi
 
 | Endpoint | Authorization | Description |
 | --- | --- | --- |
+| `GET /user-api/v1/users/own` | Authenticated | Get current user's profile from claims |
+| `PUT /user-api/v1/users/own` | Authenticated | Update current user's profile from claims |
 | `GET /user-api/v1/users/{userId}` | `users:read` | Get user profile |
 | `PUT /user-api/v1/users/{userId}` | `users:update` | Update profile names and/or image |
 
@@ -41,5 +49,6 @@ Frontend feature folders:
 
 | Folder | Responsibility |
 | --- | --- |
+| `features/profile/pages/profile-page` | Current user's own profile read/update and profile-picture upload |
 | `features/admin/pages/admin-users-page` | Admin user and account management |
 | `core/api/accounts-api.client.ts` | Account and role data from Authentication API |
