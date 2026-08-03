@@ -112,6 +112,50 @@ Registration creates:
 - A default `Customer` role assignment.
 - An email confirmation notification job.
 
+### Register Admin
+
+```http
+POST /auth-api/v1/auth/register/admin
+Authorization: Bearer {adminAccessToken}
+```
+
+Requires `accounts:create-admin`.
+
+Request:
+
+```ts
+type RegisterAdminRequest = {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+};
+```
+
+Response:
+
+```ts
+ApiResponse<string> // accountId
+```
+
+This endpoint creates an administrator account and assigns the `Admin` role. It is for existing administrators only; do not expose it in public registration UI.
+
+### Confirm Email
+
+```http
+GET /auth-api/v1/auth/confirm-email?accountId={accountId}&email={email}
+```
+
+Public. The frontend confirmation page should call this endpoint using the `accountId` and `email` query parameters from the email link.
+
+Response:
+
+```ts
+ApiResponse<null>
+```
+
+On success, the backend marks the local account email as confirmed and updates the Keycloak user as email verified. Login is rejected until the email is confirmed.
+
 ### Login
 
 ```http
@@ -187,6 +231,7 @@ Current backend permissions:
 | `orders:update-status` | Update/delete orders in current backend |
 | `users:read` | Read users, accounts, roles |
 | `users:update` | Update users and delete accounts |
+| `accounts:create-admin` | Create administrator accounts |
 
 Role-to-permission mapping:
 
@@ -757,13 +802,20 @@ Current email confirmation flow:
 1. User registers through `/auth-api/v1/auth/register`.
 2. Authentication API publishes/schedules the confirmation notification.
 3. Notification service sends an HTML email using the configured confirmation URL template.
-4. The frontend should implement the confirmation page route matching the configured template, currently:
+4. The frontend confirmation page reads `accountId` and `email` from the route query string.
+5. The frontend calls the backend confirmation endpoint:
+
+```http
+GET /auth-api/v1/auth/confirm-email?accountId={accountId}&email={email}
+```
+
+The configured frontend route template is currently:
 
 ```text
 http://localhost:5173/confirm-email?accountId={accountId}&email={email}
 ```
 
-If the backend later exposes a confirm-email endpoint, wire that page to call it with the `accountId` and `email` query parameters.
+After successful confirmation, show the user a success state and a sign-in action. On `400`, show an invalid/expired confirmation link message. On `404`, show account not found.
 
 ## Caching Behavior
 
@@ -796,7 +848,7 @@ Create one API client service per backend area:
 Add an HTTP interceptor that:
 
 - Attaches `Authorization: Bearer {accessToken}` to protected API calls.
-- Skips the token for login, register, refresh, public product reads, public review reads, and public image reads.
+- Skips the token for login, public customer register, confirm email, refresh, public product reads, public review reads, and public image reads.
 - On `401`, attempts one refresh request if a refresh token is available.
 - On refresh failure, clears auth state.
 
@@ -813,4 +865,3 @@ For images:
 - Store the returned `imageResponse.id`.
 - Send image IDs to product or user update/create requests.
 - Render images using `/image-api/v1/images/{imageId}/content`.
-
