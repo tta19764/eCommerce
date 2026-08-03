@@ -41,6 +41,10 @@ public sealed class Account : Entity
 
     public bool IsActive { get; private set; }
 
+    public DateTime? EmailConfirmedAtUtc { get; private set; }
+
+    public bool IsEmailConfirmed => EmailConfirmedAtUtc.HasValue;
+
     public DateTime CreatedAtUtc { get; private set; }
 
     public DateTime? DeletedAtUtc { get; private set; }
@@ -94,6 +98,18 @@ public sealed class Account : Entity
         }
 
         _roles.Add(AccountRole.Create(Id, role.Id));
+    }
+
+    public Result ConfirmEmail(DateTime utcNow)
+    {
+        if (!IsActive)
+        {
+            return Result.Failure(AccountErrors.NotActive);
+        }
+
+        EmailConfirmedAtUtc ??= utcNow;
+
+        return Result.Success();
     }
 
     public Result Delete(DateTime utcNow)

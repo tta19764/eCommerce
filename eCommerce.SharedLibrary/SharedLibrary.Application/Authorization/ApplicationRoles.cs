@@ -3,8 +3,26 @@ namespace SharedLibrary.Application.Authorization;
 /// <summary>
 /// Application role names expected in identity-provider tokens.
 /// </summary>
-public static class ApplicationRoles
+public readonly record struct ApplicationRoles
 {
-    public const string Customer = "Customer";
-    public const string Admin = "Admin";
+    private ApplicationRoles(string name)
+    {
+        Name = name;
+    }
+
+    public static ApplicationRoles Customer { get; } = new("Customer");
+
+    public static ApplicationRoles Admin { get; } = new("Admin");
+
+    public string Name => field ?? string.Empty;
+
+    public override string ToString()
+    {
+        return Name;
+    }
+
+    public static implicit operator string(ApplicationRoles role)
+    {
+        return role.Name;
+    }
 }

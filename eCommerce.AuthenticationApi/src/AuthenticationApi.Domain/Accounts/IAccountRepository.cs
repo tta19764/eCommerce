@@ -9,6 +9,8 @@ public interface IAccountRepository
 
     Task<Account?> GetByEmailAsync(string email, CancellationToken cancellationToken = default);
 
+    Task<Account?> GetByIdentityIdAsync(string identityId, CancellationToken cancellationToken = default);
+
     Task<IReadOnlyCollection<Account>> GetPageAsync(
         int page,
         int pageSize,

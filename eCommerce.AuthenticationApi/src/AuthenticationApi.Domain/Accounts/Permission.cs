@@ -3,7 +3,7 @@ namespace AuthenticationApi.Domain.Accounts;
 /// <summary>
 /// Fine-grained authorization capability granted through roles.
 /// </summary>
-public sealed class Permission
+public sealed class Permission(int id, string name)
 {
     // Authorization permissions are reference data, not aggregate roots, so stable integer ids are enough.
     public static readonly Permission ProductRead = new(1, "products:read");
@@ -15,21 +15,15 @@ public sealed class Permission
     public static readonly Permission OrderUpdateStatus = new(8, "orders:update-status");
     public static readonly Permission UserRead = new(9, "users:read");
     public static readonly Permission UserUpdate = new(10, "users:update");
+    public static readonly Permission AccountCreateAdmin = new(11, "accounts:create-admin");
 
-    private Permission()
+    private Permission() : this(0, string.Empty)
     {
-        Name = string.Empty;
     }
 
-    public Permission(int id, string name)
-    {
-        Id = id;
-        Name = name;
-    }
+    public int Id { get; init; } = id;
 
-    public int Id { get; init; }
-
-    public string Name { get; init; }
+    public string Name { get; init; } = name;
 
     public static IReadOnlyCollection<Permission> All { get; } =
     [
@@ -41,6 +35,7 @@ public sealed class Permission
         OrderRead,
         OrderUpdateStatus,
         UserRead,
-        UserUpdate
+        UserUpdate,
+        AccountCreateAdmin
     ];
 }

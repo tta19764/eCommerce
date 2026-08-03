@@ -14,6 +14,7 @@ public static class ApplicationPermissions
     public const string OrderUpdateStatus = "orders:update-status";
     public const string UserRead = "users:read";
     public const string UserUpdate = "users:update";
+    public const string AccountCreateAdmin = "accounts:create-admin";
 
     public static IReadOnlyCollection<string> All { get; } =
     [
@@ -25,6 +26,7 @@ public static class ApplicationPermissions
         OrderRead,
         OrderUpdateStatus,
         UserRead,
-        UserUpdate
+        UserUpdate,
+        AccountCreateAdmin
     ];
 }

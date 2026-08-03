@@ -8,21 +8,21 @@ using SharedLibrary.Application.Authorization;
 using SharedLibrary.Domain.Abstractions;
 using UserApi.Messages.Users;
 
-namespace AuthenticationApi.Application.Accounts.Register;
+namespace AuthenticationApi.Application.Accounts.RegisterAdmin;
 
 /// <summary>
-/// Handles account registration in Keycloak, the local auth store, and the user profile store.
+/// Handles administrator registration in Keycloak, the local auth store, and the user profile store.
 /// </summary>
-public sealed class RegisterCommandHandler(
+public sealed class RegisterAdminCommandHandler(
     IAccountRepository accountRepository,
     IRoleRepository roleRepository,
     IUnitOfWork unitOfWork,
     IIdentityProvider identityProvider,
     IRequestClient<CreateUserProfileRequest> userProfileClient,
     IPublishEndpoint publishEndpoint,
-    ILogger<RegisterCommandHandler> logger) : ICommandHandler<RegisterCommand, Guid>
+    ILogger<RegisterAdminCommandHandler> logger) : ICommandHandler<RegisterAdminCommand, Guid>
 {
-    public async Task<Result<Guid>> Handle(RegisterCommand request, CancellationToken cancellationToken)
+    public async Task<Result<Guid>> Handle(RegisterAdminCommand request, CancellationToken cancellationToken)
     {
         var normalizedEmail = request.Email.Trim().ToUpperInvariant();
         var existingAccount = await accountRepository.GetByEmailAsync(normalizedEmail, cancellationToken);
@@ -42,19 +42,19 @@ public sealed class RegisterCommandHandler(
             return Result.Failure<Guid>(accountResult.Error);
         }
 
-        // Keycloak owns credentials and returns the identity subject that resource services can trust in tokens.
         var identityResult = await identityProvider.RegisterAsync(
             accountId,
             request.Email.Trim(),
             request.Password,
             request.FirstName,
             request.LastName,
+            ApplicationRoles.Admin,
             cancellationToken);
 
         if (identityResult.IsFailure)
         {
             logger.LogWarning(
-                "Identity registration failed for account {AccountId}: {ErrorCode}",
+                "Admin identity registration failed for account {AccountId}: {ErrorCode}",
                 accountId,
                 identityResult.Error.Code);
 
@@ -69,17 +69,16 @@ public sealed class RegisterCommandHandler(
             return Result.Failure<Guid>(identityLinkResult.Error);
         }
 
-        var customerRole = await roleRepository.GetByNameAsync(ApplicationRoles.Customer, cancellationToken);
+        var adminRole = await roleRepository.GetByNameAsync(ApplicationRoles.Admin, cancellationToken);
 
-        if (customerRole is not null)
+        if (adminRole is not null)
         {
-            accountResult.Value.AssignRole(customerRole);
+            accountResult.Value.AssignRole(adminRole);
         }
 
         accountRepository.Add(accountResult.Value);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        // UserApi owns profile data; AuthenticationApi is the only service that starts profile creation.
         var profile = await userProfileClient.GetResponse<CreateUserProfileResponse>(
             new CreateUserProfileRequest(
                 request.FirstName,
@@ -94,7 +93,7 @@ public sealed class RegisterCommandHandler(
             await identityProvider.DeleteAsync(identityResult.Value, cancellationToken);
 
             logger.LogWarning(
-                "Profile creation failed for account {AccountId}: {ErrorCode}",
+                "Admin profile creation failed for account {AccountId}: {ErrorCode}",
                 accountId,
                 profile.Message.ErrorCode);
 
@@ -122,7 +121,7 @@ public sealed class RegisterCommandHandler(
                 request.LastName),
             cancellationToken);
 
-        logger.LogInformation("Registered account {AccountId}", accountId);
+        logger.LogInformation("Registered admin account {AccountId}", accountId);
 
         return Result.Success(accountId);
     }

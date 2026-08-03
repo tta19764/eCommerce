@@ -1,3 +1,4 @@
+using SharedLibrary.Application.Authorization;
 using SharedLibrary.Domain.Abstractions;
 
 namespace AuthenticationApi.Application.Abstractions;
@@ -15,6 +16,15 @@ public interface IIdentityProvider
         string lastName,
         CancellationToken cancellationToken = default);
 
+    Task<Result<string>> RegisterAsync(
+        Guid accountId,
+        string email,
+        string password,
+        string firstName,
+        string lastName,
+        ApplicationRoles roleName,
+        CancellationToken cancellationToken = default);
+
     Task<Result<TokenResponse>> LoginAsync(
         string email,
         string password,
@@ -23,6 +33,8 @@ public interface IIdentityProvider
     Task<Result<TokenResponse>> RefreshTokenAsync(
         string refreshToken,
         CancellationToken cancellationToken = default);
+
+    Task<Result> ConfirmEmailAsync(string identityId, CancellationToken cancellationToken = default);
 
     Task<Result> DeleteAsync(string identityId, CancellationToken cancellationToken = default);
 }

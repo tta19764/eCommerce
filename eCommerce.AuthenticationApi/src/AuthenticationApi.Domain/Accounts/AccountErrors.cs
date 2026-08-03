@@ -14,6 +14,9 @@ public static class AccountErrors
     public static readonly Error ProfileNotLinked = new("Account.ProfileNotLinked", "Account is not linked to a user profile");
     public static readonly Error DuplicateEmail = new("Account.DuplicateEmail", "An account with this email already exists");
     public static readonly Error InvalidCredentials = new("Account.InvalidCredentials", "Invalid email or password");
+    public static readonly Error EmailNotConfirmed = new("Account.EmailNotConfirmed", "Email address is not confirmed");
+    public static readonly Error EmailMismatch = new("Account.EmailMismatch", "Email does not match the account");
+    public static readonly Error EmailConfirmationFailed = new("Account.EmailConfirmationFailed", "Email confirmation failed");
     public static readonly Error NotFound = new("Account.NotFound", "Account was not found");
     public static readonly Error NotActive = new("Account.NotActive", "Account is not active");
     public static readonly Error IdentityRegistrationFailed = new("Account.IdentityRegistrationFailed", "Identity registration failed");

@@ -31,6 +31,25 @@ public sealed class KeycloakIdentityProvider(
         string lastName,
         CancellationToken cancellationToken = default)
     {
+        return await RegisterAsync(
+            accountId,
+            email,
+            password,
+            firstName,
+            lastName,
+            ApplicationRoles.Customer,
+            cancellationToken);
+    }
+
+    public async Task<Result<string>> RegisterAsync(
+        Guid accountId,
+        string email,
+        string password,
+        string firstName,
+        string lastName,
+        ApplicationRoles roleName,
+        CancellationToken cancellationToken = default)
+    {
         var user = new UserRepresentationModel
         {
             Username = email,
@@ -38,7 +57,7 @@ public sealed class KeycloakIdentityProvider(
             FirstName = firstName,
             LastName = lastName,
             Enabled = true,
-            EmailVerified = true,
+            EmailVerified = false,
             CreatedTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
             Credentials =
             [
@@ -69,7 +88,7 @@ public sealed class KeycloakIdentityProvider(
 
             var roleAssignmentResult = await AssignRealmRoleAsync(
                 identityId,
-                ApplicationRoles.Customer,
+                roleName,
                 cancellationToken);
 
             if (roleAssignmentResult.IsFailure)
@@ -134,6 +153,25 @@ public sealed class KeycloakIdentityProvider(
         catch (HttpRequestException)
         {
             return Result.Failure(AccountErrors.IdentityDeletionFailed);
+        }
+    }
+
+    public async Task<Result> ConfirmEmailAsync(string identityId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var response = await adminClient.PutAsJsonAsync(
+                $"users/{Uri.EscapeDataString(identityId)}",
+                new { emailVerified = true },
+                cancellationToken);
+
+            return response.IsSuccessStatusCode
+                ? Result.Success()
+                : Result.Failure(AccountErrors.EmailConfirmationFailed);
+        }
+        catch (HttpRequestException)
+        {
+            return Result.Failure(AccountErrors.EmailConfirmationFailed);
         }
     }
 

@@ -30,6 +30,16 @@ public sealed class AccountRepository(AuthenticationDbContext dbContext)
             .FirstOrDefaultAsync(account => account.Email.Value == email, cancellationToken);
     }
 
+    public async Task<Account?> GetByIdentityIdAsync(string identityId, CancellationToken cancellationToken = default)
+    {
+        return await DbSet
+            .Include(account => account.Roles)
+            .ThenInclude(accountRole => accountRole.Role)
+            .ThenInclude(role => role.Permissions)
+            .ThenInclude(rolePermission => rolePermission.Permission)
+            .FirstOrDefaultAsync(account => account.IdentityId == identityId, cancellationToken);
+    }
+
     public new async Task<IReadOnlyCollection<Account>> GetPageAsync(
         int page,
         int pageSize,

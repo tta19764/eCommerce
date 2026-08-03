@@ -43,6 +43,8 @@ public sealed class AccountConfiguration : IEntityTypeConfiguration<Account>
         builder.Property(account => account.IsActive)
             .IsRequired();
 
+        builder.Property(account => account.EmailConfirmedAtUtc);
+
         builder.Property(account => account.CreatedAtUtc)
             .IsRequired();
 

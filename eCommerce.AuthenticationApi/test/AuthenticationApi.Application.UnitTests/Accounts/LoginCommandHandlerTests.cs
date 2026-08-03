@@ -21,6 +21,7 @@ public class LoginCommandHandlerTests
         var account = Account.Create(
             Guid.NewGuid(),
             new Email("JOHN.SMITH@EXAMPLE.COM")).Value;
+        account.ConfirmEmail(DateTime.UtcNow);
 
         var tokenResponse = new TokenResponse(
             "access-token",
@@ -45,6 +46,35 @@ public class LoginCommandHandlerTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().Be(tokenResponse);
+    }
+
+    [Fact]
+    public async Task Handle_Should_ReturnEmailNotConfirmed_WhenAccountEmailIsNotConfirmed()
+    {
+        // Arrange
+        CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+        var account = Account.Create(
+            Guid.NewGuid(),
+            new Email("JOHN.SMITH@EXAMPLE.COM")).Value;
+
+        _accountRepositoryMock
+            .GetByEmailAsync("JOHN.SMITH@EXAMPLE.COM", cancellationToken)
+            .Returns(account);
+
+        var handler = new LoginCommandHandler(_accountRepositoryMock, _identityProviderMock);
+
+        // Act
+        Result<TokenResponse> result = await handler.Handle(
+            new LoginCommand("john.smith@example.com", "password-123"),
+            cancellationToken);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(AccountErrors.EmailNotConfirmed);
+
+        await _identityProviderMock
+            .DidNotReceive()
+            .LoginAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]

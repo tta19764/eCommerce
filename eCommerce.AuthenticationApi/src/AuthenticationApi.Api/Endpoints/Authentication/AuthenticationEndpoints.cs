@@ -1,11 +1,13 @@
 using AuthenticationApi.Application;
 using AuthenticationApi.Application.Accounts;
+using AuthenticationApi.Application.Accounts.ConfirmEmail;
 using AuthenticationApi.Application.Accounts.DeleteAccount;
 using AuthenticationApi.Application.Accounts.GetAccounts;
 using AuthenticationApi.Application.Accounts.GetRoles;
 using AuthenticationApi.Application.Accounts.Login;
 using AuthenticationApi.Application.Accounts.RefreshToken;
 using AuthenticationApi.Application.Accounts.Register;
+using AuthenticationApi.Application.Accounts.RegisterAdmin;
 using AuthenticationApi.Domain.Accounts;
 using MediatR;
 using SharedLibrary.Api.Contracts;
@@ -37,6 +39,15 @@ public static class AuthenticationEndpoints
             .Produces<ApiResponse<Guid>>(StatusCodes.Status201Created)
             .Produces<ApiResponse<Guid>>(StatusCodes.Status400BadRequest);
 
+        group.MapPost("register/admin", RegisterAdmin)
+            .WithName(nameof(RegisterAdmin))
+            .WithSummary("Register an administrator account")
+            .Produces<ApiResponse<Guid>>(StatusCodes.Status201Created)
+            .Produces<ApiResponse<Guid>>(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden)
+            .RequireAuthorization(ApplicationPermissions.AccountCreateAdmin);
+
         group.MapPost("login", Login)
             .WithName(nameof(Login))
             .WithSummary("Log in with email and password")
@@ -48,6 +59,14 @@ public static class AuthenticationEndpoints
             .WithSummary("Refresh access and refresh tokens")
             .Produces<ApiResponse<TokenResponse>>()
             .Produces<ApiResponse<TokenResponse>>(StatusCodes.Status401Unauthorized);
+
+        group.MapGet("confirm-email", ConfirmEmail)
+            .WithName(nameof(ConfirmEmail))
+            .WithSummary("Confirm an account email address")
+            .Produces<ApiResponse<object>>()
+            .Produces<ApiResponse<object>>(StatusCodes.Status400BadRequest)
+            .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
+            .Produces<ApiResponse<object>>(StatusCodes.Status409Conflict);
 
         group.MapGet("roles", GetRoles)
             .WithName(nameof(GetRoles))
@@ -90,6 +109,21 @@ public static class AuthenticationEndpoints
             : Results.BadRequest(result.MapToApiResponse());
     }
 
+    public static async Task<IResult> RegisterAdmin(
+        RegisterAdminCommand command,
+        ISender sender,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(command, cancellationToken);
+
+        return result.IsSuccess
+            ? Results.CreatedAtRoute(
+                nameof(DeleteAccount),
+                new { accountId = result.Value, version = AuthenticationApiApiVersions.V1RouteValue },
+                result.MapToApiResponse())
+            : Results.BadRequest(result.MapToApiResponse());
+    }
+
     public static async Task<IResult> Login(
         LoginCommand command,
         ISender sender,
@@ -112,6 +146,29 @@ public static class AuthenticationEndpoints
         return result.IsSuccess
             ? Results.Ok(result.MapToApiResponse())
             : Results.Unauthorized();
+    }
+
+    public static async Task<IResult> ConfirmEmail(
+        Guid accountId,
+        string email,
+        ISender sender,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new ConfirmEmailCommand(accountId, email), cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            return Results.Ok(result.MapToApiResponse());
+        }
+
+        if (result.Error == AccountErrors.NotFound)
+        {
+            return Results.NotFound(result.MapToApiResponse());
+        }
+
+        return result.Error == AccountErrors.NotActive
+            ? Results.Conflict(result.MapToApiResponse())
+            : Results.BadRequest(result.MapToApiResponse());
     }
 
     public static async Task<IResult> GetRoles(

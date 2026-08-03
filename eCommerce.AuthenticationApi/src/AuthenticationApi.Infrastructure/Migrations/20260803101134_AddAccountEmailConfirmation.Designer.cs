@@ -3,6 +3,7 @@ using System;
 using AuthenticationApi.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AuthenticationApi.Infrastructure.Migrations
 {
     [DbContext(typeof(AuthenticationDbContext))]
-    partial class AuthenticationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260803101134_AddAccountEmailConfirmation")]
+    partial class AddAccountEmailConfirmation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -142,11 +145,6 @@ namespace AuthenticationApi.Infrastructure.Migrations
                         {
                             Id = 10,
                             Name = "users:update"
-                        },
-                        new
-                        {
-                            Id = 11,
-                            Name = "accounts:create-admin"
                         });
                 });
 
@@ -249,11 +247,6 @@ namespace AuthenticationApi.Infrastructure.Migrations
                         {
                             RoleId = 2,
                             PermissionId = 10
-                        },
-                        new
-                        {
-                            RoleId = 2,
-                            PermissionId = 11
                         });
                 });
 

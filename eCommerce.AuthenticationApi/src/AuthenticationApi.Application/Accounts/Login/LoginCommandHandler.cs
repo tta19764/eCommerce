@@ -23,6 +23,11 @@ public sealed class LoginCommandHandler(
             return Result.Failure<TokenResponse>(AccountErrors.InvalidCredentials);
         }
 
+        if (!account.IsEmailConfirmed)
+        {
+            return Result.Failure<TokenResponse>(AccountErrors.EmailNotConfirmed);
+        }
+
         var tokenResult = await identityProvider.LoginAsync(
             request.Email.Trim(),
             request.Password,
