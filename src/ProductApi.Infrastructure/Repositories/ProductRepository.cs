@@ -1,4 +1,4 @@
-﻿using ProductApi.Domain.Products;
+using ProductApi.Domain.Products;
 using SharedLibrary.Infrastructure.Repositories;
 
 namespace ProductApi.Infrastructure.Repositories;

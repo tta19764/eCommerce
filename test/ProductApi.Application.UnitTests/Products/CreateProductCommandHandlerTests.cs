@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using ProductApi.Application.Products.CreateProduct;
 using ProductApi.Domain.Products;
+using SharedLibrary.Application.Abstractions.Caching;
 using SharedLibrary.Domain.Abstractions;
 
 namespace ProductApi.Application.UnitTests.Products;
@@ -15,6 +16,7 @@ public class CreateProductCommandHandlerTests
     private readonly IUnitOfWork _unitOfWorkMock = Substitute.For<IUnitOfWork>();
     private readonly IRequestClient<AddProductImagesRequest> _imageClientMock =
         Substitute.For<IRequestClient<AddProductImagesRequest>>();
+    private readonly ICacheService _cacheServiceMock = Substitute.For<ICacheService>();
 
     [Fact]
     public async Task Handle_Should_AddProductAndSaveChanges()
@@ -28,6 +30,7 @@ public class CreateProductCommandHandlerTests
             _productRepositoryMock,
             _unitOfWorkMock,
             _imageClientMock,
+            _cacheServiceMock,
             NullLogger<CreateProductCommandHandler>.Instance);
 
         var command = new CreateProductCommand("  Keyboard  ", "  Mechanical keyboard  ", 99.99m, "usd", 10, [imageId]);
@@ -46,9 +49,11 @@ public class CreateProductCommandHandlerTests
             product.Price.Amount == command.Price &&
             product.Price.Currency.Code == "USD" &&
             product.Quantity.Value == command.Quantity &&
-            product.ImageIds.Contains(imageId)));
+            product.ImageIds.Contains(imageId) &&
+            product.DisplayImageId == imageId));
 
         await _unitOfWorkMock.Received(1).SaveChangesAsync(cancellationToken);
+        await _cacheServiceMock.Received(1).RemoveAsync("products:page-keys", cancellationToken);
     }
 
     private void SetupValidImagesResponse(Guid imageId)

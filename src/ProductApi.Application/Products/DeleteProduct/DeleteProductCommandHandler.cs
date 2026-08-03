@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using ProductApi.Domain.Products;
+using SharedLibrary.Application.Abstractions.Caching;
 using SharedLibrary.Application.Abstractions.Messaging;
 using SharedLibrary.Domain.Abstractions;
 
@@ -11,6 +12,7 @@ namespace ProductApi.Application.Products.DeleteProduct;
 public sealed class DeleteProductCommandHandler(
     IProductRepository productRepository,
     IUnitOfWork unitOfWork,
+    ICacheService cacheService,
     ILogger<DeleteProductCommandHandler> logger) : ICommandHandler<DeleteProductCommand>
 {
     /// <summary>
@@ -33,6 +35,7 @@ public sealed class DeleteProductCommandHandler(
         productRepository.Delete(product);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
+        await ProductCacheKeys.InvalidatePagesAsync(cacheService, cancellationToken);
 
         logger.LogInformation("Deleted product {ProductId}", request.ProductId);
 

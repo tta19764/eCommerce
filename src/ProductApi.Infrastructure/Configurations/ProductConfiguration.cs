@@ -65,6 +65,8 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
             .HasColumnType("uuid[]")
             .IsRequired();
 
+        builder.Property(product => product.DisplayImageId);
+
         builder.Property(product => product.Rating)
             .HasPrecision(3, 1)
             .IsRequired();

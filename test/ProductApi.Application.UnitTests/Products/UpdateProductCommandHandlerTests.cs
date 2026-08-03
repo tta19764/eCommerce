@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using ProductApi.Application.Products.UpdateProduct;
 using ProductApi.Domain.Products;
+using SharedLibrary.Application.Abstractions.Caching;
 using SharedLibrary.Domain.Abstractions;
 using SharedLibrary.Domain.Money;
 
@@ -16,6 +17,7 @@ public class UpdateProductCommandHandlerTests
     private readonly IUnitOfWork _unitOfWorkMock = Substitute.For<IUnitOfWork>();
     private readonly IRequestClient<AddProductImagesRequest> _imageClientMock =
         Substitute.For<IRequestClient<AddProductImagesRequest>>();
+    private readonly ICacheService _cacheServiceMock = Substitute.For<ICacheService>();
 
     [Fact]
     public async Task Handle_Should_UpdateProductAndSaveChanges_WhenProductExists()
@@ -34,11 +36,15 @@ public class UpdateProductCommandHandlerTests
 
         var imageId = Guid.NewGuid();
         SetupValidImagesResponse(imageId);
+        _cacheServiceMock
+            .GetAsync<List<string>>("products:page-keys", cancellationToken)
+            .Returns(["products:page:1:size:10"]);
 
         var handler = new UpdateProductCommandHandler(
             _productRepositoryMock,
             _unitOfWorkMock,
             _imageClientMock,
+            _cacheServiceMock,
             NullLogger<UpdateProductCommandHandler>.Instance);
 
         var command = new UpdateProductCommand(product.Id, "Mouse", "Wireless mouse", 49.99m, "eur", 5, [imageId]);
@@ -54,9 +60,12 @@ public class UpdateProductCommandHandlerTests
         product.Price.Currency.Code.Should().Be("EUR");
         product.Quantity.Value.Should().Be(command.Quantity);
         product.ImageIds.Should().ContainSingle().Which.Should().Be(imageId);
+        product.DisplayImageId.Should().Be(imageId);
 
         _productRepositoryMock.Received(1).Update(product);
         await _unitOfWorkMock.Received(1).SaveChangesAsync(cancellationToken);
+        await _cacheServiceMock.Received(1).RemoveAsync("products:page:1:size:10", cancellationToken);
+        await _cacheServiceMock.Received(1).RemoveAsync("products:page-keys", cancellationToken);
     }
 
     [Fact]
@@ -70,6 +79,7 @@ public class UpdateProductCommandHandlerTests
             _productRepositoryMock,
             _unitOfWorkMock,
             _imageClientMock,
+            _cacheServiceMock,
             NullLogger<UpdateProductCommandHandler>.Instance);
 
         var command = new UpdateProductCommand(productId, "Mouse", "Wireless mouse", 49.99m, "EUR", 5);
@@ -83,6 +93,7 @@ public class UpdateProductCommandHandlerTests
 
         _productRepositoryMock.DidNotReceive().Update(Arg.Any<Product>());
         await _unitOfWorkMock.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
+        await _cacheServiceMock.DidNotReceive().RemoveAsync(Arg.Any<string>(), Arg.Any<CancellationToken>());
     }
 
     private void SetupValidImagesResponse(Guid imageId)

@@ -1,4 +1,4 @@
-﻿using SharedLibrary.Domain.Abstractions;
+using SharedLibrary.Domain.Abstractions;
 using SharedLibrary.Domain.Money;
 
 namespace ProductApi.Domain.Products;
@@ -23,7 +23,8 @@ public class Product : Entity
         Description description,
         Money price, 
         Quantity quantity,
-        IReadOnlyCollection<Guid>? imageIds)
+        IReadOnlyCollection<Guid>? imageIds,
+        Guid? displayImageId)
         : base(id)
     {
         Name = name;
@@ -31,6 +32,7 @@ public class Product : Entity
         Price = price;
         Quantity = quantity;
         ImageIds = imageIds?.Distinct().ToArray() ?? [];
+        DisplayImageId = displayImageId;
         Rating = 0.0m;
         ReviewsCount = 0;
     }
@@ -44,6 +46,8 @@ public class Product : Entity
     public Quantity Quantity { get; private set; }
 
     public Guid[] ImageIds { get; private set; }
+
+    public Guid? DisplayImageId { get; private set; }
 
     /// <summary>
     /// Average product rating rounded to one digit after the decimal point.
@@ -67,7 +71,8 @@ public class Product : Entity
         Description description,
         Money price, 
         Quantity quantity,
-        IReadOnlyCollection<Guid>? imageIds = null)
+        IReadOnlyCollection<Guid>? imageIds = null,
+        Guid? displayImageId = null)
     {
         // Products cannot be sold without a positive price.
         if(price.Amount <= 0)
@@ -76,8 +81,18 @@ public class Product : Entity
         // Negative stock would make availability and checkout decisions invalid.
         if(quantity.Value < 0)
             return Result.Failure<Product>(ProductErrors.InvalidQuantity);
+
+        var distinctImageIds = imageIds?.Distinct().ToArray() ?? [];
+        var resolvedDisplayImageId = ResolveDisplayImageId(distinctImageIds, displayImageId);
+
+        // The display image is not a separate image; it must point at one of the product images.
+        // Keeping this invariant in the aggregate protects every read model built from Product.
+        if (resolvedDisplayImageId.IsFailure)
+        {
+            return Result.Failure<Product>(resolvedDisplayImageId.Error);
+        }
         
-        var product = new Product(Guid.NewGuid(), name, description, price, quantity, imageIds);
+        var product = new Product(Guid.NewGuid(), name, description, price, quantity, distinctImageIds, resolvedDisplayImageId.Value);
         
         return product;
     }
@@ -94,7 +109,8 @@ public class Product : Entity
         Description description,
         Money price,
         Quantity quantity,
-        IReadOnlyCollection<Guid>? imageIds = null)
+        IReadOnlyCollection<Guid>? imageIds = null,
+        Guid? displayImageId = null)
     {
         // Products cannot be sold without a positive price.
         if (price.Amount <= 0)
@@ -108,11 +124,22 @@ public class Product : Entity
             return Result.Failure(ProductErrors.InvalidQuantity);
         }
 
+        var distinctImageIds = imageIds?.Distinct().ToArray() ?? [];
+        var resolvedDisplayImageId = ResolveDisplayImageId(distinctImageIds, displayImageId);
+
+        // Re-evaluate the display image after every image-list replacement, otherwise an update
+        // could leave DisplayImageId pointing at an image no longer attached to the product.
+        if (resolvedDisplayImageId.IsFailure)
+        {
+            return Result.Failure(resolvedDisplayImageId.Error);
+        }
+
         Name = name;
         Description = description;
         Price = price;
         Quantity = quantity;
-        ImageIds = imageIds?.Distinct().ToArray() ?? [];
+        ImageIds = distinctImageIds;
+        DisplayImageId = resolvedDisplayImageId.Value;
 
         return Result.Success();
     }
@@ -136,5 +163,39 @@ public class Product : Entity
         ReviewsCount++;
 
         return Result.Success();
+    }
+
+    /// <summary>
+    /// Executes the AdjustQuantity operation.
+    /// </summary>
+    /// <param name="quantityDelta">The quantityDelta value.</param>
+    public Result AdjustQuantity(int quantityDelta)
+    {
+        var adjustedQuantity = Quantity.Value + quantityDelta;
+
+        if (adjustedQuantity < 0)
+        {
+            return Result.Failure(ProductErrors.InsufficientQuantity);
+        }
+
+        Quantity = new Quantity(adjustedQuantity);
+
+        return Result.Success();
+    }
+
+    private static Result<Guid?> ResolveDisplayImageId(Guid[] imageIds, Guid? displayImageId)
+    {
+        if (imageIds.Length == 0)
+        {
+            return displayImageId is null
+                ? Result.Success<Guid?>(null)
+                : Result.Failure<Guid?>(ProductErrors.InvalidDisplayImage);
+        }
+
+        var resolvedDisplayImageId = displayImageId ?? imageIds[0];
+
+        return imageIds.Contains(resolvedDisplayImageId)
+            ? Result.Success<Guid?>(resolvedDisplayImageId)
+            : Result.Failure<Guid?>(ProductErrors.InvalidDisplayImage);
     }
 }

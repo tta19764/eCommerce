@@ -170,7 +170,8 @@ public static class ProductEndpoints
             request.Price,
             request.CurrencyCode,
             request.Quantity,
-            request.ImageIds);
+            request.ImageIds,
+            request.DisplayImageId);
 
         var result = await sender.Send(command, cancellationToken);
 

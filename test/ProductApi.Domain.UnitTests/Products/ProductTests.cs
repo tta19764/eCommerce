@@ -27,6 +27,7 @@ public class ProductTests
         result.Value.Price.Should().Be(price);
         result.Value.Quantity.Should().Be(quantity);
         result.Value.ImageIds.Should().ContainSingle().Which.Should().Be(imageId);
+        result.Value.DisplayImageId.Should().Be(imageId);
         result.Value.Rating.Should().Be(0.0m);
         result.Value.ReviewsCount.Should().Be(0);
         result.Value.Id.Should().NotBeEmpty();
@@ -89,6 +90,33 @@ public class ProductTests
         product.Price.Currency.Should().Be(Currency.Eur);
         product.Quantity.Value.Should().Be(5);
         product.ImageIds.Should().ContainSingle().Which.Should().Be(imageId);
+        product.DisplayImageId.Should().Be(imageId);
+    }
+
+    [Fact]
+    public void Update_Should_ReturnFailure_WhenDisplayImageIsNotProductImage()
+    {
+        // Arrange
+        var imageId = Guid.NewGuid();
+        var product = Product.Create(
+            new Name("Keyboard"),
+            new Description("Mechanical keyboard"),
+            new Money(99.99m, Currency.Usd),
+            new Quantity(10),
+            [imageId]).Value;
+
+        // Act
+        var result = product.Update(
+            new Name("Mouse"),
+            new Description("Wireless mouse"),
+            new Money(49.99m, Currency.Eur),
+            new Quantity(5),
+            [imageId],
+            Guid.NewGuid());
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(ProductErrors.InvalidDisplayImage);
     }
 
     [Fact]

@@ -18,11 +18,15 @@ The catalog slice owns products, descriptions, prices, inventory quantities, ima
 
 ### Product Browsing
 
-Product list and product detail endpoints are public. Product responses include description, price, quantity, image IDs, average rating rounded to one decimal place, and review count.
+Product list and product detail endpoints are public. Product responses include description, price, quantity, image IDs, display image ID, average rating rounded to one decimal place, and review count. The display image ID is not a separate image; it must point to one of the product image IDs.
 
 ### Product Management
 
-Admin users create, update, and delete products. Product image IDs are supplied after uploading images through `ImageApi`.
+Admin users create, update, and delete products. Product image IDs are supplied after uploading images through `ImageApi`. Admins can choose one attached image as `displayImageId` for product cards and primary display.
+
+### Inventory Adjustments
+
+Product API owns product quantity changes. Order API sends `AdjustProductQuantitiesRequest` messages when an admin confirms an order or when a confirmed/paid order is cancelled. Product API validates all requested adjustments before saving so partial stock changes are not persisted.
 
 ### Reviews And Ratings
 
@@ -42,7 +46,7 @@ Authenticated users with `products:read` can create reviews. Product pages and p
 
 ## Caching
 
-Product page queries are cached through the shared caching abstraction. Redis is used when configured by AppHost.
+Product page queries are cached through the shared caching abstraction. Redis is used when configured by AppHost. Product create, update, delete, review changes, and order-driven inventory adjustments invalidate cached product pages.
 
 ## Frontend Mapping
 

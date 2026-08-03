@@ -12,6 +12,7 @@ namespace ProductApi.Application.Products.UpdateProduct;
 /// <param name="CurrencyCode">The ISO currency code for the product price.</param>
 /// <param name="Quantity">The available product quantity.</param>
 /// <param name="ImageIds">The image identifiers already uploaded to ImageApi.</param>
+/// <param name="DisplayImageId">The image identifier selected for product cards and primary display.</param>
 public sealed record UpdateProductCommand(
     Guid ProductId,
     string Name,
@@ -19,4 +20,5 @@ public sealed record UpdateProductCommand(
     decimal Price,
     string CurrencyCode,
     int Quantity,
-    IReadOnlyCollection<Guid>? ImageIds = null) : ICommand;
+    IReadOnlyCollection<Guid>? ImageIds = null,
+    Guid? DisplayImageId = null) : ICommand;

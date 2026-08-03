@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Logging;
+using ProductApi.Application.Products;
 using ProductApi.Domain.Products;
 using ProductApi.Domain.Reviews;
+using SharedLibrary.Application.Abstractions.Caching;
 using SharedLibrary.Application.Abstractions.Messaging;
 using SharedLibrary.Domain.Abstractions;
 
@@ -13,6 +15,7 @@ public sealed class CreateProductReviewCommandHandler(
     IProductRepository productRepository,
     IProductReviewRepository productReviewRepository,
     IUnitOfWork unitOfWork,
+    ICacheService cacheService,
     ILogger<CreateProductReviewCommandHandler> logger) : ICommandHandler<CreateProductReviewCommand, Guid>
 {
     /// <summary>
@@ -62,6 +65,7 @@ public sealed class CreateProductReviewCommandHandler(
         productRepository.Update(product);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
+        await ProductCacheKeys.InvalidatePagesAsync(cacheService, cancellationToken);
 
         logger.LogInformation(
             "Created review {ReviewId} for product {ProductId}",

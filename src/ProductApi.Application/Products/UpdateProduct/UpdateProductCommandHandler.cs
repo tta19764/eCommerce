@@ -2,6 +2,7 @@ using ImageApi.Messages.Images;
 using MassTransit;
 using Microsoft.Extensions.Logging;
 using ProductApi.Domain.Products;
+using SharedLibrary.Application.Abstractions.Caching;
 using SharedLibrary.Application.Abstractions.Messaging;
 using SharedLibrary.Domain.Abstractions;
 using SharedLibrary.Domain.Money;
@@ -15,6 +16,7 @@ public sealed class UpdateProductCommandHandler(
     IProductRepository productRepository,
     IUnitOfWork unitOfWork,
     IRequestClient<AddProductImagesRequest> imageClient,
+    ICacheService cacheService,
     ILogger<UpdateProductCommandHandler> logger) : ICommandHandler<UpdateProductCommand>
 {
     /// <summary>
@@ -61,7 +63,8 @@ public sealed class UpdateProductCommandHandler(
             new Description(request.Description.Trim()),
             new Money(request.Price, Currency.FromCode(request.CurrencyCode.Trim().ToUpperInvariant())),
             new Quantity(request.Quantity),
-            imageIds);
+            imageIds,
+            request.DisplayImageId);
 
         if (updateResult.IsFailure)
         {
@@ -76,6 +79,7 @@ public sealed class UpdateProductCommandHandler(
         productRepository.Update(product);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
+        await ProductCacheKeys.InvalidatePagesAsync(cacheService, cancellationToken);
 
         logger.LogInformation("Updated product {ProductId}", request.ProductId);
 

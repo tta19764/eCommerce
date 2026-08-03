@@ -10,6 +10,7 @@ namespace ProductApi.Application.Products;
 /// <param name="Currency">The product price currency code.</param>
 /// <param name="Quantity">The available product quantity.</param>
 /// <param name="ImageIds">The product image identifiers.</param>
+/// <param name="DisplayImageId">The image identifier selected for product cards and primary display.</param>
 /// <param name="Rating">The average product rating rounded to one digit after the decimal point.</param>
 /// <param name="ReviewsCount">The number of product reviews.</param>
 public sealed record ProductResponse(
@@ -20,5 +21,6 @@ public sealed record ProductResponse(
     string Currency,
     int Quantity,
     IReadOnlyCollection<Guid> ImageIds,
+    Guid? DisplayImageId,
     decimal Rating,
     int ReviewsCount);

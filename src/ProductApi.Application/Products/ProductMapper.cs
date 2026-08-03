@@ -14,6 +14,7 @@ internal static class ProductMapper
             product.Price.Currency.Code,
             product.Quantity.Value,
             product.ImageIds,
+            product.DisplayImageId,
             Math.Round(product.Rating, 1, MidpointRounding.AwayFromZero),
             product.ReviewsCount);
     }

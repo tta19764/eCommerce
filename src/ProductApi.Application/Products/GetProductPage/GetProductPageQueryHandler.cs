@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using ProductApi.Application.Products;
 using ProductApi.Domain.Products;
+using SharedLibrary.Application.Abstractions.Caching;
 using SharedLibrary.Application.Abstractions.Messaging;
 using SharedLibrary.Application.Pagination;
 using SharedLibrary.Domain.Abstractions;
@@ -12,6 +13,7 @@ namespace ProductApi.Application.Products.GetProductPage;
 /// </summary>
 public sealed class GetProductPageQueryHandler(
     IProductRepository productRepository,
+    ICacheService cacheService,
     ILogger<GetProductPageQueryHandler> logger)
     : IQueryHandler<GetProductPageQuery, PagedListResponse<ProductResponse>>
 {
@@ -49,6 +51,8 @@ public sealed class GetProductPageQueryHandler(
             page,
             pageSize,
             items.Count);
+
+        await ProductCacheKeys.TrackPageAsync(cacheService, ProductCacheKeys.Page(page, pageSize), cancellationToken);
 
         return Result.Success(response);
     }
