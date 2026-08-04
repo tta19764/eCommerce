@@ -2,7 +2,7 @@
 
 ## General Description
 
-The orders slice owns order creation, order items, order totals, order status, ownership checks, admin order reads, and order updates. It is implemented in `OrderApi`.
+The orders slice owns order creation, seller-order grouping, order items, order totals, order status, ownership checks, admin order reads, seller fulfillment, and order updates. It is implemented in `OrderApi`.
 
 ## Backend Projects
 
@@ -10,7 +10,7 @@ The orders slice owns order creation, order items, order totals, order status, o
 | --- | --- |
 | `OrderApi.Api` | Order endpoints |
 | `OrderApi.Application` | Order commands and queries |
-| `OrderApi.Domain` | Order aggregate, statuses, items, totals |
+| `OrderApi.Domain` | Order aggregate, seller-order groups, statuses, items, totals |
 | `OrderApi.Infrastructure` | EF Core persistence, repositories, external lookups |
 | `OrderApi.Messages` | Order-related message contracts |
 
@@ -44,6 +44,14 @@ Administrators update order status through `PATCH /orders/{orderId}/status`. The
 
 Cancelling is allowed until the order has shipped. Moving an order to `Confirmed` asks Product API to decrement quantities for the order items. Cancelling a confirmed or paid order asks Product API to restore those quantities. If Product API reports missing products or insufficient quantity, the order status change is rejected and the order is not saved.
 
+### Seller Order Groups
+
+Each order is split into seller-order groups when products from multiple sellers are purchased in the same checkout. Order items store both `sellerId` and `sellerOrderId`.
+
+Sellers use `GET /orders/seller` to see only their groups and `PATCH /orders/seller/{sellerOrderId}/status` to update fulfillment state for their part of the order. Admins can read or update any seller-order group through the same endpoints when they have the matching order permissions.
+
+Seller-order status changes publish integration events. MessagingApi uses the seller-order lookup message contract to validate customer/seller participants before opening an order conversation.
+
 ### Own Order Cancellation
 
 Authenticated customers cancel their own orders through `POST /orders/{orderId}/cancel`. The endpoint resolves the caller through Authentication API, verifies ownership, then uses the same status-update workflow as the admin endpoint with `Cancelled`.
@@ -58,6 +66,9 @@ Authenticated customers cancel their own orders through `POST /orders/{orderId}/
 | `GET /order-api/v1/orders/{orderId}` | Authenticated | Get order if admin or owner |
 | `GET /order-api/v1/orders/clients/{clientId}` | `orders:read` | Page orders by client |
 | `GET /order-api/v1/orders/own` | Authenticated | Page current user's orders |
+| `GET /order-api/v1/orders/seller` | Authenticated seller | Page current seller's seller-order groups |
+| `GET /order-api/v1/orders/seller/{sellerOrderId}` | Seller owner or `orders:read` | Get one seller-order group |
+| `PATCH /order-api/v1/orders/seller/{sellerOrderId}/status` | Seller owner or `orders:update-status` | Update one seller-order group |
 | `PUT /order-api/v1/orders/{orderId}` | `orders:update-status` | Replace pending order items |
 | `PATCH /order-api/v1/orders/{orderId}/status` | `orders:update-status` | Admin order status update with inventory adjustment |
 | `POST /order-api/v1/orders/{orderId}/cancel` | Authenticated | Cancel current user's own order |

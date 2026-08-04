@@ -15,6 +15,9 @@ public sealed class EmbeddedEmailTemplateRenderer : IEmailTemplateRenderer
     private const string OrderStatusChangedResourceName =
         "NotificationApi.Application.Templates.OrderStatusChanged.html";
 
+    private const string ConversationMessageResourceName =
+        "NotificationApi.Application.Templates.ConversationMessage.html";
+
     /// <inheritdoc />
     public string RenderEmailConfirmation(
         string firstName,
@@ -50,6 +53,25 @@ public sealed class EmbeddedEmailTemplateRenderer : IEmailTemplateRenderer
                 ["orderId"] = orderId.ToString(),
                 ["status"] = status,
                 ["changedAtUtc"] = changedAtUtc.ToString("yyyy-MM-dd HH:mm 'UTC'"),
+                ["year"] = DateTime.UtcNow.Year.ToString()
+            });
+    }
+
+    /// <inheritdoc />
+    public string RenderConversationMessage(
+        string recipientFullName,
+        string senderFullName,
+        string messagePreview,
+        DateTime sentAtUtc)
+    {
+        return RenderTemplate(
+            ConversationMessageResourceName,
+            new Dictionary<string, string>
+            {
+                ["recipientFullName"] = string.IsNullOrWhiteSpace(recipientFullName) ? "there" : recipientFullName,
+                ["senderFullName"] = string.IsNullOrWhiteSpace(senderFullName) ? "A marketplace participant" : senderFullName,
+                ["messagePreview"] = messagePreview,
+                ["sentAtUtc"] = sentAtUtc.ToString("yyyy-MM-dd HH:mm 'UTC'"),
                 ["year"] = DateTime.UtcNow.Year.ToString()
             });
     }

@@ -30,4 +30,18 @@ public interface IEmailTemplateRenderer
         Guid orderId,
         string status,
         DateTime changedAtUtc);
+
+    /// <summary>
+    /// Renders the marketplace conversation message template.
+    /// </summary>
+    /// <param name="recipientFullName">The recipient display name.</param>
+    /// <param name="senderFullName">The sender display name.</param>
+    /// <param name="messagePreview">A short preview of the message body.</param>
+    /// <param name="sentAtUtc">The UTC timestamp when the message was sent.</param>
+    /// <returns>The rendered HTML body.</returns>
+    string RenderConversationMessage(
+        string recipientFullName,
+        string senderFullName,
+        string messagePreview,
+        DateTime sentAtUtc);
 }

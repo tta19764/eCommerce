@@ -7,7 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\eCommerce.AuthenticationApi\src\AuthenticationApi.Messages\AuthenticationApi.Messages.csproj" />
+    <ProjectReference Include="..\..\..\eCommerce.MessagingApi\src\MessagingApi.Messages\MessagingApi.Messages.csproj" />
     <ProjectReference Include="..\..\..\eCommerce.SharedLibrary\SharedLibrary.Application\SharedLibrary.Application.csproj" />
+    <ProjectReference Include="..\..\..\eCommerce.UserApi\src\UserApi.Messages\UserApi.Messages.csproj" />
     <ProjectReference Include="..\NotificationApi.Domain\NotificationApi.Domain.csproj" />
     <ProjectReference Include="..\NotificationApi.Messages\NotificationApi.Messages.csproj" />
   </ItemGroup>

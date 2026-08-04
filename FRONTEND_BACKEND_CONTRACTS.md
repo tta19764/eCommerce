@@ -21,6 +21,7 @@ Gateway route prefixes:
 | Order API | `/order-api` |
 | User API | `/user-api` |
 | Image API | `/image-api` |
+| Messaging API | `/messaging-api` |
 
 All service endpoints are versioned under `/v1` through the gateway. Example:
 
@@ -710,12 +711,28 @@ Response:
 ```ts
 type OrderItemResponse = {
   id: string;
+  sellerOrderId: string;
+  sellerId: string;
   productId: string;
   productName: string;
   unitPrice: number;
   currency: string;
   quantity: number;
   totalPrice: number;
+};
+
+type SellerOrderResponse = {
+  id: string;
+  orderId: string;
+  sellerId: string;
+  status: OrderStatus;
+  createdAtUtc: string;
+  confirmedOnUtc: string | null;
+  paidOnUtc: string | null;
+  shippedOnUtc: string | null;
+  completedOnUtc: string | null;
+  cancelledOnUtc: string | null;
+  items: OrderItemResponse[];
 };
 
 type OrderResponse = {
@@ -726,6 +743,7 @@ type OrderResponse = {
   totalPrice: number;
   currency: string;
   items: OrderItemResponse[];
+  sellerOrders: SellerOrderResponse[];
   confirmedOnUtc: string | null;
   paidOnUtc: string | null;
   shippedOnUtc: string | null;
@@ -735,6 +753,57 @@ type OrderResponse = {
 
 ApiResponse<PagedListResponse<OrderResponse>>
 ```
+
+### GET Seller Orders Page
+
+```http
+GET /order-api/v1/orders/seller?page=1&pageSize=10
+Authorization: Bearer {sellerAccessToken}
+```
+
+Requires any authenticated seller account. The backend resolves the current user from token claims and returns only seller-order groups owned by that seller.
+
+Response:
+
+```ts
+ApiResponse<PagedListResponse<SellerOrderResponse>>
+```
+
+### GET Seller Order
+
+```http
+GET /order-api/v1/orders/seller/{sellerOrderId}
+Authorization: Bearer {accessToken}
+```
+
+Accessible to the seller who owns that seller-order group or an admin with `orders:read`.
+
+Response:
+
+```ts
+ApiResponse<SellerOrderResponse>
+```
+
+### PATCH Seller Order Status
+
+```http
+PATCH /order-api/v1/orders/seller/{sellerOrderId}/status
+Authorization: Bearer {accessToken}
+```
+
+Accessible to the seller who owns that seller-order group or an admin with `orders:update-status`.
+
+Request:
+
+```ts
+type UpdateSellerOrderStatusRequest = {
+  status: OrderStatus;
+};
+```
+
+Use this endpoint for seller fulfillment workflows. It updates only the seller's order group and adjusts inventory only for items in that group when the status moves to `Confirmed` or `Cancelled`.
+
+Returns `204` on success.
 
 ### GET Own Orders Page
 
@@ -1035,6 +1104,133 @@ Authorization: Bearer {adminAccessToken}
 ```
 
 Requires `products:update`. Returns `204` on success.
+
+## Messaging API
+
+Base prefix:
+
+```text
+/messaging-api/v1/conversations
+```
+
+Messaging endpoints are authenticated. The frontend never sends participant user IDs; the backend resolves the current user through the token and verifies product/order participants with the owning services.
+
+### POST Product Inquiry Conversation
+
+```http
+POST /messaging-api/v1/conversations/product-inquiries/{productId}
+Authorization: Bearer {accessToken}
+```
+
+Starts or reuses a conversation between the current customer and the product seller. Customers cannot start an inquiry with themselves.
+
+Response:
+
+```ts
+ApiResponse<string> // conversationId
+```
+
+### POST Seller Order Conversation
+
+```http
+POST /messaging-api/v1/conversations/seller-orders/{sellerOrderId}
+Authorization: Bearer {accessToken}
+```
+
+Starts or reuses a conversation attached to one seller-order group. Only the order customer or the seller who owns that seller-order group can create/open it.
+
+Response:
+
+```ts
+ApiResponse<string> // conversationId
+```
+
+### GET Conversations Page
+
+```http
+GET /messaging-api/v1/conversations?page=1&pageSize=20
+Authorization: Bearer {accessToken}
+```
+
+Response:
+
+```ts
+type ConversationType = "ProductInquiry" | "SellerOrder";
+type ConversationStatus = "Open" | "Closed";
+
+type ConversationResponse = {
+  id: string;
+  type: ConversationType;
+  customerUserId: string;
+  sellerUserId: string;
+  productId: string | null;
+  orderId: string | null;
+  sellerOrderId: string | null;
+  status: ConversationStatus;
+  createdAtUtc: string;
+  lastMessageAtUtc: string;
+  customerReadAtUtc: string | null;
+  sellerReadAtUtc: string | null;
+};
+
+ApiResponse<PagedListResponse<ConversationResponse>>
+```
+
+### GET Conversation Messages
+
+```http
+GET /messaging-api/v1/conversations/{conversationId}/messages?page=1&pageSize=50
+Authorization: Bearer {accessToken}
+```
+
+Response:
+
+```ts
+type ConversationMessageType = "Text" | "System";
+
+type ConversationMessageResponse = {
+  id: string;
+  conversationId: string;
+  senderUserId: string | null;
+  body: string;
+  type: ConversationMessageType;
+  createdAtUtc: string;
+};
+
+ApiResponse<PagedListResponse<ConversationMessageResponse>>
+```
+
+### POST Conversation Message
+
+```http
+POST /messaging-api/v1/conversations/{conversationId}/messages
+Authorization: Bearer {accessToken}
+```
+
+Request:
+
+```ts
+type SendConversationMessageRequest = {
+  body: string;
+};
+```
+
+Response:
+
+```ts
+ApiResponse<string> // messageId
+```
+
+Sending a message updates the conversation read marker for the sender and publishes a notification event. NotificationApi queues an email for the recipient only when their email is confirmed.
+
+### POST Mark Conversation Read
+
+```http
+POST /messaging-api/v1/conversations/{conversationId}/read
+Authorization: Bearer {accessToken}
+```
+
+Returns `204` on success.
 
 ## Notifications
 

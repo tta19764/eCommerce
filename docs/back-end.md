@@ -63,6 +63,7 @@ Not every service has every project type. Message projects are used where other 
 | Users | `UserApi` | Own-profile reads/updates and admin profile management linked to auth accounts |
 | Images | `ImageApi` | Image metadata and binary content |
 | Notifications | `NotificationApi` | Email confirmation jobs and SMTP delivery |
+| Messaging | `MessagingApi` | Customer-seller conversations for product inquiries and seller-order groups |
 | Gateway | `GatewayApi` | Browser-facing reverse proxy and Swagger aggregation |
 | AppHost | `eCommerce.AppHost` | Local orchestration and infrastructure configuration |
 
@@ -78,6 +79,7 @@ AppHost creates a logical PostgreSQL database per service:
 | Image API | `image_db` |
 | Authentication API | `authentication_db` |
 | Notification API | `notification_db` |
+| Messaging API | `messaging_db` |
 
 ## Authorization
 
@@ -88,6 +90,7 @@ Current roles:
 | Role | Description |
 | --- | --- |
 | `Customer` | Shopper role with product read and order creation rights |
+| `Seller` | Marketplace seller role with product ownership workflows |
 | `Admin` | Administration role with all configured permissions |
 
 Current permissions include product, order, user, and account-administration actions. See [Authentication Slice](./vertical-slices/authentication.md) for the full permission model.

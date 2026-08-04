@@ -20,6 +20,10 @@ The notifications slice owns durable notification jobs and email delivery. It is
 
 Authentication publishes a confirmation request after registration. NotificationApi stores a notification job and sends an HTML email containing the frontend confirmation link.
 
+### Marketplace Chat Messages
+
+MessagingApi publishes `MessageSentIntegrationEvent` after a conversation message is saved. NotificationApi checks the recipient account through AuthenticationApi and queues an HTML email only when the email address is confirmed.
+
 ### Durable Retry
 
 Failed notification jobs are stored with attempts, last error, and next-attempt time. Quartz polls pending jobs and retries them until the maximum attempt count is reached.

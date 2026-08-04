@@ -19,6 +19,7 @@ Detailed documentation lives in [docs](./docs):
 | [Users Slice](./docs/vertical-slices/users.md) | Own-profile workflows, user profiles, account linkage, profile updates, and image references |
 | [Images Slice](./docs/vertical-slices/images.md) | Image metadata, object storage, upload, download, and deletion |
 | [Notifications Slice](./docs/vertical-slices/notifications.md) | Email confirmation, SMTP, durable jobs, retries, and Quartz |
+| [Messaging Slice](./docs/vertical-slices/messaging.md) | Customer-seller product inquiries, seller-order conversations, and chat email notifications |
 | [Gateway And AppHost](./docs/vertical-slices/gateway-apphost.md) | Gateway routing, Aspire orchestration, and local infrastructure |
 
 The frontend contract handoff is maintained separately in [FRONTEND_BACKEND_CONTRACTS.md](./FRONTEND_BACKEND_CONTRACTS.md).
@@ -35,6 +36,7 @@ The backend is split into microservices:
 | `UserApi` | Own-profile endpoints and user profile records linked to authentication accounts |
 | `ImageApi` | Image metadata and binary content backed by MinIO |
 | `NotificationApi` | Durable notification jobs and SMTP email delivery |
+| `MessagingApi` | Marketplace conversations between customers and sellers |
 | `GatewayApi` | Browser-facing gateway, reverse proxy, Swagger aggregation |
 | `SharedLibrary` | Cross-service abstractions, middleware, authorization, caching, messaging helpers |
 | `AppHost` | .NET Aspire orchestration for projects and infrastructure containers |
