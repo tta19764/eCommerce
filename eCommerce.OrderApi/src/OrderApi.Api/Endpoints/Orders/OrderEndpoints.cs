@@ -10,8 +10,11 @@ using OrderApi.Application.Orders.DeleteOrder;
 using OrderApi.Application.Orders.GetOrder;
 using OrderApi.Application.Orders.GetOrderPage;
 using OrderApi.Application.Orders.GetOrdersByClient;
+using OrderApi.Application.Orders.GetSellerOrder;
+using OrderApi.Application.Orders.GetSellerOrders;
 using OrderApi.Application.Orders.UpdateOrder;
 using OrderApi.Application.Orders.UpdateOrderStatus;
+using OrderApi.Application.Orders.UpdateSellerOrderStatus;
 using OrderApi.Domain.Orders;
 using SharedLibrary.Api.Contracts;
 using SharedLibrary.Api.Extensions;
@@ -75,6 +78,30 @@ public static class OrderEndpoints
             .Produces<ApiResponse<PagedListResponse<OrderResponse>>>()
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status403Forbidden)
+            .RequireAuthorization();
+
+        group.MapGet("seller", GetSellerOrders)
+            .WithName(nameof(GetSellerOrders))
+            .Produces<ApiResponse<PagedListResponse<SellerOrderResponse>>>()
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden)
+            .RequireAuthorization();
+
+        group.MapGet("seller/{sellerOrderId:guid}", GetSellerOrder)
+            .WithName(nameof(GetSellerOrder))
+            .Produces<ApiResponse<SellerOrderResponse>>()
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden)
+            .Produces<ApiResponse<SellerOrderResponse>>(StatusCodes.Status404NotFound)
+            .RequireAuthorization();
+
+        group.MapPatch("seller/{sellerOrderId:guid}/status", UpdateSellerOrderStatus)
+            .WithName(nameof(UpdateSellerOrderStatus))
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces(StatusCodes.Status403Forbidden)
+            .Produces<ApiResponse<object>>(StatusCodes.Status400BadRequest)
+            .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
             .RequireAuthorization();
 
         group.MapPut("{orderId:guid}", UpdateOrder)
@@ -274,6 +301,96 @@ public static class OrderEndpoints
 
         return result.IsSuccess
             ? Results.Ok(result.MapToApiResponse())
+            : Results.BadRequest(result.MapToApiResponse());
+    }
+
+    /// <summary>
+    /// Gets seller-order groups for the current seller.
+    /// </summary>
+    public static async Task<IResult> GetSellerOrders(
+        [AsParameters] GetClientOrdersRequest request,
+        ISender sender,
+        IRequestClient<GetAccountUserIdByIdentityIdRequest> accountClient,
+        ClaimsPrincipal user,
+        CancellationToken cancellationToken)
+    {
+        var currentUserId = await GetCurrentUserIdAsync(user, accountClient, cancellationToken);
+
+        if (currentUserId is null)
+        {
+            return Results.Forbid();
+        }
+
+        var result = await sender.Send(
+            new GetSellerOrdersQuery(currentUserId.Value, request.Page, request.PageSize),
+            cancellationToken);
+
+        return result.IsSuccess
+            ? Results.Ok(result.MapToApiResponse())
+            : Results.BadRequest(result.MapToApiResponse());
+    }
+
+    /// <summary>
+    /// Gets one seller-order group when the current user is the seller or an admin.
+    /// </summary>
+    public static async Task<IResult> GetSellerOrder(
+        Guid sellerOrderId,
+        ISender sender,
+        ClaimsPrincipal user,
+        IAuthorizationService authorizationService,
+        IRequestClient<GetAccountUserIdByIdentityIdRequest> accountClient,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetSellerOrderQuery(sellerOrderId), cancellationToken);
+
+        if (result.IsFailure)
+        {
+            return Results.NotFound(result.MapToApiResponse());
+        }
+
+        if (await HasPermissionAsync(user, authorizationService, ApplicationPermissions.OrderRead) ||
+            await IsCurrentUserAsync(user, result.Value.SellerId, accountClient, cancellationToken))
+        {
+            return Results.Ok(result.MapToApiResponse());
+        }
+
+        return Results.Forbid();
+    }
+
+    /// <summary>
+    /// Updates one seller-order group when the current user is the seller or an admin.
+    /// </summary>
+    public static async Task<IResult> UpdateSellerOrderStatus(
+        Guid sellerOrderId,
+        UpdateSellerOrderStatusRequest request,
+        ISender sender,
+        ClaimsPrincipal user,
+        IAuthorizationService authorizationService,
+        IRequestClient<GetAccountUserIdByIdentityIdRequest> accountClient,
+        CancellationToken cancellationToken)
+    {
+        var sellerOrder = await sender.Send(new GetSellerOrderQuery(sellerOrderId), cancellationToken);
+
+        if (sellerOrder.IsFailure)
+        {
+            return Results.NotFound(sellerOrder.MapToApiResponse());
+        }
+
+        if (!await HasPermissionAsync(user, authorizationService, ApplicationPermissions.OrderUpdateStatus) &&
+            !await IsCurrentUserAsync(user, sellerOrder.Value.SellerId, accountClient, cancellationToken))
+        {
+            return Results.Forbid();
+        }
+
+        var result = await sender.Send(new UpdateSellerOrderStatusCommand(sellerOrderId, request.Status), cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            return Results.NoContent();
+        }
+
+        return result.Error.Code.EndsWith(".NotFound", StringComparison.Ordinal)
+            ? Results.NotFound(result.MapToApiResponse())
             : Results.BadRequest(result.MapToApiResponse());
     }
 

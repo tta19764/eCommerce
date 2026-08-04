@@ -7,6 +7,8 @@ namespace OrderApi.Domain.UnitTests.Orders;
 
 public class OrderTests
 {
+    private static readonly Guid SellerId = Guid.NewGuid();
+
     [Fact]
     public void Create_Should_CreatePendingOrder()
     {
@@ -34,6 +36,7 @@ public class OrderTests
 
         // Act
         var result = order.AddItem(
+            SellerId,
             productId,
             new ProductName("Keyboard"),
             new Money(99.99m, Currency.Usd),
@@ -55,6 +58,7 @@ public class OrderTests
         var productId = Guid.NewGuid();
 
         order.AddItem(
+            SellerId,
             productId,
             new ProductName("Keyboard"),
             new Money(100m, Currency.Usd),
@@ -62,6 +66,7 @@ public class OrderTests
 
         // Act
         var result = order.AddItem(
+            SellerId,
             productId,
             new ProductName("Keyboard"),
             new Money(100m, Currency.Usd),
@@ -82,6 +87,7 @@ public class OrderTests
 
         // Act
         var result = order.AddItem(
+            SellerId,
             Guid.NewGuid(),
             new ProductName("Keyboard"),
             new Money(100m, Currency.Usd),
@@ -99,6 +105,12 @@ public class OrderTests
         // Arrange
         var order = Order.Create(Guid.NewGuid(), new OrderDate(DateTime.UtcNow));
         var confirmedAtUtc = new DateTime(2026, 7, 28, 13, 0, 0, DateTimeKind.Utc);
+        order.AddItem(
+            SellerId,
+            Guid.NewGuid(),
+            new ProductName("Keyboard"),
+            new Money(100m, Currency.Usd),
+            new OrderItemQuantity(1));
 
         // Act
         var result = order.Confirm(confirmedAtUtc);

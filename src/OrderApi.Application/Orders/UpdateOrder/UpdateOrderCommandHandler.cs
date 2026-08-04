@@ -33,7 +33,7 @@ public sealed class UpdateOrderCommandHandler(
             return Result.Failure(OrderErrors.NotFound);
         }
 
-        var replacementItems = new List<OrderItem>();
+        var replacementItems = new List<(Guid SellerId, Guid ProductId, ProductName ProductName, Money UnitPrice, OrderItemQuantity Quantity)>();
 
         foreach (var item in request.Items.GroupBy(item => item.ProductId).Select(group => new OrderItemRequest(group.Key, group.Sum(item => item.Quantity))))
         {
@@ -48,8 +48,8 @@ public sealed class UpdateOrderCommandHandler(
                 return Result.Failure(OrderErrors.ProductNotFound);
             }
 
-            replacementItems.Add(OrderItem.Create(
-                order.Id,
+            replacementItems.Add((
+                product.Message.SellerId,
                 product.Message.ProductId,
                 new ProductName(product.Message.Name),
                 new Money(product.Message.Price, Currency.FromCode(product.Message.Currency)),

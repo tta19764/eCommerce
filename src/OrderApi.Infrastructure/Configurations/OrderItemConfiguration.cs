@@ -24,6 +24,12 @@ public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
         builder.Property(item => item.OrderId)
             .IsRequired();
 
+        builder.Property(item => item.SellerOrderId)
+            .IsRequired();
+
+        builder.Property(item => item.SellerId)
+            .IsRequired();
+
         builder.Property(item => item.ProductId)
             .IsRequired();
 
@@ -61,6 +67,8 @@ public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
         builder.Ignore(item => item.TotalPrice);
 
         builder.HasIndex(item => item.OrderId);
+        builder.HasIndex(item => item.SellerOrderId);
+        builder.HasIndex(item => item.SellerId);
         builder.HasIndex(item => item.ProductId);
     }
 }

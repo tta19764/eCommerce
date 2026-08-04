@@ -25,6 +25,7 @@ public class CreateOrderCommandHandlerTests
         CancellationToken cancellationToken = TestContext.Current.CancellationToken;
         var clientId = Guid.NewGuid();
         var productId = Guid.NewGuid();
+        var sellerId = Guid.NewGuid();
 
         _productClientMock
             .GetResponse<GetProductDetailsResponse>(
@@ -32,7 +33,7 @@ public class CreateOrderCommandHandlerTests
                 cancellationToken)
             .Returns(Task.FromResult<Response<GetProductDetailsResponse>>(
                 new TestResponse<GetProductDetailsResponse>(
-                    new GetProductDetailsResponse(productId, "Keyboard", "Mechanical keyboard", 100m, "USD", 7, null, 0.0m, 0, true))));
+                    new GetProductDetailsResponse(productId, "Keyboard", "Mechanical keyboard", 100m, "USD", 7, sellerId, null, 0.0m, 0, true))));
 
         var handler = new CreateOrderCommandHandler(
             _orderRepositoryMock,
@@ -57,6 +58,7 @@ public class CreateOrderCommandHandlerTests
             order.Status == OrderStatus.Pending &&
             order.Items.Count == 1 &&
             order.Items.Single().ProductId == productId &&
+            order.Items.Single().SellerId == sellerId &&
             order.Items.Single().ProductName.Value == "Keyboard" &&
             order.Items.Single().UnitPrice.Amount == 100m &&
             order.Items.Single().UnitPrice.Currency.Code == "USD" &&
@@ -78,7 +80,7 @@ public class CreateOrderCommandHandlerTests
                 cancellationToken)
             .Returns(Task.FromResult<Response<GetProductDetailsResponse>>(
                 new TestResponse<GetProductDetailsResponse>(
-                    new GetProductDetailsResponse(productId, string.Empty, string.Empty, 0m, "USD", 0, null, 0.0m, 0, false))));
+                    new GetProductDetailsResponse(productId, string.Empty, string.Empty, 0m, "USD", 0, Guid.Empty, null, 0.0m, 0, false))));
 
         var handler = new CreateOrderCommandHandler(
             _orderRepositoryMock,

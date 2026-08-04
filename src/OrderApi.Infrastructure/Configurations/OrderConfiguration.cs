@@ -52,7 +52,15 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
             .HasForeignKey(item => item.OrderId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        builder.HasMany(order => order.SellerOrders)
+            .WithOne()
+            .HasForeignKey(sellerOrder => sellerOrder.OrderId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         builder.Navigation(order => order.Items)
+            .UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        builder.Navigation(order => order.SellerOrders)
             .UsePropertyAccessMode(PropertyAccessMode.Field);
 
         builder.HasIndex(order => order.ClientId);

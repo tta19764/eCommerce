@@ -108,6 +108,7 @@ public class UpdateOrderStatusCommandHandlerTests
         var order = Order.Create(Guid.NewGuid(), new OrderDate(DateTime.UtcNow));
 
         order.AddItem(
+            Guid.NewGuid(),
             productId,
             new ProductName("Keyboard"),
             new Money(100m, Currency.FromCode("USD")),

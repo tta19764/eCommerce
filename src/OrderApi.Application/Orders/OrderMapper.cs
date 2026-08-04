@@ -19,6 +19,9 @@ internal static class OrderMapper
         var items = order.Items
             .Select(ToItemResponse)
             .ToList();
+        var sellerOrders = order.SellerOrders
+            .Select(sellerOrder => ToSellerOrderResponse(sellerOrder, order.Items))
+            .ToList();
 
         return new OrderResponse(
             order.Id,
@@ -28,6 +31,7 @@ internal static class OrderMapper
             CalculateTotal(order),
             GetOrderCurrency(order).Code,
             items,
+            sellerOrders,
             order.ConfirmedOnUtc,
             order.PaidOnUtc,
             order.ShippedOnUtc,
@@ -45,6 +49,9 @@ internal static class OrderMapper
         var items = order.Items
             .Select(ToDetailsItemResponse)
             .ToList();
+        var sellerOrders = order.SellerOrders
+            .Select(sellerOrder => ToSellerOrderResponse(sellerOrder, order.Items))
+            .ToList();
 
         return new OrderDetailsResponse(
             order.Id,
@@ -54,6 +61,7 @@ internal static class OrderMapper
             CalculateTotal(order),
             GetOrderCurrency(order).Code,
             items,
+            sellerOrders,
             order.ConfirmedOnUtc,
             order.PaidOnUtc,
             order.ShippedOnUtc,
@@ -78,12 +86,14 @@ internal static class OrderMapper
         var items = order.Items
             .Select(item => new OrderItemFullInfo(
                 item.Id,
+                item.SellerOrderId,
+                item.SellerId,
                 item.ProductId,
                 item.ProductName.Value,
                 item.UnitPrice.Amount,
                 item.UnitPrice.Currency.Code,
                 item.Quantity.Value,
-                item.TotalPrice.Amount))
+            item.TotalPrice.Amount))
             .ToList();
 
         return new OrderFullInfo(
@@ -108,6 +118,8 @@ internal static class OrderMapper
     {
         return new OrderItemResponse(
             item.Id,
+            item.SellerOrderId,
+            item.SellerId,
             item.ProductId,
             item.ProductName.Value,
             item.UnitPrice.Amount,
@@ -120,12 +132,38 @@ internal static class OrderMapper
     {
         return new OrderDetailsItemResponse(
             item.Id,
+            item.SellerOrderId,
+            item.SellerId,
             item.ProductId,
             item.ProductName.Value,
             item.UnitPrice.Amount,
             item.UnitPrice.Currency.Code,
             item.Quantity.Value,
             item.TotalPrice.Amount);
+    }
+
+    internal static SellerOrderResponse ToSellerOrderResponse(
+        SellerOrder sellerOrder,
+        IEnumerable<OrderItem> orderItems)
+    {
+        var items = orderItems
+            .Where(item => item.SellerOrderId == sellerOrder.Id)
+            .Select(ToItemResponse)
+            .ToList();
+
+        return new SellerOrderResponse(
+            sellerOrder.Id,
+            sellerOrder.OrderId,
+            sellerOrder.SellerId,
+            sellerOrder.Status.ToString(),
+            items.Sum(item => item.TotalPrice),
+            items.FirstOrDefault()?.Currency ?? Currency.Usd.Code,
+            items,
+            sellerOrder.ConfirmedOnUtc,
+            sellerOrder.PaidOnUtc,
+            sellerOrder.ShippedOnUtc,
+            sellerOrder.CompletedOnUtc,
+            sellerOrder.CancelledOnUtc);
     }
 
     private static decimal CalculateTotal(Order order)

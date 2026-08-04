@@ -32,6 +32,9 @@ public sealed class UpdateOrderStatusCommandHandler(
         }
 
         var previousStatus = order.Status;
+        var previousSellerStatuses = order.SellerOrders.ToDictionary(
+            sellerOrder => sellerOrder.Id,
+            sellerOrder => sellerOrder.Status);
         var transition = ApplyTransition(order, request.Status);
 
         if (transition.IsFailure)
@@ -39,7 +42,11 @@ public sealed class UpdateOrderStatusCommandHandler(
             return transition;
         }
 
-        var adjustmentResult = await AdjustProductQuantitiesAsync(order, previousStatus, request.Status, cancellationToken);
+        var adjustmentResult = await AdjustProductQuantitiesAsync(
+            order,
+            previousSellerStatuses,
+            request.Status,
+            cancellationToken);
 
         if (adjustmentResult.IsFailure)
         {
@@ -70,20 +77,27 @@ public sealed class UpdateOrderStatusCommandHandler(
 
     private async Task<Result> AdjustProductQuantitiesAsync(
         Order order,
-        OrderStatus previousStatus,
+        IReadOnlyDictionary<Guid, OrderStatus> previousSellerStatuses,
         OrderStatus requestedStatus,
         CancellationToken cancellationToken)
     {
-        var quantityMultiplier = GetQuantityMultiplier(previousStatus, requestedStatus);
+        var adjustments = order.Items
+            .Select(item =>
+            {
+                var previousStatus = previousSellerStatuses.GetValueOrDefault(item.SellerOrderId, OrderStatus.Pending);
+                var quantityMultiplier = GetQuantityMultiplier(previousStatus, requestedStatus);
 
-        if (quantityMultiplier == 0)
+                return quantityMultiplier == 0
+                    ? null
+                    : new ProductQuantityAdjustment(item.ProductId, item.Quantity.Value * quantityMultiplier);
+            })
+            .OfType<ProductQuantityAdjustment>()
+            .ToArray();
+
+        if (adjustments.Length == 0)
         {
             return Result.Success();
         }
-
-        var adjustments = order.Items
-            .Select(item => new ProductQuantityAdjustment(item.ProductId, item.Quantity.Value * quantityMultiplier))
-            .ToArray();
 
         var response = await productQuantityClient.GetResponse<AdjustProductQuantitiesResponse>(
             new AdjustProductQuantitiesRequest(adjustments),

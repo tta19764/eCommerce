@@ -8,6 +8,7 @@ namespace OrderApi.Domain.Orders;
 public static class OrderErrors
 {
     public static readonly Error NotFound = new("Order.NotFound", "Order was not found");
+    public static readonly Error SellerOrderNotFound = new("Order.SellerOrderNotFound", "Seller order was not found");
     public static readonly Error EmptyOrder = new("Order.EmptyOrder", "Order must contain at least one item");
     public static readonly Error ProductNotFound = new("Order.ProductNotFound", "Product was not found");
     public static readonly Error InsufficientProductQuantity = new("Order.InsufficientProductQuantity", "One or more products do not have enough quantity");

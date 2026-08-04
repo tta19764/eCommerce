@@ -27,6 +27,7 @@ public class GetOrderFullInfoConsumerTests
         var productId = Guid.NewGuid();
 
         order.AddItem(
+            Guid.NewGuid(),
             productId,
             new ProductName("Keyboard"),
             new Money(100m, Currency.Usd),

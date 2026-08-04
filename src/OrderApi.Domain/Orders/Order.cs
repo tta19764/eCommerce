@@ -10,6 +10,7 @@ namespace OrderApi.Domain.Orders;
 public class Order : Entity
 {
     private readonly List<OrderItem> _items = [];
+    private readonly List<SellerOrder> _sellerOrders = [];
 
     private Order()
     {
@@ -42,6 +43,8 @@ public class Order : Entity
 
     public IReadOnlyCollection<OrderItem> Items => _items;
 
+    public IReadOnlyCollection<SellerOrder> SellerOrders => _sellerOrders;
+
     /// <summary>
     /// Creates a new order for the supplied client.
     /// </summary>
@@ -60,7 +63,7 @@ public class Order : Entity
     /// <param name="productName">The product name at purchase time.</param>
     /// <param name="unitPrice">The unit price at purchase time.</param>
     /// <param name="quantity">The ordered quantity.</param>
-    public Result AddItem(Guid productId, ProductName productName, Money unitPrice, OrderItemQuantity quantity)
+    public Result AddItem(Guid sellerId, Guid productId, ProductName productName, Money unitPrice, OrderItemQuantity quantity)
     {
         if (Status != OrderStatus.Pending)
         {
@@ -72,7 +75,8 @@ public class Order : Entity
             return Result.Failure(OrderErrors.InvalidQuantity);
         }
 
-        var existingItem = _items.FirstOrDefault(item => item.ProductId == productId);
+        var sellerOrder = GetOrCreateSellerOrder(sellerId);
+        var existingItem = _items.FirstOrDefault(item => item.ProductId == productId && item.SellerOrderId == sellerOrder.Id);
 
         if (existingItem is not null)
         {
@@ -80,7 +84,37 @@ public class Order : Entity
             return Result.Success();
         }
 
-        _items.Add(OrderItem.Create(Id, productId, productName, unitPrice, quantity));
+        _items.Add(OrderItem.Create(Id, sellerOrder.Id, sellerId, productId, productName, unitPrice, quantity));
+
+        return Result.Success();
+    }
+
+    public Result ApplySellerOrderStatus(Guid sellerOrderId, OrderStatus status, DateTime utcNow)
+    {
+        var sellerOrder = _sellerOrders.FirstOrDefault(order => order.Id == sellerOrderId);
+
+        if (sellerOrder is null)
+        {
+            return Result.Failure(OrderErrors.SellerOrderNotFound);
+        }
+
+        var transition = status switch
+        {
+            OrderStatus.Pending when sellerOrder.Status == OrderStatus.Pending => Result.Success(),
+            OrderStatus.Confirmed => sellerOrder.Confirm(utcNow),
+            OrderStatus.Paid => sellerOrder.MarkAsPaid(utcNow),
+            OrderStatus.Shipped => sellerOrder.MarkAsShipped(utcNow),
+            OrderStatus.Completed => sellerOrder.Complete(utcNow),
+            OrderStatus.Cancelled => sellerOrder.Cancel(utcNow),
+            _ => Result.Failure(OrderErrors.InvalidStatusTransition)
+        };
+
+        if (transition.IsFailure)
+        {
+            return transition;
+        }
+
+        RecalculateStatus(utcNow);
 
         return Result.Success();
     }
@@ -89,22 +123,33 @@ public class Order : Entity
     /// Executes the ReplaceItems operation.
     /// </summary>
     /// <param name="items">The items value.</param>
-    public Result ReplaceItems(IEnumerable<OrderItem> items)
+    public Result ReplaceItems(
+        IEnumerable<(Guid SellerId, Guid ProductId, ProductName ProductName, Money UnitPrice, OrderItemQuantity Quantity)> items)
     {
         if (Status != OrderStatus.Pending)
         {
             return Result.Failure(OrderErrors.NotPending);
         }
 
-        var orderItems = items.ToList();
+        var itemSnapshots = items.ToList();
 
-        if (orderItems.Count == 0)
+        if (itemSnapshots.Count == 0)
         {
             return Result.Failure(OrderErrors.EmptyOrder);
         }
 
         _items.Clear();
-        _items.AddRange(orderItems);
+        _sellerOrders.Clear();
+
+        foreach (var item in itemSnapshots)
+        {
+            var result = AddItem(item.SellerId, item.ProductId, item.ProductName, item.UnitPrice, item.Quantity);
+
+            if (result.IsFailure)
+            {
+                return result;
+            }
+        }
 
         return Result.Success();
     }
@@ -121,8 +166,17 @@ public class Order : Entity
             return Result.Failure(OrderErrors.NotPending);
         }
 
-        Status = OrderStatus.Confirmed;
-        ConfirmedOnUtc = utcNow;
+        foreach (var sellerOrder in _sellerOrders.Where(order => order.Status == OrderStatus.Pending))
+        {
+            var result = sellerOrder.Confirm(utcNow);
+
+            if (result.IsFailure)
+            {
+                return result;
+            }
+        }
+
+        RecalculateStatus(utcNow);
 
         RaiseDomainEvent(new OrderConfirmedDomainEvent(Id));
 
@@ -141,8 +195,17 @@ public class Order : Entity
             return Result.Failure(OrderErrors.NotConfirmed);
         }
 
-        Status = OrderStatus.Paid;
-        PaidOnUtc = utcNow;
+        foreach (var sellerOrder in _sellerOrders.Where(order => order.Status == OrderStatus.Confirmed))
+        {
+            var result = sellerOrder.MarkAsPaid(utcNow);
+
+            if (result.IsFailure)
+            {
+                return result;
+            }
+        }
+
+        RecalculateStatus(utcNow);
 
         RaiseDomainEvent(new OrderPaidDomainEvent(Id));
 
@@ -161,8 +224,17 @@ public class Order : Entity
             return Result.Failure(OrderErrors.NotPaid);
         }
 
-        Status = OrderStatus.Shipped;
-        ShippedOnUtc = utcNow;
+        foreach (var sellerOrder in _sellerOrders.Where(order => order.Status == OrderStatus.Paid))
+        {
+            var result = sellerOrder.MarkAsShipped(utcNow);
+
+            if (result.IsFailure)
+            {
+                return result;
+            }
+        }
+
+        RecalculateStatus(utcNow);
 
         RaiseDomainEvent(new OrderShippedDomainEvent(Id));
 
@@ -181,8 +253,17 @@ public class Order : Entity
             return Result.Failure(OrderErrors.NotShipped);
         }
 
-        Status = OrderStatus.Completed;
-        CompletedOnUtc = utcNow;
+        foreach (var sellerOrder in _sellerOrders.Where(order => order.Status == OrderStatus.Shipped))
+        {
+            var result = sellerOrder.Complete(utcNow);
+
+            if (result.IsFailure)
+            {
+                return result;
+            }
+        }
+
+        RecalculateStatus(utcNow);
 
         RaiseDomainEvent(new OrderCompletedDomainEvent(Id));
 
@@ -201,11 +282,61 @@ public class Order : Entity
             return Result.Failure(OrderErrors.CannotCancel);
         }
 
-        Status = OrderStatus.Cancelled;
-        CancelledOnUtc = utcNow;
+        foreach (var sellerOrder in _sellerOrders.Where(order => order.Status is not OrderStatus.Cancelled))
+        {
+            var result = sellerOrder.Cancel(utcNow);
+
+            if (result.IsFailure)
+            {
+                return result;
+            }
+        }
+
+        RecalculateStatus(utcNow);
 
         RaiseDomainEvent(new OrderCancelledDomainEvent(Id));
 
         return Result.Success();
+    }
+
+    private SellerOrder GetOrCreateSellerOrder(Guid sellerId)
+    {
+        var sellerOrder = _sellerOrders.FirstOrDefault(order => order.SellerId == sellerId);
+
+        if (sellerOrder is not null)
+        {
+            return sellerOrder;
+        }
+
+        sellerOrder = SellerOrder.Create(Id, sellerId);
+        _sellerOrders.Add(sellerOrder);
+
+        return sellerOrder;
+    }
+
+    private void RecalculateStatus(DateTime utcNow)
+    {
+        if (_sellerOrders.Count == 0)
+        {
+            return;
+        }
+
+        Status = _sellerOrders.All(order => order.Status == OrderStatus.Cancelled)
+            ? OrderStatus.Cancelled
+            : _sellerOrders.All(order => order.Status == OrderStatus.Completed)
+                ? OrderStatus.Completed
+                : _sellerOrders.All(order => order.Status == OrderStatus.Shipped)
+                    ? OrderStatus.Shipped
+                    : _sellerOrders.All(order => order.Status == OrderStatus.Paid)
+                        ? OrderStatus.Paid
+                        : _sellerOrders.All(order => order.Status == OrderStatus.Confirmed)
+                            ? OrderStatus.Confirmed
+                            : OrderStatus.Pending;
+
+        ConfirmedOnUtc ??= _sellerOrders.Any(order => order.ConfirmedOnUtc is not null) ? utcNow : null;
+        PaidOnUtc ??= _sellerOrders.Any(order => order.PaidOnUtc is not null) ? utcNow : null;
+        ShippedOnUtc ??= _sellerOrders.Any(order => order.ShippedOnUtc is not null) ? utcNow : null;
+        CompletedOnUtc ??= Status == OrderStatus.Completed ? utcNow : null;
+        CancelledOnUtc ??= Status == OrderStatus.Cancelled ? utcNow : null;
     }
 }

@@ -21,6 +21,11 @@ public class OrderDbContext(DbContextOptions<OrderDbContext> options) : DbContex
     public DbSet<OrderItem> OrderItems { get; set; }
 
     /// <summary>
+    /// Seller-specific order groups table.
+    /// </summary>
+    public DbSet<SellerOrder> SellerOrders { get; set; }
+
+    /// <summary>
     /// Durable domain-event messages pending background publication.
     /// </summary>
     public DbSet<OutboxMessage> OutboxMessages { get; set; }

@@ -10,6 +10,7 @@ namespace OrderApi.Application.Orders;
 /// <param name="TotalPrice">The calculated total price for all order items.</param>
 /// <param name="Currency">The order currency code.</param>
 /// <param name="Items">The product snapshot items stored in the order.</param>
+/// <param name="SellerOrders">Seller-specific order groups.</param>
 /// <param name="ConfirmedOnUtc">The UTC confirmation date, when applicable.</param>
 /// <param name="PaidOnUtc">The UTC payment date, when applicable.</param>
 /// <param name="ShippedOnUtc">The UTC shipment date, when applicable.</param>
@@ -23,6 +24,7 @@ public sealed record OrderDetailsResponse(
     decimal TotalPrice,
     string Currency,
     IReadOnlyCollection<OrderDetailsItemResponse> Items,
+    IReadOnlyCollection<SellerOrderResponse> SellerOrders,
     DateTime? ConfirmedOnUtc,
     DateTime? PaidOnUtc,
     DateTime? ShippedOnUtc,

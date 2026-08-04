@@ -43,6 +43,7 @@ public sealed class CreateOrderCommandHandler(
             }
 
             var addItemResult = order.AddItem(
+                product.Message.SellerId,
                 product.Message.ProductId,
                 new ProductName(product.Message.Name),
                 new Money(product.Message.Price, Currency.FromCode(product.Message.Currency)),

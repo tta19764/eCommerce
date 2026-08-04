@@ -85,6 +85,25 @@ public interface IOrderRepository
     public Task<int> CountByClientIdAsync(Guid clientId, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Gets an order that contains the supplied seller-order group.
+    /// </summary>
+    public Task<Order?> GetBySellerOrderIdAsync(Guid sellerOrderId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets seller-order groups for one seller.
+    /// </summary>
+    public Task<IEnumerable<Order>> GetOrdersBySellerIdAsync(
+        Guid sellerId,
+        int page = 1,
+        int pageSize = 10,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Counts seller-order groups for one seller.
+    /// </summary>
+    public Task<int> CountBySellerIdAsync(Guid sellerId, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Marks an order for deletion.
     /// </summary>
     /// <param name="order">The order to delete.</param>

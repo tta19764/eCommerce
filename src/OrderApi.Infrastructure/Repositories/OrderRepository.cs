@@ -13,6 +13,7 @@ public class OrderRepository(OrderDbContext dbContext) : Repository<Order, Order
     {
         return await DbSet
             .Include(order => order.Items)
+            .Include(order => order.SellerOrders)
             .FirstOrDefaultAsync(order => order.Id == id, cancellationToken);
     }
 
@@ -61,7 +62,8 @@ public class OrderRepository(OrderDbContext dbContext) : Repository<Order, Order
         var query = FilterByOrderPrice(
             DbSet
             .AsNoTracking()
-            .Include(order => order.Items),
+            .Include(order => order.Items)
+            .Include(order => order.SellerOrders),
             minOrderPrice,
             maxOrderPrice);
 
@@ -88,6 +90,7 @@ public class OrderRepository(OrderDbContext dbContext) : Repository<Order, Order
         return await DbSet
             .AsNoTracking()
             .Include(order => order.Items)
+            .Include(order => order.SellerOrders)
             .Where(order => order.ClientId == clientId)
             .OrderByDescending(order => order.CreatedAtUtc.Value)
             .ThenByDescending(order => order.Id)
@@ -125,6 +128,42 @@ public class OrderRepository(OrderDbContext dbContext) : Repository<Order, Order
         return DbSet
             .AsNoTracking()
             .CountAsync(order => order.ClientId == clientId, cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<Order?> GetBySellerOrderIdAsync(Guid sellerOrderId, CancellationToken cancellationToken = default)
+    {
+        return await DbSet
+            .Include(order => order.Items)
+            .Include(order => order.SellerOrders)
+            .FirstOrDefaultAsync(order => order.SellerOrders.Any(sellerOrder => sellerOrder.Id == sellerOrderId), cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<IEnumerable<Order>> GetOrdersBySellerIdAsync(
+        Guid sellerId,
+        int page = 1,
+        int pageSize = 10,
+        CancellationToken cancellationToken = default)
+    {
+        return await DbSet
+            .AsNoTracking()
+            .Include(order => order.Items)
+            .Include(order => order.SellerOrders)
+            .Where(order => order.SellerOrders.Any(sellerOrder => sellerOrder.SellerId == sellerId))
+            .OrderByDescending(order => order.CreatedAtUtc.Value)
+            .ThenByDescending(order => order.Id)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public Task<int> CountBySellerIdAsync(Guid sellerId, CancellationToken cancellationToken = default)
+    {
+        return DbSet
+            .AsNoTracking()
+            .CountAsync(order => order.SellerOrders.Any(sellerOrder => sellerOrder.SellerId == sellerId), cancellationToken);
     }
 
     private static IQueryable<Order> FilterByOrderPrice(

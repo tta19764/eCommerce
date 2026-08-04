@@ -18,6 +18,8 @@ public class OrderItem : Entity
     private OrderItem(
         Guid id,
         Guid orderId,
+        Guid sellerOrderId,
+        Guid sellerId,
         Guid productId,
         ProductName productName,
         Money unitPrice,
@@ -25,6 +27,8 @@ public class OrderItem : Entity
         : base(id)
     {
         OrderId = orderId;
+        SellerOrderId = sellerOrderId;
+        SellerId = sellerId;
         ProductId = productId;
         ProductName = productName;
         UnitPrice = unitPrice;
@@ -32,6 +36,10 @@ public class OrderItem : Entity
     }
 
     public Guid OrderId { get; private set; }
+
+    public Guid SellerOrderId { get; private set; }
+
+    public Guid SellerId { get; private set; }
 
     public Guid ProductId { get; private set; }
 
@@ -58,11 +66,13 @@ public class OrderItem : Entity
     /// <param name="quantity">The quantity value.</param>
     public static OrderItem Create(
         Guid orderId,
+        Guid sellerOrderId,
+        Guid sellerId,
         Guid productId,
         ProductName productName,
         Money unitPrice,
         OrderItemQuantity quantity)
     {
-        return new OrderItem(Guid.NewGuid(), orderId, productId, productName, unitPrice, quantity);
+        return new OrderItem(Guid.NewGuid(), orderId, sellerOrderId, sellerId, productId, productName, unitPrice, quantity);
     }
 }

@@ -54,6 +54,8 @@ public sealed record OrderFullInfo(
 /// <param name="TotalPrice">The total price for this line.</param>
 public sealed record OrderItemFullInfo(
     Guid Id,
+    Guid SellerOrderId,
+    Guid SellerId,
     Guid ProductId,
     string ProductName,
     decimal UnitPrice,
