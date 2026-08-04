@@ -2,7 +2,7 @@
 
 ## General Description
 
-The catalog slice owns products, descriptions, prices, inventory quantities, image references, reviews, and ratings. It is implemented in `ProductApi` and uses `ImageApi` indirectly by storing image IDs after images have been uploaded.
+The catalog slice owns products, categories, product type, seller ownership metadata, descriptions, prices, inventory quantities, image references, reviews, and ratings. It is implemented in `ProductApi` and uses `ImageApi` indirectly by storing image IDs after images have been uploaded.
 
 ## Backend Projects
 
@@ -10,7 +10,7 @@ The catalog slice owns products, descriptions, prices, inventory quantities, ima
 | --- | --- |
 | `ProductApi.Api` | Product and review endpoints |
 | `ProductApi.Application` | Product and review commands and queries |
-| `ProductApi.Domain` | Product, review, money, quantity, rating domain rules |
+| `ProductApi.Domain` | Product, category, review, money, quantity, rating domain rules |
 | `ProductApi.Infrastructure` | EF Core persistence and repositories |
 | `ProductApi.Messages` | Product-related message contracts |
 
@@ -18,11 +18,13 @@ The catalog slice owns products, descriptions, prices, inventory quantities, ima
 
 ### Product Browsing
 
-Product list and product detail endpoints are public. Product responses include description, price, quantity, image IDs, display image ID, average rating rounded to one decimal place, and review count. The display image ID is not a separate image; it must point to one of the product image IDs.
+Product list and product detail endpoints are public. Product responses include description, price, quantity, seller ID, category ID, product type, image IDs, display image ID, average rating rounded to one decimal place, and review count. The display image ID is not a separate image; it must point to one of the product image IDs.
+
+Product pages support search and filters by query text, category, category descendants, product type, seller, price range, minimum rating, stock availability, and sort order. Categories are stored as an adjacency-list hierarchy so parent categories can include all child category products. Category responses include `path` and `depth` so seller forms can show readable options such as `Digital Products > Templates`.
 
 ### Product Management
 
-Admin users create, update, and delete products. Product image IDs are supplied after uploading images through `ImageApi`. Admins can choose one attached image as `displayImageId` for product cards and primary display.
+Admin users create, update, and delete products. Product image IDs are supplied after uploading images through `ImageApi`. Admins must assign a seller ID, category ID, and product type. Admins can choose one attached image as `displayImageId` for product cards and primary display.
 
 ### Inventory Adjustments
 
@@ -37,6 +39,8 @@ Authenticated users with `products:read` can create reviews. Product pages and p
 | Endpoint | Authorization | Description |
 | --- | --- | --- |
 | `GET /product-api/v1/products` | Public | Page products |
+| `GET /product-api/v1/products/categories` | Public | List active product categories |
+| `GET /product-api/v1/products/types` | Public | List product type options |
 | `GET /product-api/v1/products/{productId}` | Public | Get product details |
 | `POST /product-api/v1/products` | `products:create` | Create product |
 | `PUT /product-api/v1/products/{productId}` | `products:update` | Update product |

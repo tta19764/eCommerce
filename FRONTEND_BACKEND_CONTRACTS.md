@@ -140,6 +140,33 @@ ApiResponse<string> // accountId
 
 This endpoint creates an administrator account and assigns the `Admin` role. It is for existing administrators only; do not expose it in public registration UI.
 
+### Register Seller
+
+```http
+POST /auth-api/v1/auth/register/seller
+```
+
+Public.
+
+Request:
+
+```ts
+type RegisterSellerRequest = {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+};
+```
+
+Response:
+
+```ts
+ApiResponse<string> // accountId
+```
+
+This endpoint creates a seller account, assigns the `Seller` role, creates the linked User API profile, and sends the same email confirmation notification used by normal customer registration.
+
 ### Confirm Email
 
 ```http
@@ -216,6 +243,7 @@ Current application roles:
 | Role | Purpose |
 | --- | --- |
 | `Customer` | Normal shopper account |
+| `Seller` | Marketplace seller account for product ownership workflows |
 | `Admin` | Back office/admin account |
 
 Current backend permissions:
@@ -226,6 +254,10 @@ Current backend permissions:
 | `products:create` | Create products |
 | `products:update` | Update products and delete images |
 | `products:delete` | Delete products |
+| `products:create-own` | Seller-owned product creation workflow |
+| `products:update-own` | Seller-owned product update workflow |
+| `products:delete-own` | Seller-owned product deletion workflow |
+| `products:read-own` | Seller-owned product read workflow |
 | `orders:create` | Create orders |
 | `orders:read` | Admin order reads |
 | `orders:update-status` | Update/delete orders in current backend |
@@ -239,6 +271,7 @@ Role-to-permission mapping:
 | Role | Permissions |
 | --- | --- |
 | `Customer` | `products:read`, `orders:create`, `images:upload` |
+| `Seller` | `products:read`, `products:create`, `products:create-own`, `products:update-own`, `products:delete-own`, `products:read-own`, `images:upload` |
 | `Admin` | All permissions |
 
 The backend authorizes from token role claims. Keycloak tokens must contain realm roles as role claims. The app can use decoded roles for UI visibility, but the backend remains the source of truth.
@@ -341,7 +374,7 @@ Base prefix:
 ### GET Products Page
 
 ```http
-GET /product-api/v1/products?page=1&pageSize=10
+GET /product-api/v1/products?page=1&pageSize=10&query=keyboard&categoryId={categoryId}&includeSubcategories=true&productType=Physical&minPrice=10&maxPrice=500&minRating=4&inStock=true&sortBy=Price&sortDescending=false
 ```
 
 Public.
@@ -356,6 +389,15 @@ type ProductResponse = {
   price: number;
   currency: string;
   quantity: number;
+  sellerId: string;
+  categoryId: string;
+  productType:
+    | "Physical"
+    | "DigitalDownload"
+    | "LicenseKey"
+    | "Service"
+    | "Subscription"
+    | "Bundle";
   imageIds: string[];
   displayImageId: string | null;
   rating: number;
@@ -366,6 +408,74 @@ ApiResponse<PagedListResponse<ProductResponse>>
 ```
 
 `rating` is rounded by the backend to one digit after the decimal point.
+
+Supported query parameters:
+
+| Parameter | Meaning |
+| --- | --- |
+| `query` | Case-insensitive search in product name and description |
+| `categoryId` | Restrict results to one category |
+| `includeSubcategories` | Include descendant categories when `categoryId` is supplied |
+| `productType` | `Physical`, `DigitalDownload`, `LicenseKey`, `Service`, `Subscription`, or `Bundle` |
+| `sellerId` | Restrict results to one seller account/profile ID |
+| `minPrice`, `maxPrice` | Inclusive price range |
+| `minRating` | Minimum average rating, usually `0..5` |
+| `inStock` | When `true`, returns products with quantity greater than zero |
+| `sortBy` | `Default`, `Name`, `Price`, or `Rating` |
+| `sortDescending` | Reverse the selected sort |
+
+### GET Product Categories
+
+```http
+GET /product-api/v1/products/categories
+```
+
+Public.
+
+Response:
+
+```ts
+type ProductCategoryResponse = {
+  id: string;
+  name: string;
+  slug: string;
+  parentCategoryId: string | null;
+  path: string;
+  depth: number;
+};
+
+ApiResponse<ProductCategoryResponse[]>
+```
+
+For seller/admin product forms, use `path` in the dropdown label. Example: `Electronics > Computers`. Use `depth` only when rendering an indented tree-style picker.
+
+### GET Product Types
+
+```http
+GET /product-api/v1/products/types
+```
+
+Public.
+
+Response:
+
+```ts
+type ProductTypeResponse = {
+  value:
+    | "Physical"
+    | "DigitalDownload"
+    | "LicenseKey"
+    | "Service"
+    | "Subscription"
+    | "Bundle";
+  label: string;
+  description: string;
+};
+
+ApiResponse<ProductTypeResponse[]>
+```
+
+Use `value` in create/update/filter requests and `label` for UI text.
 
 ### GET Product
 
@@ -399,6 +509,15 @@ type CreateProductRequest = {
   price: number;
   currencyCode: string;
   quantity: number;
+  sellerId: string;
+  categoryId: string;
+  productType:
+    | "Physical"
+    | "DigitalDownload"
+    | "LicenseKey"
+    | "Service"
+    | "Subscription"
+    | "Bundle";
   imageIds?: string[] | null;
   displayImageId?: string | null;
 };
@@ -430,6 +549,15 @@ type UpdateProductRequest = {
   price: number;
   currencyCode: string;
   quantity: number;
+  sellerId: string;
+  categoryId: string;
+  productType:
+    | "Physical"
+    | "DigitalDownload"
+    | "LicenseKey"
+    | "Service"
+    | "Subscription"
+    | "Bundle";
   imageIds?: string[] | null;
   displayImageId?: string | null;
 };
