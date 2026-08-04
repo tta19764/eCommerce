@@ -25,6 +25,13 @@ export class AppShell {
     ),
     { initialValue: this.router.url.startsWith('/admin') },
   );
+  protected readonly isSellerPortal = toSignal(
+    this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      map((event) => event.urlAfterRedirects.startsWith('/seller')),
+    ),
+    { initialValue: this.router.url.startsWith('/seller') },
+  );
 
   protected logout(): void {
     // Clear client credentials before returning to the public storefront.

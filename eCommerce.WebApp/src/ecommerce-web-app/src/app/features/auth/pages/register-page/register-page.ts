@@ -16,6 +16,7 @@ export class RegisterPage {
   private readonly router = inject(Router);
   protected readonly busy = signal(false);
   protected readonly error = signal('');
+  protected readonly accountType = signal<'customer' | 'seller'>('customer');
   protected readonly form = new FormGroup({
     firstName: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     lastName: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
@@ -35,7 +36,13 @@ export class RegisterPage {
     }
     this.busy.set(true);
     this.error.set('');
-    this.auth.register(this.form.getRawValue()).subscribe({
+    const request = this.form.getRawValue();
+    const registration =
+      this.accountType() === 'seller'
+        ? this.auth.registerSeller(request)
+        : this.auth.register(request);
+
+    registration.subscribe({
       next: () => this.router.navigate(['/login'], { queryParams: { registered: true } }),
       error: (error) => {
         this.error.set(apiErrorMessage(error));

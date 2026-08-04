@@ -1,9 +1,37 @@
 <section class="mx-auto max-w-xl px-4 py-16">
   <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
     <h1 class="text-2xl font-bold">Create an account</h1>
-    <p class="mt-2 text-slate-500">Register to place orders and track their status.</p>
+    <p class="mt-2 text-slate-500">Choose how you want to use the marketplace.</p>
 
     <form class="mt-6 space-y-5" [formGroup]="form" (ngSubmit)="submit()">
+      <fieldset>
+        <legend class="mb-2 text-sm font-medium">Account type</legend>
+        <div class="grid gap-3 sm:grid-cols-2">
+          <button
+            class="rounded-lg border p-4 text-left"
+            type="button"
+            [class.border-brand-600]="accountType() === 'customer'"
+            [class.bg-brand-50]="accountType() === 'customer'"
+            [class.border-slate-300]="accountType() !== 'customer'"
+            (click)="accountType.set('customer')"
+          >
+            <strong class="block">Customer</strong>
+            <span class="mt-1 block text-sm text-slate-500">Shop and manage your orders.</span>
+          </button>
+          <button
+            class="rounded-lg border p-4 text-left"
+            type="button"
+            [class.border-brand-600]="accountType() === 'seller'"
+            [class.bg-brand-50]="accountType() === 'seller'"
+            [class.border-slate-300]="accountType() !== 'seller'"
+            (click)="accountType.set('seller')"
+          >
+            <strong class="block">Seller</strong>
+            <span class="mt-1 block text-sm text-slate-500">Create marketplace listings.</span>
+          </button>
+        </div>
+      </fieldset>
+
       <div class="grid gap-4 sm:grid-cols-2">
         <div>
           <label class="mb-1 block text-sm font-medium" for="first-name">First name</label>
@@ -57,7 +85,13 @@
         type="submit"
         [disabled]="busy()"
       >
-        {{ busy() ? 'Creating account…' : 'Create account' }}
+        {{
+          busy()
+            ? 'Creating account…'
+            : accountType() === 'seller'
+              ? 'Create seller account'
+              : 'Create customer account'
+        }}
       </button>
     </form>
 

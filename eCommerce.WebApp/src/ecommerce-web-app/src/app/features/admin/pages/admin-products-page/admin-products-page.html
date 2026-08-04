@@ -77,6 +77,38 @@
             formControlName="quantity"
           />
         </label>
+
+        <label class="text-sm font-medium">
+          Seller ID
+          <input
+            class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
+            formControlName="sellerId"
+          />
+        </label>
+
+        <label class="text-sm font-medium">
+          Category
+          <select
+            class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
+            formControlName="categoryId"
+          >
+            @for (category of categories(); track category.id) {
+              <option [value]="category.id">{{ category.path }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="text-sm font-medium">
+          Product type
+          <select
+            class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
+            formControlName="productType"
+          >
+            @for (type of productTypes(); track type.value) {
+              <option [value]="type.value">{{ type.label }}</option>
+            }
+          </select>
+        </label>
       </div>
 
       <label class="text-sm font-medium">

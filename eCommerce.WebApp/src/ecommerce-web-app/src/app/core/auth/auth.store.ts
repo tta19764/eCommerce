@@ -1,7 +1,13 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { tap } from 'rxjs';
 import { AuthApiClient } from '../api/auth-api.client';
-import { AuthUser, LoginRequest, RegisterRequest, TokenResponse } from '../models/auth.models';
+import {
+  AuthUser,
+  LoginRequest,
+  RegisterRequest,
+  RegisterSellerRequest,
+  TokenResponse,
+} from '../models/auth.models';
 
 const STORAGE_KEY = 'ecommerce.session';
 
@@ -25,6 +31,7 @@ export class AuthStore {
   readonly user = computed(() => this.decodeUser(this.tokens()?.accessToken));
   readonly isAuthenticated = computed(() => !!this.user() && !this.isExpired(this.tokens()));
   readonly isAdmin = computed(() => this.user()?.role === 'Admin');
+  readonly isSeller = computed(() => this.user()?.role === 'Seller');
   readonly accessToken = computed(() => this.tokens()?.accessToken ?? null);
   readonly refreshToken = computed(() => this.tokens()?.refreshToken ?? null);
 
@@ -34,6 +41,10 @@ export class AuthStore {
 
   register(request: RegisterRequest) {
     return this.api.register(request);
+  }
+
+  registerSeller(request: RegisterSellerRequest) {
+    return this.api.registerSeller(request);
   }
 
   refresh() {
@@ -86,9 +97,15 @@ export class AuthStore {
     }
   }
 
-  private resolveApplicationRole(roles: string[]): 'Admin' | 'Customer' {
+  private resolveApplicationRole(roles: string[]): 'Admin' | 'Seller' | 'Customer' {
     // Hide Keycloak infrastructure roles by reducing them to one application role.
-    return roles.some((role) => role.toLowerCase() === 'admin') ? 'Admin' : 'Customer';
+    const normalizedRoles = roles.map((role) => role.toLowerCase());
+
+    if (normalizedRoles.includes('admin')) {
+      return 'Admin';
+    }
+
+    return normalizedRoles.includes('seller') ? 'Seller' : 'Customer';
   }
 
   private decodeBase64Url(value: string): string {

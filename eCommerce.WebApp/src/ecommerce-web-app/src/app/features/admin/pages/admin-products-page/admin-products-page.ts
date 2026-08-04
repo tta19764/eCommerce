@@ -5,7 +5,13 @@ import { Observable } from 'rxjs';
 import { apiErrorMessage } from '../../../../core/api/api-base';
 import { ImagesApiClient } from '../../../../core/api/images-api.client';
 import { ProductsApiClient } from '../../../../core/api/products-api.client';
-import { Product, ProductUpsertRequest } from '../../../../core/models/product.models';
+import {
+  Product,
+  CreateProductRequest,
+  ProductCategory,
+  ProductType,
+  ProductTypeOption,
+} from '../../../../core/models/product.models';
 
 @Component({
   selector: 'app-admin-products-page',
@@ -16,10 +22,13 @@ import { Product, ProductUpsertRequest } from '../../../../core/models/product.m
 })
 export class AdminProductsPage {
   protected readonly maxProductImages = 8;
+
   private readonly api = inject(ProductsApiClient);
   private readonly images = inject(ImagesApiClient);
 
   protected readonly products = signal<Product[]>([]);
+  protected readonly categories = signal<ProductCategory[]>([]);
+  protected readonly productTypes = signal<ProductTypeOption[]>([]);
   protected readonly editingProduct = signal<Product | null>(null);
   protected readonly loading = signal(true);
   protected readonly saving = signal(false);
@@ -45,9 +54,17 @@ export class AdminProductsPage {
       nonNullable: true,
       validators: [Validators.required, Validators.min(0)],
     }),
+    sellerId: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    categoryId: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    productType: new FormControl<ProductType>('Physical', {
+      nonNullable: true,
+      validators: [Validators.required],
+    }),
   });
 
   constructor() {
+    this.loadCategories();
+    this.loadProductTypes();
     this.load();
   }
 
@@ -73,6 +90,9 @@ export class AdminProductsPage {
       price: product.price,
       currencyCode: product.currency,
       quantity: product.quantity,
+      sellerId: product.sellerId,
+      categoryId: product.categoryId,
+      productType: product.productType,
     });
     this.productImageIds.set(this.orderedImageIds(product));
     this.formOpen.set(true);
@@ -204,12 +224,13 @@ export class AdminProductsPage {
     });
   }
 
-  private productRequest(): ProductUpsertRequest {
+  private productRequest(): CreateProductRequest {
     const formValue = this.form.getRawValue();
 
     return {
       ...formValue,
       currencyCode: formValue.currencyCode.toUpperCase(),
+      productType: formValue.productType,
       imageIds: this.productImageIds(),
       displayImageId: this.productImageIds()[0] ?? null,
     };
@@ -222,6 +243,28 @@ export class AdminProductsPage {
       price: 0,
       currencyCode: 'USD',
       quantity: 0,
+      sellerId: '',
+      categoryId: this.categories()[0]?.id ?? '',
+      productType: 'Physical',
+    });
+  }
+
+  private loadCategories(): void {
+    this.api.getCategories().subscribe({
+      next: (categories) => {
+        this.categories.set(categories);
+        if (!this.form.controls.categoryId.value && categories.length) {
+          this.form.controls.categoryId.setValue(categories[0].id);
+        }
+      },
+      error: (error) => this.error.set(apiErrorMessage(error)),
+    });
+  }
+
+  private loadProductTypes(): void {
+    this.api.getTypes().subscribe({
+      next: (types) => this.productTypes.set(types),
+      error: (error) => this.error.set(apiErrorMessage(error)),
     });
   }
 

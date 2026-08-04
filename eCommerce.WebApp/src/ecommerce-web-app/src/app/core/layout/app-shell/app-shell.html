@@ -50,6 +50,14 @@
             {{ isAdminPortal() ? 'Store Page' : 'Admin Portal' }}
           </a>
         }
+        @if (auth.isSeller()) {
+          <a
+            class="rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-700"
+            [routerLink]="isSellerPortal() ? '/' : '/seller'"
+          >
+            {{ isSellerPortal() ? 'Store Page' : 'Seller Portal' }}
+          </a>
+        }
       </div>
 
       <div class="mt-4 flex flex-col gap-3 lg:mt-0 lg:ml-auto lg:flex-row lg:items-center">

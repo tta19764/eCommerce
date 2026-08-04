@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { adminGuard } from './core/auth/admin.guard';
 import { authGuard } from './core/auth/auth.guard';
+import { sellerGuard } from './core/auth/seller.guard';
 
 export const routes: Routes = [
   {
@@ -54,6 +55,15 @@ export const routes: Routes = [
         (m) => m.ConfirmEmailPage,
       ),
     title: 'Confirm email · eCommerce',
+  },
+  {
+    path: 'seller',
+    canActivate: [sellerGuard],
+    loadComponent: () =>
+      import('./features/seller/pages/seller-products-page/seller-products-page').then(
+        (m) => m.SellerProductsPage,
+      ),
+    title: 'Seller portal · eCommerce',
   },
   {
     path: 'admin',

@@ -8,7 +8,7 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
   const auth = inject(AuthStore);
   const token = auth.accessToken();
   const isApi = request.url.startsWith(environment.gatewayUrl);
-  const isAuth = /\/auth\/(login|register|refresh)$/.test(request.url);
+  const isAuth = /\/auth\/(login|register(?:\/seller)?|refresh)$/.test(request.url);
   const isPublicAuthRequest = isAuth || request.url.includes('/auth/confirm-email');
 
   // Authentication endpoints must not receive a stale access token.

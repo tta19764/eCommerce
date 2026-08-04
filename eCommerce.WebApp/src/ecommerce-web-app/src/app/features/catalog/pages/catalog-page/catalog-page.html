@@ -11,6 +11,132 @@
 </section>
 
 <section class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+  <form
+    class="mb-8 grid gap-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm lg:grid-cols-6"
+    [formGroup]="filterForm"
+    (ngSubmit)="applyFilters()"
+  >
+    <label class="text-sm font-medium lg:col-span-2">
+      Search
+      <input
+        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
+        formControlName="query"
+        placeholder="Name or description"
+      />
+    </label>
+
+    <label class="text-sm font-medium">
+      Category
+      <select
+        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
+        formControlName="categoryId"
+      >
+        <option value="">All categories</option>
+        @for (category of categories(); track category.id) {
+          <option [value]="category.id">{{ category.path }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="text-sm font-medium">
+      Type
+      <select
+        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
+        formControlName="productType"
+      >
+        <option value="">All types</option>
+        @for (type of productTypes(); track type.value) {
+          <option [value]="type.value">{{ type.label }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="text-sm font-medium">
+      Sort
+      <select
+        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
+        formControlName="sortBy"
+      >
+        @for (sortOption of sortOptions; track sortOption) {
+          <option [value]="sortOption">{{ sortOption }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="flex items-end gap-2 pb-2 text-sm font-medium">
+      <input class="h-4 w-4 rounded border-slate-300" type="checkbox" formControlName="inStock" />
+      In stock
+    </label>
+
+    <label class="text-sm font-medium">
+      Min price
+      <input
+        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
+        type="number"
+        min="0"
+        step="0.01"
+        formControlName="minPrice"
+      />
+    </label>
+
+    <label class="text-sm font-medium">
+      Max price
+      <input
+        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
+        type="number"
+        min="0"
+        step="0.01"
+        formControlName="maxPrice"
+      />
+    </label>
+
+    <label class="text-sm font-medium">
+      Min rating
+      <input
+        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
+        type="number"
+        min="0"
+        max="5"
+        step="0.5"
+        formControlName="minRating"
+      />
+    </label>
+
+    <label class="flex items-end gap-2 pb-2 text-sm font-medium">
+      <input
+        class="h-4 w-4 rounded border-slate-300"
+        type="checkbox"
+        formControlName="includeSubcategories"
+      />
+      Subcategories
+    </label>
+
+    <label class="flex items-end gap-2 pb-2 text-sm font-medium">
+      <input
+        class="h-4 w-4 rounded border-slate-300"
+        type="checkbox"
+        formControlName="sortDescending"
+      />
+      Descending
+    </label>
+
+    <div class="flex items-end gap-2">
+      <button
+        class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
+        type="submit"
+      >
+        Apply
+      </button>
+      <button
+        class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+        type="button"
+        (click)="clearFilters()"
+      >
+        Clear
+      </button>
+    </div>
+  </form>
+
   <div class="mb-6 flex items-end justify-between border-b border-slate-200 pb-4">
     <div>
       <h2 class="text-2xl font-bold">Products</h2>

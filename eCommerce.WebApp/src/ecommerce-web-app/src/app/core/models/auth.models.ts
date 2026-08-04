@@ -9,6 +9,12 @@ export interface RegisterRequest extends LoginRequest {
   lastName: string;
 }
 
+export type RegisterSellerRequest = RegisterRequest;
+
+export interface RefreshTokenRequest {
+  refreshToken: string;
+}
+
 export interface TokenResponse {
   accessToken: string;
   expiresAtUtc: string;
@@ -19,6 +25,6 @@ export interface TokenResponse {
 export interface AuthUser {
   id: string;
   email: string;
-  role: 'Admin' | 'Customer';
+  role: 'Admin' | 'Seller' | 'Customer';
   userId: string | null;
 }
