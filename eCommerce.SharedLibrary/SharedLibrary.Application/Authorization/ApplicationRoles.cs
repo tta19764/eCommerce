@@ -12,6 +12,8 @@ public readonly record struct ApplicationRoles
 
     public static ApplicationRoles Customer { get; } = new("Customer");
 
+    public static ApplicationRoles Seller { get; } = new("Seller");
+
     public static ApplicationRoles Admin { get; } = new("Admin");
 
     public string Name => field ?? string.Empty;

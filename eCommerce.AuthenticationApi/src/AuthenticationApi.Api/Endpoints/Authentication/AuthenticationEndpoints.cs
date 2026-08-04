@@ -8,6 +8,7 @@ using AuthenticationApi.Application.Accounts.Login;
 using AuthenticationApi.Application.Accounts.RefreshToken;
 using AuthenticationApi.Application.Accounts.Register;
 using AuthenticationApi.Application.Accounts.RegisterAdmin;
+using AuthenticationApi.Application.Accounts.RegisterSeller;
 using AuthenticationApi.Domain.Accounts;
 using MediatR;
 using SharedLibrary.Api.Contracts;
@@ -47,6 +48,12 @@ public static class AuthenticationEndpoints
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status403Forbidden)
             .RequireAuthorization(ApplicationPermissions.AccountCreateAdmin);
+
+        group.MapPost("register/seller", RegisterSeller)
+            .WithName(nameof(RegisterSeller))
+            .WithSummary("Register a seller account")
+            .Produces<ApiResponse<Guid>>(StatusCodes.Status201Created)
+            .Produces<ApiResponse<Guid>>(StatusCodes.Status400BadRequest);
 
         group.MapPost("login", Login)
             .WithName(nameof(Login))
@@ -123,6 +130,27 @@ public static class AuthenticationEndpoints
     /// <param name="cancellationToken">The cancellationToken value.</param>
     public static async Task<IResult> RegisterAdmin(
         RegisterAdminCommand command,
+        ISender sender,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(command, cancellationToken);
+
+        return result.IsSuccess
+            ? Results.CreatedAtRoute(
+                nameof(DeleteAccount),
+                new { accountId = result.Value, version = AuthenticationApiApiVersions.V1RouteValue },
+                result.MapToApiResponse())
+            : Results.BadRequest(result.MapToApiResponse());
+    }
+
+    /// <summary>
+    /// Registers a public seller account.
+    /// </summary>
+    /// <param name="command">The seller registration command.</param>
+    /// <param name="sender">The MediatR sender.</param>
+    /// <param name="cancellationToken">The request cancellation token.</param>
+    public static async Task<IResult> RegisterSeller(
+        RegisterSellerCommand command,
         ISender sender,
         CancellationToken cancellationToken)
     {

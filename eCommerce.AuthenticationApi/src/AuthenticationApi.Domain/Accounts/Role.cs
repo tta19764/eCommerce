@@ -20,6 +20,17 @@ public sealed class Role
         "Admin",
         Permission.All.ToArray());
 
+    public static readonly Role Seller = Create(
+        3,
+        "Seller",
+        Permission.ProductRead,
+        Permission.ProductCreate,
+        Permission.ProductCreateOwn,
+        Permission.ProductUpdateOwn,
+        Permission.ProductDeleteOwn,
+        Permission.ProductReadOwn,
+        Permission.ImageUpload);
+
     private Role()
     {
         Name = string.Empty;
@@ -37,7 +48,7 @@ public sealed class Role
 
     public IReadOnlyCollection<RolePermission> Permissions => _permissions;
 
-    public static IReadOnlyCollection<Role> All { get; } = [Customer, Admin];
+    public static IReadOnlyCollection<Role> All { get; } = [Customer, Admin, Seller];
 
     private static Role Create(int id, string name, params Permission[] permissions)
     {

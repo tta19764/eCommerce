@@ -18,6 +18,16 @@ public sealed class PermissionAuthorizationHandler : AuthorizationHandler<Permis
                 ApplicationPermissions.OrderCreate,
                 ApplicationPermissions.ImageUpload
             },
+            [ApplicationRoles.Seller] = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ApplicationPermissions.ProductRead,
+                ApplicationPermissions.ProductCreateOwn,
+                ApplicationPermissions.ProductUpdateOwn,
+                ApplicationPermissions.ProductDeleteOwn,
+                ApplicationPermissions.ProductReadOwn,
+                ApplicationPermissions.ProductCreate,
+                ApplicationPermissions.ImageUpload
+            },
             [ApplicationRoles.Admin] = ApplicationPermissions.All.ToHashSet(StringComparer.OrdinalIgnoreCase)
         };
 

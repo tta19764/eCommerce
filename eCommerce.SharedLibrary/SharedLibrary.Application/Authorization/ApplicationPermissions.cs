@@ -9,6 +9,10 @@ public static class ApplicationPermissions
     public const string ProductCreate = "products:create";
     public const string ProductUpdate = "products:update";
     public const string ProductDelete = "products:delete";
+    public const string ProductCreateOwn = "products:create-own";
+    public const string ProductUpdateOwn = "products:update-own";
+    public const string ProductDeleteOwn = "products:delete-own";
+    public const string ProductReadOwn = "products:read-own";
     public const string OrderCreate = "orders:create";
     public const string OrderRead = "orders:read";
     public const string OrderUpdateStatus = "orders:update-status";
@@ -23,6 +27,10 @@ public static class ApplicationPermissions
         ProductCreate,
         ProductUpdate,
         ProductDelete,
+        ProductCreateOwn,
+        ProductUpdateOwn,
+        ProductDeleteOwn,
+        ProductReadOwn,
         OrderCreate,
         OrderRead,
         OrderUpdateStatus,
