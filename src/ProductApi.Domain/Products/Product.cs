@@ -24,7 +24,10 @@ public class Product : Entity
         Money price, 
         Quantity quantity,
         IReadOnlyCollection<Guid>? imageIds,
-        Guid? displayImageId)
+        Guid? displayImageId,
+        Guid sellerId,
+        Guid categoryId,
+        ProductType productType)
         : base(id)
     {
         Name = name;
@@ -33,6 +36,9 @@ public class Product : Entity
         Quantity = quantity;
         ImageIds = imageIds?.Distinct().ToArray() ?? [];
         DisplayImageId = displayImageId;
+        SellerId = sellerId;
+        CategoryId = categoryId;
+        ProductType = productType;
         Rating = 0.0m;
         ReviewsCount = 0;
     }
@@ -48,6 +54,21 @@ public class Product : Entity
     public Guid[] ImageIds { get; private set; }
 
     public Guid? DisplayImageId { get; private set; }
+
+    /// <summary>
+    /// Seller account or profile that owns this marketplace listing.
+    /// </summary>
+    public Guid SellerId { get; private set; }
+
+    /// <summary>
+    /// Primary marketplace category used for browsing and filtering.
+    /// </summary>
+    public Guid CategoryId { get; private set; }
+
+    /// <summary>
+    /// Fulfillment type for this listing.
+    /// </summary>
+    public ProductType ProductType { get; private set; }
 
     /// <summary>
     /// Average product rating rounded to one digit after the decimal point.
@@ -72,8 +93,17 @@ public class Product : Entity
         Money price, 
         Quantity quantity,
         IReadOnlyCollection<Guid>? imageIds = null,
-        Guid? displayImageId = null)
+        Guid? displayImageId = null,
+        Guid? sellerId = null,
+        Guid? categoryId = null,
+        ProductType productType = ProductType.Physical)
     {
+        if (sellerId is null || sellerId == Guid.Empty)
+            return Result.Failure<Product>(ProductErrors.InvalidSeller);
+
+        if (categoryId is null || categoryId == Guid.Empty)
+            return Result.Failure<Product>(ProductErrors.InvalidCategory);
+
         // Products cannot be sold without a positive price.
         if(price.Amount <= 0)
             return Result.Failure<Product>(ProductErrors.InvalidPrice);
@@ -92,7 +122,17 @@ public class Product : Entity
             return Result.Failure<Product>(resolvedDisplayImageId.Error);
         }
         
-        var product = new Product(Guid.NewGuid(), name, description, price, quantity, distinctImageIds, resolvedDisplayImageId.Value);
+        var product = new Product(
+            Guid.NewGuid(),
+            name,
+            description,
+            price,
+            quantity,
+            distinctImageIds,
+            resolvedDisplayImageId.Value,
+            sellerId.Value,
+            categoryId.Value,
+            productType);
         
         return product;
     }
@@ -110,8 +150,15 @@ public class Product : Entity
         Money price,
         Quantity quantity,
         IReadOnlyCollection<Guid>? imageIds = null,
-        Guid? displayImageId = null)
+        Guid? displayImageId = null,
+        Guid? categoryId = null,
+        ProductType? productType = null)
     {
+        if (categoryId is null || categoryId == Guid.Empty)
+        {
+            return Result.Failure(ProductErrors.InvalidCategory);
+        }
+
         // Products cannot be sold without a positive price.
         if (price.Amount <= 0)
         {
@@ -140,6 +187,8 @@ public class Product : Entity
         Quantity = quantity;
         ImageIds = distinctImageIds;
         DisplayImageId = resolvedDisplayImageId.Value;
+        CategoryId = categoryId.Value;
+        ProductType = productType ?? ProductType;
 
         return Result.Success();
     }

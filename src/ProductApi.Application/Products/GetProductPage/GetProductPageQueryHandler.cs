@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using ProductApi.Application.Products;
+using ProductApi.Domain.Categories;
 using ProductApi.Domain.Products;
 using SharedLibrary.Application.Abstractions.Caching;
 using SharedLibrary.Application.Abstractions.Messaging;
@@ -13,6 +14,7 @@ namespace ProductApi.Application.Products.GetProductPage;
 /// </summary>
 public sealed class GetProductPageQueryHandler(
     IProductRepository productRepository,
+    IProductCategoryRepository categoryRepository,
     ICacheService cacheService,
     ILogger<GetProductPageQueryHandler> logger)
     : IQueryHandler<GetProductPageQuery, PagedListResponse<ProductResponse>>
@@ -30,11 +32,23 @@ public sealed class GetProductPageQueryHandler(
         var page = NormalizePage(request.Page);
         var pageSize = NormalizePageSize(request.PageSize);
 
-        var products = await productRepository.GetPageAsync(
+        var categoryIds = await GetCategoryIdsAsync(request, cancellationToken);
+        var filter = new ProductSearchFilter(
             page,
             pageSize,
-            cancellationToken);
-        var totalCount = await productRepository.CountAsync(cancellationToken);
+            request.Query,
+            categoryIds,
+            request.ProductType,
+            request.SellerId,
+            request.MinPrice,
+            request.MaxPrice,
+            request.MinRating,
+            request.InStock,
+            request.SortBy,
+            request.SortDescending);
+
+        var products = await productRepository.GetPageAsync(filter, cancellationToken);
+        var totalCount = await productRepository.CountAsync(filter, cancellationToken);
 
         var items = products
             .Select(ProductMapper.ToResponse)
@@ -52,7 +66,7 @@ public sealed class GetProductPageQueryHandler(
             pageSize,
             items.Count);
 
-        await ProductCacheKeys.TrackPageAsync(cacheService, ProductCacheKeys.Page(page, pageSize), cancellationToken);
+        await ProductCacheKeys.TrackPageAsync(cacheService, request.CacheKey, cancellationToken);
 
         return Result.Success(response);
     }
@@ -65,4 +79,18 @@ public sealed class GetProductPageQueryHandler(
         > 100 => 100,
         _ => pageSize
     };
+
+    private async Task<IReadOnlyCollection<Guid>?> GetCategoryIdsAsync(
+        GetProductPageQuery request,
+        CancellationToken cancellationToken)
+    {
+        if (request.CategoryId is null)
+        {
+            return null;
+        }
+
+        return request.IncludeSubcategories
+            ? await categoryRepository.GetDescendantIdsAsync(request.CategoryId.Value, cancellationToken)
+            : [request.CategoryId.Value];
+    }
 }

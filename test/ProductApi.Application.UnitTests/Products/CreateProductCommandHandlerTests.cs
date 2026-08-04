@@ -4,6 +4,7 @@ using MassTransit;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using ProductApi.Application.Products.CreateProduct;
+using ProductApi.Domain.Categories;
 using ProductApi.Domain.Products;
 using SharedLibrary.Application.Abstractions.Caching;
 using SharedLibrary.Domain.Abstractions;
@@ -13,6 +14,7 @@ namespace ProductApi.Application.UnitTests.Products;
 public class CreateProductCommandHandlerTests
 {
     private readonly IProductRepository _productRepositoryMock = Substitute.For<IProductRepository>();
+    private readonly IProductCategoryRepository _categoryRepositoryMock = Substitute.For<IProductCategoryRepository>();
     private readonly IUnitOfWork _unitOfWorkMock = Substitute.For<IUnitOfWork>();
     private readonly IRequestClient<AddProductImagesRequest> _imageClientMock =
         Substitute.For<IRequestClient<AddProductImagesRequest>>();
@@ -25,15 +27,19 @@ public class CreateProductCommandHandlerTests
         CancellationToken cancellationToken = TestContext.Current.CancellationToken;
         var imageId = Guid.NewGuid();
         SetupValidImagesResponse(imageId);
+        var sellerId = Guid.NewGuid();
+        var category = ProductCategory.Create("Electronics", "electronics").Value;
+        _categoryRepositoryMock.GetByIdAsync(category.Id, cancellationToken).Returns(category);
 
         var handler = new CreateProductCommandHandler(
             _productRepositoryMock,
+            _categoryRepositoryMock,
             _unitOfWorkMock,
             _imageClientMock,
             _cacheServiceMock,
             NullLogger<CreateProductCommandHandler>.Instance);
 
-        var command = new CreateProductCommand("  Keyboard  ", "  Mechanical keyboard  ", 99.99m, "usd", 10, [imageId]);
+        var command = new CreateProductCommand("  Keyboard  ", "  Mechanical keyboard  ", 99.99m, "usd", 10, sellerId, category.Id, ProductType.Physical, [imageId]);
 
         // Act
         Result<Guid> result = await handler.Handle(command, cancellationToken);
@@ -49,6 +55,8 @@ public class CreateProductCommandHandlerTests
             product.Price.Amount == command.Price &&
             product.Price.Currency.Code == "USD" &&
             product.Quantity.Value == command.Quantity &&
+            product.SellerId == sellerId &&
+            product.CategoryId == category.Id &&
             product.ImageIds.Contains(imageId) &&
             product.DisplayImageId == imageId));
 

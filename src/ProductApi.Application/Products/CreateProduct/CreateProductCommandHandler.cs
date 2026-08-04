@@ -1,6 +1,7 @@
 using ImageApi.Messages.Images;
 using MassTransit;
 using Microsoft.Extensions.Logging;
+using ProductApi.Domain.Categories;
 using ProductApi.Domain.Products;
 using SharedLibrary.Application.Abstractions.Caching;
 using SharedLibrary.Application.Abstractions.Messaging;
@@ -14,6 +15,7 @@ namespace ProductApi.Application.Products.CreateProduct;
 /// </summary>
 public sealed class CreateProductCommandHandler(
     IProductRepository productRepository,
+    IProductCategoryRepository categoryRepository,
     IUnitOfWork unitOfWork,
     IRequestClient<AddProductImagesRequest> imageClient,
     ICacheService cacheService,
@@ -29,6 +31,13 @@ public sealed class CreateProductCommandHandler(
     {
         logger.LogInformation("Creating product with name {ProductName}", request.Name);
 
+        var category = await categoryRepository.GetByIdAsync(request.CategoryId, cancellationToken);
+
+        if (category is null || !category.IsActive)
+        {
+            return Result.Failure<Guid>(ProductErrors.InvalidCategory);
+        }
+
         var imageIds = request.ImageIds?.Distinct().ToArray();
 
         var productResult = Product.Create(
@@ -37,7 +46,10 @@ public sealed class CreateProductCommandHandler(
             new Money(request.Price, Currency.FromCode(request.CurrencyCode.Trim().ToUpperInvariant())),
             new Quantity(request.Quantity),
             imageIds,
-            request.DisplayImageId);
+            request.DisplayImageId,
+            request.SellerId,
+            request.CategoryId,
+            request.ProductType);
 
         if (productResult.IsFailure)
         {

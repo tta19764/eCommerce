@@ -4,18 +4,22 @@ using ProductApi.Application.IntegrationTests.Infrastructure;
 using ProductApi.Application.Products.CreateProduct;
 using ProductApi.Application.Products.DeleteProduct;
 using ProductApi.Application.Products.UpdateProduct;
+using ProductApi.Domain.Products;
 using SharedLibrary.Domain.Abstractions;
 
 namespace ProductApi.Application.IntegrationTests.Products;
 
 public class ProductCommandTests(IntegrationTestWebAppFactory factory) : BaseIntegrationTest(factory)
 {
+    private static readonly Guid CategoryId = Guid.Parse("10000000-0000-0000-0000-000000000001");
+    private static readonly Guid SellerId = Guid.Parse("20000000-0000-0000-0000-000000000001");
+
     [Fact]
     public async Task CreateProduct_Should_PersistProduct()
     {
         // Arrange
         CancellationToken cancellationToken = TestContext.Current.CancellationToken;
-        var command = new CreateProductCommand($"Keyboard {Guid.NewGuid():N}", "Mechanical keyboard", 99.99m, "USD", 10);
+        var command = CreateCommand();
 
         // Act
         Result<Guid> result = await Sender.Send(command, cancellationToken);
@@ -36,6 +40,9 @@ public class ProductCommandTests(IntegrationTestWebAppFactory factory) : BaseInt
         // ReSharper disable once EntityFramework.NPlusOne.IncompleteDataUsage
         product.Price.Currency.Code.Should().Be(command.CurrencyCode);
         product.Quantity.Value.Should().Be(command.Quantity);
+        product.SellerId.Should().Be(SellerId);
+        product.CategoryId.Should().Be(CategoryId);
+        product.ProductType.Should().Be(ProductType.Physical);
     }
 
     [Fact]
@@ -44,11 +51,11 @@ public class ProductCommandTests(IntegrationTestWebAppFactory factory) : BaseInt
         // Arrange
         CancellationToken cancellationToken = TestContext.Current.CancellationToken;
         Guid productId = (await Sender.Send(
-            new CreateProductCommand($"Keyboard {Guid.NewGuid():N}", "Mechanical keyboard", 99.99m, "USD", 10),
+            CreateCommand(),
             cancellationToken)).Value;
         DbContext.ChangeTracker.Clear();
 
-        var command = new UpdateProductCommand(productId, "Mouse", "Wireless mouse", 49.99m, "EUR", 5);
+        var command = new UpdateProductCommand(productId, "Mouse", "Wireless mouse", 49.99m, "EUR", 5, CategoryId, ProductType.Physical);
 
         // Act
         Result result = await Sender.Send(command, cancellationToken);
@@ -69,6 +76,8 @@ public class ProductCommandTests(IntegrationTestWebAppFactory factory) : BaseInt
         // ReSharper disable once EntityFramework.NPlusOne.IncompleteDataUsage
         product.Price.Currency.Code.Should().Be(command.CurrencyCode);
         product.Quantity.Value.Should().Be(command.Quantity);
+        product.CategoryId.Should().Be(command.CategoryId);
+        product.ProductType.Should().Be(command.ProductType);
     }
 
     [Fact]
@@ -77,7 +86,7 @@ public class ProductCommandTests(IntegrationTestWebAppFactory factory) : BaseInt
         // Arrange
         CancellationToken cancellationToken = TestContext.Current.CancellationToken;
         Guid productId = (await Sender.Send(
-            new CreateProductCommand($"Keyboard {Guid.NewGuid():N}", "Mechanical keyboard", 99.99m, "USD", 10),
+            CreateCommand(),
             cancellationToken)).Value;
         DbContext.ChangeTracker.Clear();
 
@@ -92,4 +101,7 @@ public class ProductCommandTests(IntegrationTestWebAppFactory factory) : BaseInt
 
         productExists.Should().BeFalse();
     }
+
+    private static CreateProductCommand CreateCommand() =>
+        new($"Keyboard {Guid.NewGuid():N}", "Mechanical keyboard", 99.99m, "USD", 10, SellerId, CategoryId);
 }

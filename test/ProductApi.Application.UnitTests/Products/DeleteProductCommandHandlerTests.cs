@@ -11,6 +11,9 @@ namespace ProductApi.Application.UnitTests.Products;
 
 public class DeleteProductCommandHandlerTests
 {
+    private static readonly Guid SellerId = Guid.NewGuid();
+    private static readonly Guid CategoryId = Guid.NewGuid();
+
     private readonly IProductRepository _productRepositoryMock = Substitute.For<IProductRepository>();
     private readonly IUnitOfWork _unitOfWorkMock = Substitute.For<IUnitOfWork>();
     private readonly ICacheService _cacheServiceMock = Substitute.For<ICacheService>();
@@ -24,7 +27,9 @@ public class DeleteProductCommandHandlerTests
             new Name("Keyboard"),
             new Description("Mechanical keyboard"),
             new Money(99.99m, Currency.Usd),
-            new Quantity(10)).Value;
+            new Quantity(10),
+            sellerId: SellerId,
+            categoryId: CategoryId).Value;
 
         _productRepositoryMock
             .GetByIdAsync(product.Id, cancellationToken)

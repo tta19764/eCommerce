@@ -10,6 +10,9 @@ namespace ProductApi.Application.UnitTests.Products;
 
 public class GetProductQueryHandlerTests
 {
+    private static readonly Guid SellerId = Guid.NewGuid();
+    private static readonly Guid CategoryId = Guid.NewGuid();
+
     private readonly IProductRepository _productRepositoryMock = Substitute.For<IProductRepository>();
 
     [Fact]
@@ -21,7 +24,9 @@ public class GetProductQueryHandlerTests
             new Name("Keyboard"),
             new Description("Mechanical keyboard"),
             new Money(99.99m, Currency.Usd),
-            new Quantity(10)).Value;
+            new Quantity(10),
+            sellerId: SellerId,
+            categoryId: CategoryId).Value;
 
         _productRepositoryMock
             .GetByIdAsync(product.Id, cancellationToken)
@@ -43,5 +48,8 @@ public class GetProductQueryHandlerTests
         result.Value.Price.Should().Be(product.Price.Amount);
         result.Value.Currency.Should().Be(product.Price.Currency.Code);
         result.Value.Quantity.Should().Be(product.Quantity.Value);
+        result.Value.SellerId.Should().Be(SellerId);
+        result.Value.CategoryId.Should().Be(CategoryId);
+        result.Value.ProductType.Should().Be(ProductType.Physical.ToString());
     }
 }

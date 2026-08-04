@@ -1,9 +1,12 @@
 using MediatR;
+using ProductApi.Application.Categories;
+using ProductApi.Application.Categories.GetCategories;
 using ProductApi.Application.Products;
 using ProductApi.Application.Products.CreateProduct;
 using ProductApi.Application.Products.DeleteProduct;
 using ProductApi.Application.Products.GetProduct;
 using ProductApi.Application.Products.GetProductPage;
+using ProductApi.Application.Products.GetProductTypes;
 using ProductApi.Application.Products.UpdateProduct;
 using ProductApi.Application.Reviews;
 using ProductApi.Application.Reviews.CreateProductReview;
@@ -44,6 +47,16 @@ public static class ProductEndpoints
             .WithSummary("Get products by page")
             .Produces<ApiResponse<PagedListResponse<ProductResponse>>>()
             .Produces<ApiResponse<PagedListResponse<ProductResponse>>>(StatusCodes.Status400BadRequest);
+
+        group.MapGet("categories", GetCategories)
+            .WithName(nameof(GetCategories))
+            .WithSummary("Get product categories")
+            .Produces<ApiResponse<IReadOnlyCollection<ProductCategoryResponse>>>();
+
+        group.MapGet("types", GetProductTypes)
+            .WithName(nameof(GetProductTypes))
+            .WithSummary("Get product type options")
+            .Produces<ApiResponse<IReadOnlyCollection<ProductTypeResponse>>>();
 
         group.MapGet("{productId:guid}", GetProduct)
             .WithName(nameof(GetProduct))
@@ -100,12 +113,49 @@ public static class ProductEndpoints
         CancellationToken cancellationToken)
     {
         var result = await sender.Send(
-            new GetProductPageQuery(request.Page, request.PageSize),
+            new GetProductPageQuery(
+                request.Page,
+                request.PageSize,
+                request.Query,
+                request.CategoryId,
+                request.IncludeSubcategories,
+                request.ProductType,
+                request.SellerId,
+                request.MinPrice,
+                request.MaxPrice,
+                request.MinRating,
+                request.InStock,
+                request.SortBy,
+                request.SortDescending),
             cancellationToken);
 
         return result.IsSuccess
             ? Results.Ok(result.MapToApiResponse())
             : Results.BadRequest(result.MapToApiResponse());
+    }
+
+    /// <summary>
+    /// Gets active product categories for catalog navigation.
+    /// </summary>
+    public static async Task<IResult> GetCategories(
+        ISender sender,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetCategoriesQuery(), cancellationToken);
+
+        return Results.Ok(result.MapToApiResponse());
+    }
+
+    /// <summary>
+    /// Gets product type options for product forms and filters.
+    /// </summary>
+    public static async Task<IResult> GetProductTypes(
+        ISender sender,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(new GetProductTypesQuery(), cancellationToken);
+
+        return Results.Ok(result.MapToApiResponse());
     }
 
     /// <summary>
@@ -170,6 +220,8 @@ public static class ProductEndpoints
             request.Price,
             request.CurrencyCode,
             request.Quantity,
+            request.CategoryId,
+            request.ProductType,
             request.ImageIds,
             request.DisplayImageId);
 

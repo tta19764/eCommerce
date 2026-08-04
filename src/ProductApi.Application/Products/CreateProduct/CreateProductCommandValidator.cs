@@ -30,6 +30,15 @@ public sealed class CreateProductCommandValidator : AbstractValidator<CreateProd
 
         RuleFor(command => command.Quantity)
             .GreaterThanOrEqualTo(0);
+
+        RuleFor(command => command.SellerId)
+            .NotEmpty();
+
+        RuleFor(command => command.CategoryId)
+            .NotEmpty();
+
+        RuleFor(command => command.ProductType)
+            .IsInEnum();
     }
 
     private static bool BeSupportedCurrency(string currencyCode)

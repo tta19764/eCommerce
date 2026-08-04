@@ -17,5 +17,24 @@ public sealed class GetProductPageQueryValidator : AbstractValidator<GetProductP
 
         RuleFor(query => query.PageSize)
             .InclusiveBetween(1, 100);
+
+        RuleFor(query => query.MinPrice)
+            .GreaterThanOrEqualTo(0)
+            .When(query => query.MinPrice.HasValue);
+
+        RuleFor(query => query.MaxPrice)
+            .GreaterThanOrEqualTo(0)
+            .When(query => query.MaxPrice.HasValue);
+
+        RuleFor(query => query.MinRating)
+            .InclusiveBetween(0, 5)
+            .When(query => query.MinRating.HasValue);
+
+        RuleFor(query => query.ProductType)
+            .IsInEnum()
+            .When(query => query.ProductType.HasValue);
+
+        RuleFor(query => query.SortBy)
+            .IsInEnum();
     }
 }

@@ -67,11 +67,27 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
 
         builder.Property(product => product.DisplayImageId);
 
+        builder.Property(product => product.SellerId)
+            .IsRequired();
+
+        builder.Property(product => product.CategoryId)
+            .IsRequired();
+
+        builder.Property(product => product.ProductType)
+            .HasConversion<string>()
+            .HasMaxLength(50)
+            .IsRequired();
+
         builder.Property(product => product.Rating)
             .HasPrecision(3, 1)
             .IsRequired();
 
         builder.Property(product => product.ReviewsCount)
             .IsRequired();
+
+        builder.HasIndex(product => product.SellerId);
+        builder.HasIndex(product => product.CategoryId);
+        builder.HasIndex(product => product.ProductType);
+        builder.HasIndex(product => product.Rating);
     }
 }

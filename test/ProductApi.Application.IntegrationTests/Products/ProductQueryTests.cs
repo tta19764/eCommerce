@@ -6,6 +6,7 @@ using ProductApi.Application.Products.GetProductPage;
 using ProductApi.Application.Products;
 using ProductApi.Application.Reviews.CreateProductReview;
 using ProductApi.Application.Reviews.GetProductReviewsPage;
+using ProductApi.Domain.Products;
 using SharedLibrary.Application.Pagination;
 using SharedLibrary.Domain.Abstractions;
 
@@ -13,12 +14,15 @@ namespace ProductApi.Application.IntegrationTests.Products;
 
 public class ProductQueryTests(IntegrationTestWebAppFactory factory) : BaseIntegrationTest(factory)
 {
+    private static readonly Guid CategoryId = Guid.Parse("10000000-0000-0000-0000-000000000001");
+    private static readonly Guid SellerId = Guid.Parse("20000000-0000-0000-0000-000000000001");
+
     [Fact]
     public async Task GetProduct_Should_ReturnPersistedProduct()
     {
         // Arrange
         CancellationToken cancellationToken = TestContext.Current.CancellationToken;
-        var createCommand = new CreateProductCommand($"Keyboard {Guid.NewGuid():N}", "Mechanical keyboard", 99.99m, "USD", 10);
+        var createCommand = CreateCommand();
         Guid productId = (await Sender.Send(createCommand, cancellationToken)).Value;
 
         // Act
@@ -32,6 +36,9 @@ public class ProductQueryTests(IntegrationTestWebAppFactory factory) : BaseInteg
         result.Value.Price.Should().Be(createCommand.Price);
         result.Value.Currency.Should().Be(createCommand.CurrencyCode);
         result.Value.Quantity.Should().Be(createCommand.Quantity);
+        result.Value.SellerId.Should().Be(SellerId);
+        result.Value.CategoryId.Should().Be(CategoryId);
+        result.Value.ProductType.Should().Be(ProductType.Physical.ToString());
         result.Value.Rating.Should().Be(0.0m);
         result.Value.ReviewsCount.Should().Be(0);
     }
@@ -45,7 +52,7 @@ public class ProductQueryTests(IntegrationTestWebAppFactory factory) : BaseInteg
         for (int index = 0; index < 3; index++)
         {
             await Sender.Send(
-                new CreateProductCommand($"Product {Guid.NewGuid():N}", $"Product description {index}", 10 + index, "USD", index),
+                new CreateProductCommand($"Product {Guid.NewGuid():N}", $"Product description {index}", 10 + index, "USD", index, SellerId, CategoryId),
                 cancellationToken);
         }
 
@@ -67,7 +74,7 @@ public class ProductQueryTests(IntegrationTestWebAppFactory factory) : BaseInteg
         // Arrange
         CancellationToken cancellationToken = TestContext.Current.CancellationToken;
         Guid productId = (await Sender.Send(
-            new CreateProductCommand($"Keyboard {Guid.NewGuid():N}", "Mechanical keyboard", 99.99m, "USD", 10),
+            CreateCommand(),
             cancellationToken)).Value;
         DbContext.ChangeTracker.Clear();
 
@@ -95,4 +102,7 @@ public class ProductQueryTests(IntegrationTestWebAppFactory factory) : BaseInteg
         productResult.Value.Rating.Should().Be(4.5m);
         productResult.Value.ReviewsCount.Should().Be(2);
     }
+
+    private static CreateProductCommand CreateCommand() =>
+        new($"Keyboard {Guid.NewGuid():N}", "Mechanical keyboard", 99.99m, "USD", 10, SellerId, CategoryId);
 }

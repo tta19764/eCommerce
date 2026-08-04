@@ -33,6 +33,12 @@ public sealed class UpdateProductCommandValidator : AbstractValidator<UpdateProd
 
         RuleFor(command => command.Quantity)
             .GreaterThanOrEqualTo(0);
+
+        RuleFor(command => command.CategoryId)
+            .NotEmpty();
+
+        RuleFor(command => command.ProductType)
+            .IsInEnum();
     }
 
     private static bool BeSupportedCurrency(string currencyCode)

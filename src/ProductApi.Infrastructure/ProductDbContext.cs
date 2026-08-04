@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using ProductApi.Domain.Categories;
 using ProductApi.Domain.Products;
 using ProductApi.Domain.Reviews;
 using SharedLibrary.Domain.Abstractions;
@@ -14,6 +15,11 @@ public class ProductDbContext(DbContextOptions<ProductDbContext> options) : DbCo
     /// Product catalog table.
     /// </summary>
     public DbSet<Product> Products { get; set; }
+
+    /// <summary>
+    /// Marketplace category tree table.
+    /// </summary>
+    public DbSet<ProductCategory> ProductCategories { get; set; }
 
     /// <summary>
     /// Product reviews table.

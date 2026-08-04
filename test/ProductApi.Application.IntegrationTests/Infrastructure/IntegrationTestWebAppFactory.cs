@@ -3,6 +3,7 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
+using ProductApi.Domain.Categories;
 using ProductApi.Application.IntegrationTests.Products;
 using ProductApi.Domain.Products;
 using ProductApi.Domain.Reviews;
@@ -51,6 +52,7 @@ public sealed class IntegrationTestWebAppFactory : IAsyncLifetime
         services.AddDbContext<ProductDbContext>(options =>
             options.UseNpgsql($"{_dbContainer.GetConnectionString()};Pooling=False"));
         services.AddScoped<IProductRepository, ProductRepository>();
+        services.AddScoped<IProductCategoryRepository, ProductCategoryRepository>();
         services.AddScoped<IProductReviewRepository, ProductReviewRepository>();
         services.AddScoped<IUnitOfWork>(serviceProvider => serviceProvider.GetRequiredService<ProductDbContext>());
         services.AddSingleton(imageClient);

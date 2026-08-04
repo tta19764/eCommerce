@@ -4,6 +4,7 @@ using MassTransit;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using ProductApi.Application.Products.UpdateProduct;
+using ProductApi.Domain.Categories;
 using ProductApi.Domain.Products;
 using SharedLibrary.Application.Abstractions.Caching;
 using SharedLibrary.Domain.Abstractions;
@@ -14,6 +15,7 @@ namespace ProductApi.Application.UnitTests.Products;
 public class UpdateProductCommandHandlerTests
 {
     private readonly IProductRepository _productRepositoryMock = Substitute.For<IProductRepository>();
+    private readonly IProductCategoryRepository _categoryRepositoryMock = Substitute.For<IProductCategoryRepository>();
     private readonly IUnitOfWork _unitOfWorkMock = Substitute.For<IUnitOfWork>();
     private readonly IRequestClient<AddProductImagesRequest> _imageClientMock =
         Substitute.For<IRequestClient<AddProductImagesRequest>>();
@@ -28,13 +30,17 @@ public class UpdateProductCommandHandlerTests
             new Name("Keyboard"),
             new Description("Mechanical keyboard"),
             new Money(99.99m, Currency.Usd),
-            new Quantity(10)).Value;
+            new Quantity(10),
+            sellerId: Guid.NewGuid(),
+            categoryId: Guid.NewGuid()).Value;
 
         _productRepositoryMock
             .GetByIdAsync(product.Id, cancellationToken)
             .Returns(product);
 
         var imageId = Guid.NewGuid();
+        var category = ProductCategory.Create("Digital Products", "digital-products").Value;
+        _categoryRepositoryMock.GetByIdAsync(category.Id, cancellationToken).Returns(category);
         SetupValidImagesResponse(imageId);
         _cacheServiceMock
             .GetAsync<List<string>>("products:page-keys", cancellationToken)
@@ -42,12 +48,13 @@ public class UpdateProductCommandHandlerTests
 
         var handler = new UpdateProductCommandHandler(
             _productRepositoryMock,
+            _categoryRepositoryMock,
             _unitOfWorkMock,
             _imageClientMock,
             _cacheServiceMock,
             NullLogger<UpdateProductCommandHandler>.Instance);
 
-        var command = new UpdateProductCommand(product.Id, "Mouse", "Wireless mouse", 49.99m, "eur", 5, [imageId]);
+        var command = new UpdateProductCommand(product.Id, "Mouse", "Wireless mouse", 49.99m, "eur", 5, category.Id, ProductType.DigitalDownload, [imageId]);
 
         // Act
         Result result = await handler.Handle(command, cancellationToken);
@@ -61,6 +68,8 @@ public class UpdateProductCommandHandlerTests
         product.Quantity.Value.Should().Be(command.Quantity);
         product.ImageIds.Should().ContainSingle().Which.Should().Be(imageId);
         product.DisplayImageId.Should().Be(imageId);
+        product.CategoryId.Should().Be(category.Id);
+        product.ProductType.Should().Be(ProductType.DigitalDownload);
 
         _productRepositoryMock.Received(1).Update(product);
         await _unitOfWorkMock.Received(1).SaveChangesAsync(cancellationToken);
@@ -77,12 +86,13 @@ public class UpdateProductCommandHandlerTests
 
         var handler = new UpdateProductCommandHandler(
             _productRepositoryMock,
+            _categoryRepositoryMock,
             _unitOfWorkMock,
             _imageClientMock,
             _cacheServiceMock,
             NullLogger<UpdateProductCommandHandler>.Instance);
 
-        var command = new UpdateProductCommand(productId, "Mouse", "Wireless mouse", 49.99m, "EUR", 5);
+        var command = new UpdateProductCommand(productId, "Mouse", "Wireless mouse", 49.99m, "EUR", 5, Guid.NewGuid(), ProductType.Physical);
 
         // Act
         Result result = await handler.Handle(command, cancellationToken);
