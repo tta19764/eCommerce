@@ -49,6 +49,7 @@ var userDbName = GetRequired("AppHost:Postgres:Databases:User");
 var imageDbName = GetRequired("AppHost:Postgres:Databases:Image");
 var authenticationDbName = GetRequired("AppHost:Postgres:Databases:Authentication");
 var notificationDbName = GetRequired("AppHost:Postgres:Databases:Notification");
+var messagingDbName = GetRequired("AppHost:Postgres:Databases:Messaging");
 
 var rabbitMqPort = GetRequiredInt("AppHost:RabbitMq:Port");
 var rabbitMqDataVolume = GetRequired("AppHost:RabbitMq:DataVolume");
@@ -147,6 +148,8 @@ var imageApiPort = GetRequiredInt("AppHost:Projects:ImageApi:HttpPort");
 var imageApiHttpsPort = GetRequiredInt("AppHost:Projects:ImageApi:HttpsPort");
 var notificationApiPort = GetRequiredInt("AppHost:Projects:NotificationApi:HttpPort");
 var notificationApiHttpsPort = GetRequiredInt("AppHost:Projects:NotificationApi:HttpsPort");
+var messagingApiPort = GetRequiredInt("AppHost:Projects:MessagingApi:HttpPort");
+var messagingApiHttpsPort = GetRequiredInt("AppHost:Projects:MessagingApi:HttpsPort");
 var gatewayApiPort = GetRequiredInt("AppHost:Projects:GatewayApi:HttpPort");
 var gatewayApiHttpsPort = GetRequiredInt("AppHost:Projects:GatewayApi:HttpsPort");
 
@@ -163,6 +166,7 @@ var userDb = postgres.AddDatabase("user-db", userDbName);
 var imageDb = postgres.AddDatabase("image-db", imageDbName);
 var authenticationDb = postgres.AddDatabase("authentication-db", authenticationDbName);
 var notificationDb = postgres.AddDatabase("notification-db", notificationDbName);
+var messagingDb = postgres.AddDatabase("messaging-db", messagingDbName);
 
 var pgAdmin = builder.AddContainer("pgadmin", pgAdminImage)
     .WithEnvironment("PGADMIN_DEFAULT_EMAIL", pgAdminEmail)
@@ -377,6 +381,28 @@ var notificationApi = builder.AddProject<Projects.NotificationApi_Api>("notifica
     .WaitFor(mailpit)
     .WaitFor(seq);
 
+// MessagingApi owns marketplace conversations between customers and sellers. It uses PostgreSQL
+// for durable chat history and RabbitMQ to validate product/order participants with the owning
+// services before creating conversations.
+var messagingApi = builder.AddProject<Projects.MessagingApi_Api>("messaging-api")
+    .WithHttpEndpoint(port: messagingApiPort)
+    .WithHttpsEndpoint(port: messagingApiHttpsPort)
+    .WithEnvironment("ASPNETCORE_ENVIRONMENT", projectEnvironment)
+    .WithEnvironment("DOTNET_ENVIRONMENT", projectEnvironment)
+    .WithEnvironment("Gateway__HeaderName", gatewayHeaderName)
+    .WithEnvironment("Gateway__Signature", gatewaySignature)
+    .WithEnvironment("Serilog__WriteTo__1__Name", seqSinkName)
+    .WithEnvironment("Serilog__WriteTo__1__Args__serverUrl", seqServerUrl)
+    .WithEnvironment("Authentication__Audience", authenticationAudience)
+    .WithEnvironment("Authentication__MetadataUrl", authenticationMetadataUrl)
+    .WithEnvironment("Authentication__RequireHttpsMetadata", authenticationRequireHttpsMetadata)
+    .WithEnvironment("Authentication__Issuer", authenticationIssuer)
+    .WithReference(messagingDb, "Database")
+    .WithReference(rabbitMq)
+    .WaitFor(postgres)
+    .WaitFor(rabbitMq)
+    .WaitFor(seq);
+
 // GatewayApi is the only externally exposed API entry point. It proxies to the backend service
 // HTTPS endpoints, adds the gateway signature on forwarded requests, and serves the combined
 // Swagger UI for the downstream APIs.
@@ -393,12 +419,14 @@ var gatewayApi = builder.AddProject<Projects.GatewayApi_Api>("gateway-api")
     .WithReference(userApi)
     .WithReference(imageApi)
     .WithReference(notificationApi)
+    .WithReference(messagingApi)
     .WaitFor(authenticationApi)
     .WaitFor(productApi)
     .WaitFor(orderApi)
     .WaitFor(userApi)
     .WaitFor(imageApi)
     .WaitFor(notificationApi)
+    .WaitFor(messagingApi)
     .WithExternalHttpEndpoints();
 
 // WebApp runs Angular's development server as a normal local process. Install packages once in the

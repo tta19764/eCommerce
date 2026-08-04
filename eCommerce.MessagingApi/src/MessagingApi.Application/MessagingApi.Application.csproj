@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\eCommerce.AuthenticationApi\src\AuthenticationApi.Messages\AuthenticationApi.Messages.csproj" />
+    <ProjectReference Include="..\..\..\eCommerce.OrderApi\src\OrderApi.Messages\OrderApi.Messages.csproj" />
+    <ProjectReference Include="..\..\..\eCommerce.ProductApi\src\ProductApi.Messages\ProductApi.Messages.csproj" />
+    <ProjectReference Include="..\..\..\eCommerce.SharedLibrary\SharedLibrary.Application\SharedLibrary.Application.csproj" />
+    <ProjectReference Include="..\MessagingApi.Domain\MessagingApi.Domain.csproj" />
+    <ProjectReference Include="..\MessagingApi.Messages\MessagingApi.Messages.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MassTransit" Version="8.4.1" />
+    <PackageReference Include="MediatR" Version="14.2.0" />
+  </ItemGroup>
+
+</Project>
