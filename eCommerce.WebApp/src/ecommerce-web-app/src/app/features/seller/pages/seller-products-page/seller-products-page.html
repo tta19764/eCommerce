@@ -1,178 +1,601 @@
-<section class="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
-  <div class="mb-8 border-b border-slate-200 pb-6">
-    <p class="text-sm font-semibold text-brand-600">Seller portal</p>
-    <h1 class="mt-1 text-3xl font-bold tracking-tight">Add a marketplace product</h1>
-    <p class="mt-2 text-slate-500">Product categories and types are supplied by the marketplace.</p>
+<section class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-8">
+  
+  <!-- Seller Header Banner & Navigation Tabs -->
+  <div class="glass-panel rounded-2xl p-6 sm:p-8 border border-slate-800 shadow-xl space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div>
+        <span class="inline-flex items-center gap-2 rounded-full bg-emerald-500/10 border border-emerald-500/30 px-3.5 py-1 text-xs font-bold text-emerald-400">
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m0 0h5m0 0v-5a2 2 0 012-2h2a2 2 0 012 2v5" />
+          </svg>
+          Seller Portal
+        </span>
+        <h1 class="mt-2 text-2xl font-extrabold text-white sm:text-3xl">
+          {{ profile() ? profile()!.fullName + ' Store' : 'Marketplace Seller Dashboard' }}
+        </h1>
+        <p class="mt-1 text-xs text-slate-400">
+          Manage your seller storefront, publish inventory listings, and fulfill customer orders.
+        </p>
+      </div>
+
+      @if (sellerId()) {
+        <div class="rounded-xl bg-slate-900 border border-slate-800 px-4 py-2 text-right self-start sm:self-auto">
+          <span class="block text-[10px] text-slate-500 uppercase tracking-wider font-bold">Seller ID</span>
+          <span class="text-xs font-mono font-bold text-emerald-400">#{{ sellerId().slice(0, 8) }}</span>
+        </div>
+      }
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="flex items-center border-b border-slate-800/80 gap-2 overflow-x-auto pt-2">
+      <button
+        type="button"
+        (click)="setTab('store')"
+        [class]="activeTab() === 'store'
+          ? 'border-emerald-500 text-emerald-400 bg-emerald-500/10'
+          : 'border-transparent text-slate-400 hover:text-white hover:bg-slate-800/50'"
+        class="border-b-2 px-5 py-2.5 text-xs font-bold transition-all flex items-center gap-2 rounded-t-xl"
+      >
+        <span>🏪</span>
+        <span>Store Page</span>
+      </button>
+
+      <button
+        type="button"
+        (click)="setTab('products')"
+        [class]="activeTab() === 'products'
+          ? 'border-emerald-500 text-emerald-400 bg-emerald-500/10'
+          : 'border-transparent text-slate-400 hover:text-white hover:bg-slate-800/50'"
+        class="border-b-2 px-5 py-2.5 text-xs font-bold transition-all flex items-center gap-2 rounded-t-xl"
+      >
+        <span>📦</span>
+        <span>Products</span>
+        <span class="rounded-full bg-slate-800 px-2 py-0.5 text-[10px] text-slate-300">{{ products().length }}</span>
+      </button>
+
+      <button
+        type="button"
+        (click)="setTab('orders')"
+        [class]="activeTab() === 'orders'
+          ? 'border-emerald-500 text-emerald-400 bg-emerald-500/10'
+          : 'border-transparent text-slate-400 hover:text-white hover:bg-slate-800/50'"
+        class="border-b-2 px-5 py-2.5 text-xs font-bold transition-all flex items-center gap-2 rounded-t-xl"
+      >
+        <span>🛒</span>
+        <span>Client Orders</span>
+        <span class="rounded-full bg-slate-800 px-2 py-0.5 text-[10px] text-slate-300">{{ sellerOrders().length }}</span>
+      </button>
+    </div>
   </div>
 
+  <!-- Messages -->
   @if (success()) {
-    <div class="mb-5 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-emerald-700">
-      {{ success() }}
+    <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-xs font-semibold text-emerald-300 flex items-center justify-between">
+      <span>{{ success() }}</span>
+      <button (click)="success.set('')" class="text-emerald-400 hover:text-white">✕</button>
     </div>
   }
 
   @if (error()) {
-    <div class="mb-5 rounded-lg border border-red-200 bg-red-50 p-3 text-red-700">
-      {{ error() }}
+    <div class="rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 text-xs font-semibold text-rose-300 flex items-center justify-between">
+      <span>{{ error() }}</span>
+      <button (click)="error.set('')" class="text-rose-400 hover:text-white">✕</button>
     </div>
   }
 
-  @if (loadingOptions()) {
-    <p class="text-slate-500">Loading seller details and product options…</p>
-  } @else {
-    <form
-      class="grid gap-5 rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
-      [formGroup]="form"
-      (ngSubmit)="save()"
-    >
-      <div class="grid gap-5 md:grid-cols-2">
-        <label class="text-sm font-medium">
-          Name
-          <input
-            class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
-            formControlName="name"
-          />
-        </label>
+  <!-- TAB 1: STORE PAGE -->
+  @if (activeTab() === 'store') {
+    <div class="space-y-6">
+      <!-- Store Overview Cards -->
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="glass-panel rounded-2xl p-5 border border-slate-800 space-y-1">
+          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Product Listings</span>
+          <p class="text-2xl font-extrabold text-white">{{ products().length }}</p>
+        </div>
 
-        <label class="text-sm font-medium">
-          Currency
-          <input
-            class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 uppercase"
-            formControlName="currencyCode"
-          />
-        </label>
+        <div class="glass-panel rounded-2xl p-5 border border-slate-800 space-y-1">
+          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Client Orders</span>
+          <p class="text-2xl font-extrabold text-emerald-400">{{ sellerOrders().length }}</p>
+        </div>
 
-        <label class="text-sm font-medium">
-          Price
-          <input
-            class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
-            type="number"
-            min="0.01"
-            step="0.01"
-            formControlName="price"
-          />
-        </label>
+        <div class="glass-panel rounded-2xl p-5 border border-slate-800 space-y-1">
+          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Seller Account Status</span>
+          <p class="text-sm font-bold text-emerald-400 flex items-center gap-1.5 mt-1">
+            <span class="h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            Active Verified Seller
+          </p>
+        </div>
 
-        <label class="text-sm font-medium">
-          Quantity
-          <input
-            class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
-            type="number"
-            min="0"
-            formControlName="quantity"
-          />
-        </label>
-
-        <label class="text-sm font-medium">
-          Category
-          <select
-            class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
-            formControlName="categoryId"
-          >
-            @for (category of categories(); track category.id) {
-              <option [value]="category.id">{{ category.path }}</option>
-            }
-          </select>
-        </label>
-
-        <label class="text-sm font-medium">
-          Product type
-          <select
-            class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
-            formControlName="productType"
-          >
-            @for (type of productTypes(); track type.value) {
-              <option [value]="type.value">{{ type.label }}</option>
-            }
-          </select>
-        </label>
+        <div class="glass-panel rounded-2xl p-5 border border-slate-800 space-y-1">
+          <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Catalog Taxonomy</span>
+          <p class="text-sm font-bold text-indigo-300 mt-1">{{ flatCategories().length }} Categories Available</p>
+        </div>
       </div>
 
-      <label class="text-sm font-medium">
-        Description
-        <textarea
-          class="mt-1 min-h-28 w-full rounded-lg border border-slate-300 px-3 py-2"
-          formControlName="description"
-        ></textarea>
-      </label>
+      <!-- Seller Profile Details Card -->
+      <div class="glass-panel rounded-2xl p-6 sm:p-8 border border-slate-800 space-y-6">
+        <h2 class="text-lg font-bold text-white flex items-center gap-2">
+          <span>🏪</span>
+          <span>Seller Profile Overview</span>
+        </h2>
 
-      <section>
-        <div class="flex items-end justify-between gap-4">
-          <div>
-            <h2 class="text-sm font-semibold">Product images</h2>
-            <p class="mt-1 text-xs text-slate-500">
-              Images upload before the product is saved. Drag to reorder; the first is the display
-              image.
-            </p>
-          </div>
-          <span class="text-xs font-medium text-slate-500">
-            {{ imageIds().length }}/{{ maxProductImages }}
-          </span>
-        </div>
+        @if (profile()) {
+          <div class="flex flex-col sm:flex-row items-start sm:items-center gap-6 p-4 rounded-xl bg-slate-900/60 border border-slate-800">
+            <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white font-extrabold text-xl shadow-lg">
+              {{ profile()!.firstName[0] }}{{ profile()!.lastName[0] }}
+            </div>
 
-        <div class="mt-3 flex flex-wrap gap-3">
-          @for (imageId of imageIds(); track imageId; let index = $index) {
-            <div
-              class="relative h-28 w-28 cursor-grab overflow-hidden rounded-lg border-2 bg-slate-100 active:cursor-grabbing"
-              [class.border-brand-500]="index === 0"
-              [class.border-slate-200]="index !== 0"
-              draggable="true"
-              (dragstart)="startDragging(index)"
-              (dragover)="$event.preventDefault()"
-              (drop)="dropImage(index)"
-            >
-              <img
-                class="h-full w-full object-cover"
-                [src]="imageUrl(imageId)"
-                [alt]="'Product image ' + (index + 1)"
-              />
-              @if (index === 0) {
-                <span
-                  class="absolute bottom-1 left-1 rounded bg-brand-600 px-1.5 py-0.5 text-[10px] font-bold text-white"
-                >
-                  Display
+            <div class="space-y-1 flex-1">
+              <h3 class="text-base font-bold text-white">{{ profile()!.fullName }}</h3>
+              <p class="text-xs text-slate-400">{{ profile()!.email }}</p>
+              <div class="flex flex-wrap gap-2 pt-1">
+                <span class="rounded-md bg-slate-800 px-2.5 py-1 text-[10px] font-mono text-emerald-400">
+                  Seller Account ID: {{ profile()!.id }}
                 </span>
-              }
+              </div>
+            </div>
+
+            <div class="flex flex-wrap gap-2">
               <button
-                class="absolute right-1 top-1 flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-lg font-bold text-red-600 shadow"
                 type="button"
-                aria-label="Remove image"
-                (click)="removeImage(index)"
+                (click)="setTab('products')"
+                class="rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 transition-all shadow-md"
               >
-                ×
+                Manage Products
+              </button>
+              <button
+                type="button"
+                (click)="setTab('orders')"
+                class="rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-4 py-2 border border-slate-700 transition-all"
+              >
+                View Client Orders
               </button>
             </div>
-          }
+          </div>
+        }
+      </div>
+    </div>
+  }
 
-          @if (imageIds().length < maxProductImages) {
-            <input
-              #imageInput
-              class="hidden"
-              type="file"
-              multiple
-              accept="image/jpeg,image/png,image/webp,image/gif"
-              (change)="uploadImages($event)"
-            />
-            <button
-              class="flex h-28 w-28 flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-300 text-sm font-semibold text-slate-600 hover:border-brand-500 hover:bg-brand-50 hover:text-brand-700 disabled:opacity-60"
-              type="button"
-              [disabled]="uploadingImages()"
-              (click)="imageInput.click()"
-            >
-              <span class="text-2xl leading-none">+</span>
-              {{ uploadingImages() ? 'Uploading…' : 'Add image' }}
+  <!-- TAB 2: PRODUCTS (CARDS VIEW) -->
+  @if (activeTab() === 'products') {
+    <div class="space-y-6">
+      
+      <!-- Products Action Bar -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 glass-panel p-4 rounded-2xl border border-slate-800">
+        <div class="flex items-center gap-3 flex-1 max-w-md">
+          <input
+            type="text"
+            [ngModel]="productSearchQuery()"
+            (ngModelChange)="productSearchQuery.set($event)"
+            placeholder="Search seller products..."
+            class="w-full glass-input rounded-xl px-3.5 py-2 text-xs"
+          />
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            (click)="openCategoryModal()"
+            class="rounded-xl bg-slate-800 border border-slate-700 px-3.5 py-2 text-xs font-bold text-slate-300 hover:text-white transition-all flex items-center gap-1.5"
+          >
+            <span>🏷️</span>
+            <span>Add Category</span>
+          </button>
+
+          <button
+            type="button"
+            (click)="showProductForm() ? closeProductForm() : openCreateForm()"
+            class="rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-2 text-xs font-bold text-white shadow-md hover:from-emerald-500 hover:to-teal-500 transition-all flex items-center gap-1.5"
+          >
+            <span class="text-sm">+</span>
+            <span>{{ showProductForm() ? 'Close Form' : 'Publish Product' }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Expandable Product Add/Edit Form -->
+      @if (showProductForm()) {
+        <form
+          [formGroup]="form"
+          (ngSubmit)="saveProduct()"
+          class="glass-panel rounded-2xl p-6 sm:p-8 border border-emerald-500/40 space-y-6 shadow-2xl bg-emerald-950/10"
+        >
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div>
+              <h3 class="text-lg font-bold text-white">
+                {{ editingProduct() ? 'Edit Product Listing' : 'Publish Marketplace Listing' }}
+              </h3>
+              <p class="text-xs text-slate-400 mt-0.5">
+                Configure details, set stock levels, select category, and upload photos.
+              </p>
+            </div>
+            <button type="button" (click)="closeProductForm()" class="text-slate-400 hover:text-white">✕</button>
+          </div>
+
+          <div class="grid gap-4 md:grid-cols-2">
+            <div>
+              <label class="block text-xs font-bold text-slate-300 mb-1">Product Title *</label>
+              <input formControlName="name" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs" placeholder="e.g. Wireless Noise-Canceling Headphones" />
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-300 mb-1">Currency Code (3 Chars)</label>
+              <input formControlName="currencyCode" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs uppercase" placeholder="USD" />
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-300 mb-1">Price ($) *</label>
+              <input type="number" min="0.01" step="0.01" formControlName="price" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs" />
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-300 mb-1">Inventory Stock Quantity *</label>
+              <input type="number" min="0" formControlName="quantity" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs" />
+            </div>
+
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <label class="block text-xs font-bold text-slate-300">Category (Displays Subcategories) *</label>
+                <button type="button" (click)="openCategoryModal()" class="text-[10px] text-emerald-400 hover:underline">+ New Category</button>
+              </div>
+              <select formControlName="categoryId" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs">
+                @for (cat of flatCategories(); track cat.id) {
+                  <option [value]="cat.id" class="bg-slate-900 text-slate-200">{{ cat.fullPath }}</option>
+                }
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-300 mb-1">Product Type *</label>
+              <select formControlName="productType" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs">
+                @for (type of productTypes(); track type.value) {
+                  <option [value]="type.value" class="bg-slate-900 text-slate-200">{{ type.label }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">Detailed Description *</label>
+            <textarea formControlName="description" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs min-h-24" placeholder="Describe specifications and features..."></textarea>
+          </div>
+
+          <!-- Image Uploader -->
+          <div class="space-y-3 pt-4 border-t border-slate-800">
+            <div class="flex items-center justify-between">
+              <h4 class="text-xs font-bold text-slate-200">Product Image Gallery</h4>
+              <span class="text-[10px] text-emerald-400 font-bold">{{ imageIds().length }} / {{ maxProductImages }} uploaded</span>
+            </div>
+
+            <div class="flex flex-wrap gap-3">
+              @for (imageId of imageIds(); track imageId; let index = $index) {
+                <div
+                  class="relative h-20 w-20 cursor-grab overflow-hidden rounded-xl border-2 bg-slate-950 shadow-md group"
+                  [class.border-emerald-500]="index === 0"
+                  [class.border-slate-800]="index !== 0"
+                  draggable="true"
+                  (dragstart)="startDragging(index)"
+                  (dragover)="$event.preventDefault()"
+                  (drop)="dropImage(index)"
+                >
+                  <img class="h-full w-full object-cover" [src]="imageUrl(imageId)" [alt]="'Product image '" />
+                  @if (index === 0) {
+                    <span class="absolute bottom-1 left-1 rounded bg-emerald-600 px-1 py-0.2 text-[8px] font-bold text-white">Main</span>
+                  }
+                  <button
+                    type="button"
+                    (click)="removeImage(index)"
+                    class="absolute top-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-slate-900/90 text-rose-400 font-bold text-xs hover:bg-rose-600 hover:text-white"
+                  >
+                    ×
+                  </button>
+                </div>
+              }
+
+              @if (imageIds().length < maxProductImages) {
+                <input #imageInput type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif" (change)="uploadImages($event)" class="hidden" />
+                <button
+                  type="button"
+                  [disabled]="uploadingImages()"
+                  (click)="imageInput.click()"
+                  class="flex h-20 w-20 flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-700/80 bg-slate-900/40 text-xs font-semibold text-slate-400 hover:border-emerald-500 hover:text-emerald-400 transition-all"
+                >
+                  <span class="text-lg">+</span>
+                  <span class="text-[10px]">{{ uploadingImages() ? 'Uploading...' : 'Add Photo' }}</span>
+                </button>
+              }
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-3 pt-4 border-t border-slate-800">
+            <button type="button" (click)="closeProductForm()" class="rounded-xl bg-slate-800 px-4 py-2.5 text-xs font-bold text-slate-300">
+              Cancel
             </button>
+            <button
+              type="submit"
+              [disabled]="saving() || uploadingImages() || !sellerId()"
+              class="rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-2.5 text-xs font-bold text-white shadow-md disabled:opacity-40"
+            >
+              {{ saving() ? 'Saving Product...' : (editingProduct() ? 'Update Product' : 'Publish Product') }}
+            </button>
+          </div>
+        </form>
+      }
+
+      <!-- Products Grid Displayed as Cards (Matching Admin View) -->
+      @if (loadingProducts()) {
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          @for (item of [1, 2, 3, 4]; track item) {
+            <div class="h-64 animate-pulse rounded-2xl bg-slate-800/50"></div>
           }
         </div>
-      </section>
+      } @else if (!filteredProducts().length) {
+        <div class="glass-panel rounded-2xl p-12 text-center text-slate-400 space-y-3">
+          <h3 class="text-base font-bold text-white">No Products Found</h3>
+          <p class="text-xs text-slate-400">You have no published marketplace products matching your criteria.</p>
+          <button type="button" (click)="openCreateForm()" class="rounded-xl bg-emerald-600 text-white px-4 py-2 text-xs font-bold">
+            Publish First Product
+          </button>
+        </div>
+      } @else {
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          @for (product of filteredProducts(); track product.id) {
+            <div class="glass-panel rounded-2xl border border-slate-800 overflow-hidden flex flex-col justify-between shadow-xl hover:border-slate-700 transition-all group">
+              <!-- Card Header / Image -->
+              <div class="relative h-48 bg-slate-950/60 overflow-hidden flex items-center justify-center">
+                @if (productMainImageUrl(product)) {
+                  <img
+                    [src]="productMainImageUrl(product)!"
+                    [alt]="product.name"
+                    class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                } @else {
+                  <div class="text-center text-slate-600">
+                    <span class="text-3xl">📦</span>
+                    <p class="text-[10px] text-slate-500 font-semibold mt-1">No Image Uploaded</p>
+                  </div>
+                }
 
-      <button
-        class="justify-self-start rounded-lg bg-brand-600 px-5 py-2.5 font-semibold text-white hover:bg-brand-700 disabled:bg-slate-300"
-        type="submit"
-        [disabled]="saving() || uploadingImages() || !sellerId()"
-      >
-        {{ saving() ? 'Adding product…' : 'Add product' }}
-      </button>
-    </form>
+                <!-- Stock Status Badge (User requirement: In Stock / Out of Stock) -->
+                <div class="absolute top-3 right-3 z-10">
+                  <span
+                    [class]="product.quantity > 0 ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border-rose-500/30'"
+                    class="rounded-full border px-2.5 py-0.5 text-[10px] font-bold backdrop-blur-md"
+                  >
+                    {{ product.quantity > 0 ? 'In Stock' : 'Out of stock' }}
+                  </span>
+                </div>
+
+                <!-- Product Type Badge -->
+                <div class="absolute top-3 left-3 z-10">
+                  <span class="rounded-full bg-slate-900/80 border border-slate-700/80 px-2.5 py-0.5 text-[10px] font-semibold text-slate-300 backdrop-blur-md">
+                    {{ product.productType }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Card Content Body -->
+              <div class="p-5 space-y-3 flex-1 flex flex-col justify-between">
+                <div>
+                  <div class="flex items-start justify-between gap-2">
+                    <h3 class="font-bold text-sm text-white group-hover:text-emerald-400 transition-colors line-clamp-1">
+                      {{ product.name }}
+                    </h3>
+                    <span class="text-base font-extrabold text-emerald-400">
+                      {{ product.price | currency: product.currency }}
+                    </span>
+                  </div>
+
+                  <span class="text-[11px] text-indigo-400 block mt-1 font-semibold">
+                    📁 {{ categoryName(product.categoryId) }}
+                  </span>
+
+                  <p class="text-xs text-slate-400 line-clamp-2 mt-2 leading-relaxed">
+                    {{ product.description }}
+                  </p>
+                </div>
+
+                <!-- Card Footer Info & Actions -->
+                <div class="pt-3 border-t border-slate-800/80 space-y-3">
+                  <div class="flex items-center justify-between text-[11px] text-slate-400">
+                    <span>Stock Qty: <strong class="text-white">{{ product.quantity }}</strong></span>
+                    <span>Rating: <strong class="text-amber-400">★ {{ product.rating ? product.rating.toFixed(1) : 'New' }}</strong></span>
+                  </div>
+
+                  <div class="flex items-center gap-2">
+                    <button
+                      type="button"
+                      (click)="openEditForm(product)"
+                      class="flex-1 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700/60 py-2 text-xs font-semibold text-slate-200 transition-all flex items-center justify-center gap-1"
+                    >
+                      <span>✏️</span>
+                      <span>Edit</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      (click)="deleteProduct(product)"
+                      class="rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 p-2 text-rose-400 transition-all"
+                      title="Delete Product"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <!-- TAB 3: CLIENT ORDERS -->
+  @if (activeTab() === 'orders') {
+    <div class="space-y-6">
+      <div class="glass-panel rounded-2xl p-6 border border-slate-800 flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-bold text-white">Client Orders Management</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Fulfill marketplace orders, view ordered line items, and update order statuses.</p>
+        </div>
+        <button type="button" (click)="setTab('orders')" class="rounded-xl bg-slate-800 px-3.5 py-1.5 text-xs text-slate-300 font-semibold">
+          Refresh Orders
+        </button>
+      </div>
+
+      @if (loadingOrders()) {
+        <div class="space-y-4">
+          @for (item of [1, 2]; track item) {
+            <div class="h-44 animate-pulse rounded-2xl bg-slate-800/50"></div>
+          }
+        </div>
+      } @else if (!sellerOrders().length) {
+        <div class="glass-panel rounded-2xl p-12 text-center text-slate-400 space-y-3">
+          <h3 class="text-base font-bold text-white">No Client Orders Yet</h3>
+          <p class="text-xs text-slate-400">When clients order your products, their order details will appear here.</p>
+        </div>
+      } @else {
+        <div class="space-y-4">
+          @for (sOrder of sellerOrders(); track sOrder.id) {
+            <div class="glass-panel rounded-2xl border border-slate-800 p-6 space-y-4 shadow-lg">
+              
+              <!-- Order Group Header -->
+              <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="font-bold text-sm text-white font-mono">Order #{{ sOrder.id.slice(0, 8) }}</span>
+                    <span
+                      [class]="sOrder.status === 'Completed' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : (sOrder.status === 'Cancelled' ? 'bg-rose-500/20 text-rose-400 border-rose-500/30' : 'bg-amber-500/20 text-amber-400 border-amber-500/30')"
+                      class="rounded-full border px-2.5 py-0.5 text-[10px] font-bold"
+                    >
+                      {{ sOrder.status }}
+                    </span>
+                  </div>
+                  <span class="text-[11px] text-slate-400 block mt-0.5">Parent Order ID: {{ sOrder.orderId }}</span>
+                </div>
+
+                <div class="text-right">
+                  <span class="text-lg font-extrabold text-emerald-400">
+                    {{ sOrder.totalPrice | currency: sOrder.currency }}
+                  </span>
+                  <span class="block text-[10px] text-slate-500">Seller Group Total</span>
+                </div>
+              </div>
+
+              <!-- Ordered Items List -->
+              <div class="space-y-2">
+                <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Ordered Items</h4>
+                <div class="divide-y divide-slate-800/80 rounded-xl bg-slate-950/60 border border-slate-800 overflow-hidden">
+                  @for (item of sOrder.items; track item.id) {
+                    <div class="p-3 text-xs flex items-center justify-between">
+                      <div>
+                        <span class="font-bold text-slate-200 block">{{ item.productName }}</span>
+                        <span class="text-[10px] text-slate-500 font-mono">Product ID: {{ item.productId }}</span>
+                      </div>
+                      <div class="text-right space-x-3">
+                        <span class="text-slate-400">{{ item.quantity }} × {{ item.unitPrice | currency: item.currency }}</span>
+                        <span class="font-bold text-white">{{ item.totalPrice | currency: item.currency }}</span>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <!-- Status Action Buttons for Seller -->
+              <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+                <span class="text-[11px] text-slate-400">Update fulfillment status for client:</span>
+                
+                <div class="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    [disabled]="sOrder.status === 'Confirmed' || sOrder.status === 'Completed' || sOrder.status === 'Cancelled'"
+                    (click)="updateOrderStatus(sOrder.id, 'Confirmed')"
+                    class="rounded-xl bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 px-3 py-1 text-xs font-bold transition-all disabled:opacity-30"
+                  >
+                    Confirm Order
+                  </button>
+
+                  <button
+                    type="button"
+                    [disabled]="sOrder.status === 'Shipped' || sOrder.status === 'Completed' || sOrder.status === 'Cancelled'"
+                    (click)="updateOrderStatus(sOrder.id, 'Shipped')"
+                    class="rounded-xl bg-teal-600/20 hover:bg-teal-600 text-teal-300 hover:text-white border border-teal-500/30 px-3 py-1 text-xs font-bold transition-all disabled:opacity-30"
+                  >
+                    Mark Shipped
+                  </button>
+
+                  <button
+                    type="button"
+                    [disabled]="sOrder.status === 'Completed' || sOrder.status === 'Cancelled'"
+                    (click)="updateOrderStatus(sOrder.id, 'Completed')"
+                    class="rounded-xl bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/30 px-3 py-1 text-xs font-bold transition-all disabled:opacity-30"
+                  >
+                    Mark Completed
+                  </button>
+
+                  <button
+                    type="button"
+                    [disabled]="sOrder.status === 'Cancelled' || sOrder.status === 'Completed'"
+                    (click)="updateOrderStatus(sOrder.id, 'Cancelled')"
+                    class="rounded-xl bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 px-3 py-1 text-xs font-bold transition-all disabled:opacity-30"
+                  >
+                    Cancel Order
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Quick Category Addition Modal -->
+  @if (showCategoryModal()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+      <div class="glass-panel rounded-2xl p-6 max-w-md w-full border border-slate-800 space-y-4 shadow-2xl">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <h3 class="font-bold text-sm text-white">Add New Category / Subcategory</h3>
+          <button (click)="closeCategoryModal()" class="text-slate-400 hover:text-white">✕</button>
+        </div>
+
+        <div class="space-y-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">Category Name *</label>
+            <input
+              type="text"
+              [(ngModel)]="newCategoryName"
+              placeholder="e.g. Gaming Headsets"
+              class="w-full glass-input rounded-xl px-3.5 py-2 text-xs"
+            />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">Parent Category (Optional)</label>
+            <select [(ngModel)]="selectedParentCategoryId" class="w-full glass-input rounded-xl px-3.5 py-2 text-xs">
+              <option [value]="null" class="bg-slate-900 text-slate-400">-- None (Root Category) --</option>
+              @for (cat of flatCategories(); track cat.id) {
+                <option [value]="cat.id" class="bg-slate-900 text-slate-200">{{ cat.fullPath }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-2">
+          <button (click)="closeCategoryModal()" class="rounded-xl bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-300">
+            Cancel
+          </button>
+          <button
+            (click)="saveCategory()"
+            [disabled]="addingCategory() || !newCategoryName.trim()"
+            class="rounded-xl bg-emerald-600 text-white px-5 py-2 text-xs font-bold shadow-md disabled:opacity-40"
+          >
+            {{ addingCategory() ? 'Saving...' : 'Add Category' }}
+          </button>
+        </div>
+      </div>
+    </div>
   }
 </section>

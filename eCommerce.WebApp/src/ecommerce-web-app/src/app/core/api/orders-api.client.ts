@@ -7,6 +7,7 @@ import {
   Order,
   OrderItemRequest,
   OrderStatus,
+  SellerOrder,
   UpdateOrderStatusRequest,
 } from '../models/order.models';
 import { apiData } from './api-base';
@@ -46,5 +47,22 @@ export class OrdersApiClient {
   // Customer workflow: cancels only the current user's own order.
   cancelOwn(orderId: string) {
     return this.http.post<void>(`${this.url}/${orderId}/cancel`, {});
+  }
+
+  // Seller workflow: gets orders belonging to the authenticated seller.
+  getSellerOrders(query: PageQuery = {}) {
+    const params = new HttpParams()
+      .set('page', query.page ?? 1)
+      .set('pageSize', query.pageSize ?? 10);
+
+    return this.http
+      .get<ApiResponse<PagedList<SellerOrder>>>(`${this.url}/seller`, { params })
+      .pipe(map(apiData));
+  }
+
+  // Seller workflow: updates status for a specific seller order group.
+  updateSellerOrderStatus(sellerOrderId: string, status: OrderStatus) {
+    const request: UpdateOrderStatusRequest = { status };
+    return this.http.patch<void>(`${this.url}/seller/${sellerOrderId}/status`, request);
   }
 }
