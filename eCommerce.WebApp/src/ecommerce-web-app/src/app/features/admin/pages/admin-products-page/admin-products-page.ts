@@ -3,15 +3,15 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { apiErrorMessage } from '../../../../core/api/api-base';
-import { ImagesApiClient } from '../../../../core/api/images-api.client';
-import { ProductsApiClient } from '../../../../core/api/products-api.client';
+import { ImagesApiClient } from '../../../../core/api/images-api';
+import { ProductsApiClient } from '../../../../core/api/products-api';
 import {
   Product,
   CreateProductRequest,
   ProductCategory,
   ProductType,
   ProductTypeOption,
-} from '../../../../core/models/product.models';
+} from '../../../../core/models/product-model';
 import { flattenCategories } from '../../../../shared/utils/category-utils';
 
 @Component({

@@ -2,10 +2,10 @@ import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@ang
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs';
-import { AuthStore } from '../../auth/auth.store';
-import { CartStore } from '../../../features/cart/data-access/cart.store';
-import { MessagingService } from '../../api/messaging.service';
-import { ThemeService } from '../../theme/theme.service';
+import { AuthStore } from '../../auth/auth-store';
+import { CartStore } from '../../../features/cart/data-access/cart-store';
+import { MessagingService } from '../../api/messaging-service';
+import { ThemeService } from '../../theme/theme-service';
 
 @Component({
   selector: 'app-shell',

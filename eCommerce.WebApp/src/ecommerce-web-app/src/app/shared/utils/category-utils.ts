@@ -1,4 +1,4 @@
-import { ProductCategory, FlatCategoryOption } from '../../core/models/product.models';
+import { ProductCategory, FlatCategoryOption } from '../../core/models/product-model';
 
 /**
  * Recursively flattens a category tree into a list of options with depth indicators and breadcrumb paths.

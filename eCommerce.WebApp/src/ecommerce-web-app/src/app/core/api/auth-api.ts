@@ -2,14 +2,15 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { map } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { ApiResponse } from '../models/api.models';
+import { Account } from '../models/account-model';
+import { ApiResponse, PagedList, PageQuery } from '../models/api-model';
 import {
   LoginRequest,
   RefreshTokenRequest,
   RegisterRequest,
   RegisterSellerRequest,
   TokenResponse,
-} from '../models/auth.models';
+} from '../models/auth-model';
 import { apiData } from './api-base';
 
 @Injectable({ providedIn: 'root' })

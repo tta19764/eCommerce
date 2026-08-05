@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ProductsApiClient } from '../../../../core/api/products-api.client';
+import { ProductsApiClient } from '../../../../core/api/products-api';
 import { apiErrorMessage } from '../../../../core/api/api-base';
-import { ProductCategory, CreateCategoryRequest } from '../../../../core/models/product.models';
+import { ProductCategory, CreateCategoryRequest } from '../../../../core/models/product-model';
 import { flattenCategories } from '../../../../shared/utils/category-utils';
 
 @Component({

@@ -1,5 +1,6 @@
 import { computed, Injectable, signal } from '@angular/core';
-import { Product } from '../../../core/models/product.models';
+import { OrdersApiClient } from '../../../core/api/orders-api';
+import { Product } from '../../../core/models/product-model';
 
 export interface CartItem {
   product: Product;

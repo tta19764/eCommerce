@@ -2,14 +2,14 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { map } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { ApiResponse, PagedList, PageQuery } from '../models/api.models';
+import { ApiResponse, PagedList, PageQuery } from '../models/api-model';
 import {
   Order,
   OrderItemRequest,
   OrderStatus,
   SellerOrder,
   UpdateOrderStatusRequest,
-} from '../models/order.models';
+} from '../models/order-model';
 import { apiData } from './api-base';
 
 @Injectable({ providedIn: 'root' })

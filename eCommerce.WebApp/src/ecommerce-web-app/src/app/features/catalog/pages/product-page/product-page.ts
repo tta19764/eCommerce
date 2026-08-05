@@ -2,10 +2,10 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
-import { ImagesApiClient } from '../../../../core/api/images-api.client';
-import { ProductsApiClient } from '../../../../core/api/products-api.client';
-import { Product, ProductReview } from '../../../../core/models/product.models';
-import { CartStore } from '../../../cart/data-access/cart.store';
+import { ImagesApiClient } from '../../../../core/api/images-api';
+import { ProductsApiClient } from '../../../../core/api/products-api';
+import { Product, ProductReview } from '../../../../core/models/product-model';
+import { CartStore } from '../../../cart/data-access/cart-store';
 
 @Component({
   selector: 'app-product-page',

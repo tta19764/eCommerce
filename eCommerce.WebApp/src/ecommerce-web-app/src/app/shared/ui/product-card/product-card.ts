@@ -1,9 +1,9 @@
 import { CurrencyPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { ImagesApiClient } from '../../../core/api/images-api.client';
-import { Product } from '../../../core/models/product.models';
-import { CartStore } from '../../../features/cart/data-access/cart.store';
+import { ImagesApiClient } from '../../../core/api/images-api';
+import { Product } from '../../../core/models/product-model';
+import { CartStore } from '../../../features/cart/data-access/cart-store';
 
 @Component({
   selector: 'app-product-card',

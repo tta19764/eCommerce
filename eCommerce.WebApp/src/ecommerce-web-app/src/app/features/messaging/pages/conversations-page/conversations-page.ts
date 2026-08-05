@@ -12,10 +12,10 @@ import {
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { MessagingApiClient } from '../../../../core/api/messaging-api.client';
-import { MessagingService } from '../../../../core/api/messaging.service';
-import { AuthStore } from '../../../../core/auth/auth.store';
-import { Conversation, ConversationMessage } from '../../../../core/models/messaging.models';
+import { MessagingApiClient } from '../../../../core/api/messaging-api';
+import { MessagingService } from '../../../../core/api/messaging-service';
+import { AuthStore } from '../../../../core/auth/auth-store';
+import { Conversation, ConversationMessage } from '../../../../core/models/messaging-model';
 
 @Component({
   selector: 'app-conversations-page',

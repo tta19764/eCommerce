@@ -1,15 +1,15 @@
-﻿import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { map } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { ApiResponse, PagedList, PageQuery } from '../models/api.models';
+import { ApiResponse, PagedList, PageQuery } from '../models/api-model';
 import {
   Conversation,
   ConversationMessage,
   SendMessageRequest,
   StartProductInquiryRequest,
   StartSellerOrderConversationRequest,
-} from '../models/messaging.models';
+} from '../models/messaging-model';
 import { apiData } from './api-base';
 
 @Injectable({ providedIn: 'root' })

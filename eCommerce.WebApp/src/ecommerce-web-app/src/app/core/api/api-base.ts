@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { ApiResponse } from '../models/api.models';
+import { ApiResponse } from '../models/api-model';
 
 // JSON endpoints wrap successful data and backend errors in the same response envelope.
 export const apiData = <T>(response: ApiResponse<T>): T => {

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input, output, computed } from '@angular/core';
-import { ProductCategory } from '../../../core/models/product.models';
+import { ProductCategory } from '../../../core/models/product-model';
 
 @Component({
   selector: 'app-category-picker',

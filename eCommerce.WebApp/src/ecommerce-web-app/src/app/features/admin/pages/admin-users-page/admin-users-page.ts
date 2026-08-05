@@ -1,10 +1,10 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AccountsApiClient } from '../../../../core/api/accounts-api.client';
+import { AccountsApiClient } from '../../../../core/api/accounts-api';
 import { apiErrorMessage } from '../../../../core/api/api-base';
-import { AuthApiClient } from '../../../../core/api/auth-api.client';
-import { Account } from '../../../../core/models/account.models';
+import { AuthApiClient } from '../../../../core/api/auth-api';
+import { Account } from '../../../../core/models/account-model';
 
 @Component({
   selector: 'app-admin-users-page',

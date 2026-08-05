@@ -2,7 +2,9 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { apiErrorMessage } from '../../../../core/api/api-base';
-import { AuthStore } from '../../../../core/auth/auth.store';
+import { AuthApiClient } from '../../../../core/api/auth-api';
+import { RegisterRequest, RegisterSellerRequest } from '../../../../core/models/auth-model';
+import { AuthStore } from '../../../../core/auth/auth-store';
 
 @Component({
   selector: 'app-register-page',

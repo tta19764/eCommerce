@@ -2,8 +2,8 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { map } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Account } from '../models/account.models';
-import { ApiResponse, PagedList, PageQuery } from '../models/api.models';
+import { Account } from '../models/account-model';
+import { ApiResponse, PagedList, PageQuery } from '../models/api-model';
 import { apiData } from './api-base';
 
 @Injectable({ providedIn: 'root' })

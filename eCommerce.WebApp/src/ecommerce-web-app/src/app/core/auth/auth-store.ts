@@ -1,13 +1,13 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { tap } from 'rxjs';
-import { AuthApiClient } from '../api/auth-api.client';
+import { AuthApiClient } from '../api/auth-api';
 import {
   AuthUser,
   LoginRequest,
   RegisterRequest,
   RegisterSellerRequest,
   TokenResponse,
-} from '../models/auth.models';
+} from '../models/auth-model';
 
 const STORAGE_KEY = 'ecommerce.session';
 

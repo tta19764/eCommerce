@@ -2,12 +2,12 @@ import { CurrencyPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { apiErrorMessage } from '../../../../core/api/api-base';
-import { ImagesApiClient } from '../../../../core/api/images-api.client';
-import { OrdersApiClient } from '../../../../core/api/orders-api.client';
-import { AuthStore } from '../../../../core/auth/auth.store';
-import { OrderItemRequest } from '../../../../core/models/order.models';
-import { Product } from '../../../../core/models/product.models';
-import { CartStore } from '../../data-access/cart.store';
+import { ImagesApiClient } from '../../../../core/api/images-api';
+import { OrdersApiClient } from '../../../../core/api/orders-api';
+import { AuthStore } from '../../../../core/auth/auth-store';
+import { OrderItemRequest } from '../../../../core/models/order-model';
+import { Product } from '../../../../core/models/product-model';
+import { CartStore } from '../../data-access/cart-store';
 
 @Component({
   selector: 'app-cart-page',

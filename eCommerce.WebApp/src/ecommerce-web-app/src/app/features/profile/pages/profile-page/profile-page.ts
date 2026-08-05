@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { apiErrorMessage } from '../../../../core/api/api-base';
-import { ImagesApiClient } from '../../../../core/api/images-api.client';
-import { UsersApiClient } from '../../../../core/api/users-api.client';
-import { UserProfile } from '../../../../core/models/user.models';
+import { ImagesApiClient } from '../../../../core/api/images-api';
+import { UsersApiClient } from '../../../../core/api/users-api';
+import { UserProfile } from '../../../../core/models/user-model';
 
 @Component({
   selector: 'app-profile-page',

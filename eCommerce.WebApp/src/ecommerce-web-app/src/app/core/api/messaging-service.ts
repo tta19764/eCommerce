@@ -1,13 +1,15 @@
-﻿import { inject, Injectable, OnDestroy, signal } from '@angular/core';
+import { inject, Injectable, OnDestroy, signal } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
 import { Subject } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { AuthStore } from '../auth/auth.store';
+import { AuthStore } from '../auth/auth-store';
+import { ConversationMessage } from '../models/messaging-model';
+import { MessagingApiClient } from './messaging-api';
 import {
   ConversationCreatedRealtimeEvent,
   ConversationReadRealtimeEvent,
   MessageSentRealtimeEvent,
-} from '../models/messaging.models';
+} from '../models/messaging-model';
 
 @Injectable({ providedIn: 'root' })
 export class MessagingService implements OnDestroy {

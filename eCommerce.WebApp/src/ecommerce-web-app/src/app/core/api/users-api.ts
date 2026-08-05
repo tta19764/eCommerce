@@ -2,8 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { map } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { ApiResponse } from '../models/api.models';
-import { UpdateUserProfileRequest, UserProfile } from '../models/user.models';
+import { ApiResponse } from '../models/api-model';
+import { UpdateUserProfileRequest, UserProfile } from '../models/user-model';
 import { apiData } from './api-base';
 
 @Injectable({ providedIn: 'root' })

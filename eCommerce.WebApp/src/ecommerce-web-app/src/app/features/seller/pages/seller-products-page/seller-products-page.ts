@@ -3,11 +3,11 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin, Observable } from 'rxjs';
 import { apiErrorMessage } from '../../../../core/api/api-base';
-import { ImagesApiClient } from '../../../../core/api/images-api.client';
-import { OrdersApiClient } from '../../../../core/api/orders-api.client';
-import { ProductsApiClient } from '../../../../core/api/products-api.client';
-import { UsersApiClient } from '../../../../core/api/users-api.client';
-import { OrderStatus, SellerOrder } from '../../../../core/models/order.models';
+import { ImagesApiClient } from '../../../../core/api/images-api';
+import { OrdersApiClient } from '../../../../core/api/orders-api';
+import { ProductsApiClient } from '../../../../core/api/products-api';
+import { UsersApiClient } from '../../../../core/api/users-api';
+import { OrderStatus, SellerOrder } from '../../../../core/models/order-model';
 import {
   CreateCategoryRequest,
   CreateProductRequest,
@@ -15,8 +15,8 @@ import {
   ProductCategory,
   ProductType,
   ProductTypeOption,
-} from '../../../../core/models/product.models';
-import { UserProfile } from '../../../../core/models/user.models';
+} from '../../../../core/models/product-model';
+import { UserProfile } from '../../../../core/models/user-model';
 import { flattenCategories } from '../../../../shared/utils/category-utils';
 
 @Component({

@@ -1,13 +1,15 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { ProductsApiClient } from '../../../../core/api/products-api.client';
+import { ImagesApiClient } from '../../../../core/api/images-api';
+import { ProductsApiClient } from '../../../../core/api/products-api';
 import {
   Product,
   ProductCategory,
+  ProductSearchQuery,
   ProductSortBy,
   ProductType,
   ProductTypeOption,
-} from '../../../../core/models/product.models';
+} from '../../../../core/models/product-model';
 import { ProductCard } from '../../../../shared/ui/product-card/product-card';
 import { CategoryPicker } from '../../../../shared/ui/category-picker/category-picker';
 

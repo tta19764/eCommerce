@@ -1,9 +1,9 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { OrdersApiClient } from '../../../../core/api/orders-api.client';
-import { MessagingApiClient } from '../../../../core/api/messaging-api.client';
-import { Order } from '../../../../core/models/order.models';
+import { OrdersApiClient } from '../../../../core/api/orders-api';
+import { MessagingApiClient } from '../../../../core/api/messaging-api';
+import { Order } from '../../../../core/models/order-model';
 import { ChatWindow } from '../../../../shared/ui/chat-window/chat-window';
 
 @Component({
