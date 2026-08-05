@@ -25,8 +25,24 @@ export interface ProductCategory {
   name: string;
   slug: string;
   parentCategoryId: string | null;
-  path: string;
   depth: number;
+  subcategories: ProductCategory[];
+}
+
+export interface CreateCategoryRequest {
+  name: string;
+  slug?: string;
+  parentCategoryId?: string | null;
+}
+
+export interface FlatCategoryOption {
+  id: string;
+  name: string;
+  slug: string;
+  parentCategoryId: string | null;
+  depth: number;
+  fullPath: string;
+  indentedName: string;
 }
 
 export interface ProductTypeOption {

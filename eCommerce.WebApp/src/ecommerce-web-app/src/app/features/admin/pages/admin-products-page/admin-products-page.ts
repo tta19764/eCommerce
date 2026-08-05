@@ -1,5 +1,5 @@
 import { CurrencyPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { apiErrorMessage } from '../../../../core/api/api-base';
@@ -12,6 +12,7 @@ import {
   ProductType,
   ProductTypeOption,
 } from '../../../../core/models/product.models';
+import { flattenCategories } from '../../../../shared/utils/category-utils';
 
 @Component({
   selector: 'app-admin-products-page',
@@ -28,6 +29,7 @@ export class AdminProductsPage {
 
   protected readonly products = signal<Product[]>([]);
   protected readonly categories = signal<ProductCategory[]>([]);
+  protected readonly flatCategories = computed(() => flattenCategories(this.categories()));
   protected readonly productTypes = signal<ProductTypeOption[]>([]);
   protected readonly editingProduct = signal<Product | null>(null);
   protected readonly loading = signal(true);
@@ -173,6 +175,7 @@ export class AdminProductsPage {
         this.loading.set(false);
       },
       error: (error) => {
+        console.error('[AdminProducts load error]:', error);
         this.error.set(apiErrorMessage(error));
         this.loading.set(false);
       },
@@ -204,6 +207,7 @@ export class AdminProductsPage {
         this.load();
       },
       error: (error) => {
+        console.error('[AdminProducts save error]:', error);
         this.error.set(apiErrorMessage(error));
         this.saving.set(false);
       },
@@ -220,7 +224,10 @@ export class AdminProductsPage {
         this.success.set('Product deleted successfully.');
         this.load();
       },
-      error: (error) => this.error.set(apiErrorMessage(error)),
+      error: (error) => {
+        console.error('[AdminProducts delete error]:', error);
+        this.error.set(apiErrorMessage(error));
+      },
     });
   }
 
@@ -237,6 +244,7 @@ export class AdminProductsPage {
   }
 
   private resetForm(): void {
+    const defaultCatId = this.flatCategories()[0]?.id ?? '';
     this.form.reset({
       name: '',
       description: '',
@@ -244,7 +252,7 @@ export class AdminProductsPage {
       currencyCode: 'USD',
       quantity: 0,
       sellerId: '',
-      categoryId: this.categories()[0]?.id ?? '',
+      categoryId: defaultCatId,
       productType: 'Physical',
     });
   }
@@ -253,18 +261,25 @@ export class AdminProductsPage {
     this.api.getCategories().subscribe({
       next: (categories) => {
         this.categories.set(categories);
-        if (!this.form.controls.categoryId.value && categories.length) {
-          this.form.controls.categoryId.setValue(categories[0].id);
+        const flat = this.flatCategories();
+        if (!this.form.controls.categoryId.value && flat.length) {
+          this.form.controls.categoryId.setValue(flat[0].id);
         }
       },
-      error: (error) => this.error.set(apiErrorMessage(error)),
+      error: (error) => {
+        console.error('[AdminProducts loadCategories error]:', error);
+        this.error.set(apiErrorMessage(error));
+      },
     });
   }
 
   private loadProductTypes(): void {
     this.api.getTypes().subscribe({
       next: (types) => this.productTypes.set(types),
-      error: (error) => this.error.set(apiErrorMessage(error)),
+      error: (error) => {
+        console.error('[AdminProducts loadProductTypes error]:', error);
+        this.error.set(apiErrorMessage(error));
+      },
     });
   }
 
