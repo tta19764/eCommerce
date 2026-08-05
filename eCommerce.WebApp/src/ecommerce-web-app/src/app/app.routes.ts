@@ -42,6 +42,15 @@ export const routes: Routes = [
     title: 'Orders · eCommerce',
   },
   {
+    path: 'messages',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/messaging/pages/conversations-page/conversations-page').then(
+        (m) => m.ConversationsPage,
+      ),
+    title: 'Messages · eCommerce',
+  },
+  {
     path: 'profile',
     canActivate: [authGuard],
     loadComponent: () =>
@@ -83,6 +92,14 @@ export const routes: Routes = [
             (m) => m.AdminProductsPage,
           ),
         title: 'Manage products · eCommerce',
+      },
+      {
+        path: 'categories',
+        loadComponent: () =>
+          import('./features/admin/pages/admin-categories-page/admin-categories-page').then(
+            (m) => m.AdminCategoriesPage,
+          ),
+        title: 'Category Editor · eCommerce',
       },
       {
         path: 'users',

@@ -1,136 +1,130 @@
-<section>
-  <div class="mb-6 flex items-center justify-between gap-4">
+<section class="space-y-6">
+  
+  <!-- Title & Action Button -->
+  <div class="flex items-center justify-between border-b border-slate-800 pb-4">
     <div>
-      <h2 class="text-xl font-bold">Users</h2>
-      <p class="mt-1 text-sm text-slate-500">
-        Review application accounts, create administrators, and deactivate access.
-      </p>
+      <h2 class="text-xl font-extrabold text-white">Customer & Admin User Accounts</h2>
+      <p class="mt-1 text-xs text-slate-400">Manage user accounts, assign admin privileges, and inspect registration statuses.</p>
     </div>
     <button
-      class="shrink-0 rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
       type="button"
       (click)="formOpen.set(!formOpen())"
+      class="rounded-xl gradient-button px-4 py-2.5 text-xs font-bold text-white shadow-md flex items-center gap-1.5"
     >
-      {{ formOpen() ? 'Close form' : 'Add administrator' }}
+      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+      </svg>
+      <span>{{ formOpen() ? 'Close Form' : 'Register New Admin' }}</span>
     </button>
   </div>
 
   @if (success()) {
-    <div class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-emerald-700">
+    <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-xs font-semibold text-emerald-300">
       {{ success() }}
     </div>
   }
   @if (error()) {
-    <div class="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-red-700">
+    <div class="rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 text-xs font-semibold text-rose-300">
       {{ error() }}
     </div>
   }
 
+  <!-- Admin Registration Form -->
   @if (formOpen()) {
     <form
-      class="mb-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
       [formGroup]="form"
       (ngSubmit)="createAdmin()"
+      class="glass-panel rounded-2xl p-6 sm:p-8 border border-slate-800 space-y-4 shadow-2xl"
     >
-      <h3 class="text-lg font-bold">New administrator</h3>
-      <p class="mt-1 text-sm text-slate-500">
-        This form uses the protected administrator registration endpoint.
-      </p>
+      <div>
+        <h3 class="text-lg font-bold text-white">Create Administrator Account</h3>
+        <p class="text-xs text-slate-400 mt-0.5">Generates a new admin user in Keycloak identity & local account registry.</p>
+      </div>
 
-      <div class="mt-5 grid gap-5 md:grid-cols-2">
-        <label class="text-sm font-medium">
-          First name
-          <input
-            class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
-            formControlName="firstName"
-          />
-        </label>
-        <label class="text-sm font-medium">
-          Last name
-          <input
-            class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
-            formControlName="lastName"
-          />
-        </label>
-        <label class="text-sm font-medium">
-          Email address
-          <input
-            class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
-            type="email"
-            formControlName="email"
-          />
-        </label>
-        <label class="text-sm font-medium">
-          Temporary password
-          <input
-            class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
-            type="password"
-            formControlName="password"
-          />
-        </label>
+      <div class="grid gap-4 md:grid-cols-2">
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1">First Name</label>
+          <input formControlName="firstName" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1">Last Name</label>
+          <input formControlName="lastName" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1">Email Address</label>
+          <input type="email" formControlName="email" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1">Temporary Password</label>
+          <input type="password" formControlName="password" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs" />
+        </div>
       </div>
 
       <button
-        class="mt-5 rounded-lg bg-brand-600 px-5 py-2.5 font-semibold text-white disabled:bg-slate-300"
         type="submit"
         [disabled]="saving()"
+        class="gradient-button rounded-xl px-5 py-2.5 text-xs font-bold text-white shadow-md disabled:opacity-40"
       >
-        {{ saving() ? 'Creating…' : 'Create administrator' }}
+        {{ saving() ? 'Creating Account...' : 'Confirm Create Admin' }}
       </button>
     </form>
   }
 
+  <!-- Accounts Table -->
   @if (loading()) {
-    <p class="text-slate-500">Loading users…</p>
+    <div class="space-y-3">
+      @for (item of [1, 2, 3, 4]; track item) {
+        <div class="h-16 animate-pulse rounded-xl bg-slate-800/50"></div>
+      }
+    </div>
   } @else {
-    <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+    <div class="glass-panel rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
       <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm">
-          <thead class="bg-slate-100 text-xs uppercase text-slate-500">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-950/80 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
             <tr>
-              <th class="px-4 py-3">User</th>
-              <th class="px-4 py-3">Role</th>
-              <th class="px-4 py-3">Created</th>
-              <th class="px-4 py-3">Status</th>
-              <th class="px-4 py-3 text-right">Actions</th>
+              <th class="px-5 py-3.5">User Profile</th>
+              <th class="px-5 py-3.5">Assigned Role</th>
+              <th class="px-5 py-3.5">Created Date</th>
+              <th class="px-5 py-3.5">Account Status</th>
+              <th class="px-5 py-3.5 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-200">
+          <tbody class="divide-y divide-slate-800/60">
             @for (account of accounts(); track account.id) {
-              <tr>
-                <td class="px-4 py-3">
-                  <strong class="block">{{ account.user?.fullName || account.email }}</strong>
-                  <span class="text-slate-500">{{ account.email }}</span>
+              <tr class="hover:bg-slate-900/40 transition-colors">
+                <td class="px-5 py-4">
+                  <strong class="block text-slate-100 font-bold text-sm">{{ account.user?.fullName || account.email }}</strong>
+                  <span class="text-slate-400 text-xs font-mono">{{ account.email }}</span>
                 </td>
-                <td class="px-4 py-3">
+                <td class="px-5 py-4">
                   <span
-                    class="rounded-full px-2 py-1 text-xs font-semibold"
-                    [class.bg-purple-100]="applicationRole(account) === 'Admin'"
-                    [class.text-purple-700]="applicationRole(account) === 'Admin'"
-                    [class.bg-blue-100]="applicationRole(account) === 'Customer'"
-                    [class.text-blue-700]="applicationRole(account) === 'Customer'"
+                    class="rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider border"
+                    [class]="applicationRole(account) === 'Admin' 
+                      ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' 
+                      : (applicationRole(account) === 'Seller' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-indigo-500/10 text-indigo-400 border-indigo-500/30')"
                   >
                     {{ applicationRole(account) }}
                   </span>
                 </td>
-                <td class="px-4 py-3 text-slate-500">
+                <td class="px-5 py-4 text-slate-400">
                   {{ account.createdAtUtc | date: 'mediumDate' }}
                 </td>
-                <td class="px-4 py-3">
+                <td class="px-5 py-4">
                   <span
-                    class="font-medium"
-                    [class.text-emerald-600]="account.isActive"
-                    [class.text-slate-400]="!account.isActive"
+                    class="inline-flex items-center gap-1.5 font-semibold text-xs"
+                    [class]="account.isActive ? 'text-emerald-400' : 'text-slate-500'"
                   >
+                    <span [class]="account.isActive ? 'bg-emerald-400' : 'bg-slate-600'" class="h-2 w-2 rounded-full"></span>
                     {{ account.isActive ? 'Active' : 'Inactive' }}
                   </span>
                 </td>
-                <td class="px-4 py-3 text-right">
+                <td class="px-5 py-4 text-right">
                   <button
-                    class="font-semibold text-red-600 hover:text-red-800 disabled:text-slate-300"
                     type="button"
                     [disabled]="!account.isActive"
                     (click)="remove(account)"
+                    class="rounded-lg bg-rose-500/10 border border-rose-500/30 px-3 py-1.5 text-xs font-bold text-rose-400 hover:bg-rose-500/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                   >
                     Deactivate
                   </button>

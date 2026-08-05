@@ -1232,6 +1232,82 @@ Authorization: Bearer {accessToken}
 
 Returns `204` on success.
 
+## Real-time Notifications (SignalR)
+
+The Messaging API provides real-time updates for conversations using SignalR.
+
+### Connection
+
+Connect to the Conversations Hub using a SignalR client.
+
+**Hub URL:**
+```text
+https://localhost:7059/messaging-api/hubs/conversations
+```
+
+**Authentication:**
+SignalR requires the access token to be passed via the `access_token` query string parameter, as browsers do not support custom headers for WebSocket connections.
+
+```ts
+const connection = new signalR.HubConnectionBuilder()
+    .withUrl("https://localhost:7059/messaging-api/hubs/conversations", {
+        accessTokenFactory: () => this.authService.getAccessToken()
+    })
+    .withAutomaticReconnect()
+    .build();
+```
+
+### Client Methods (Incoming Events)
+
+The hub pushes the following events to connected clients.
+
+#### MessageSent
+Triggered when a new message is sent in a conversation where the current user is a participant.
+
+```ts
+type MessageSentRealtimeEvent = {
+  conversationId: string;
+  message: ConversationMessageResponse;
+  customerUserId: string;
+  sellerUserId: string;
+};
+
+connection.on("MessageSent", (event: MessageSentRealtimeEvent) => {
+  // Update UI with new message
+});
+```
+
+#### ConversationCreated
+Triggered when a new conversation is started where the current user is a participant.
+
+```ts
+type ConversationCreatedRealtimeEvent = {
+  conversation: ConversationResponse;
+  customerUserId: string;
+  sellerUserId: string;
+};
+
+connection.on("ConversationCreated", (event: ConversationCreatedRealtimeEvent) => {
+  // Update conversation list
+});
+```
+
+#### ConversationRead
+Triggered when a participant marks a conversation as read.
+
+```ts
+type ConversationReadRealtimeEvent = {
+  conversationId: string;
+  readerUserId: string;
+  otherParticipantUserId: string;
+  readAtUtc: string;
+};
+
+connection.on("ConversationRead", (event: ConversationReadRealtimeEvent) => {
+  // Update read indicators (e.g., clear unread count or show 'seen' checkmark)
+});
+```
+
 ## Notifications
 
 The Notification service sends email through SMTP and uses Quartz background jobs. The frontend does not call the Notification service directly for email confirmation in the current backend flow.

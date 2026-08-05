@@ -20,6 +20,16 @@ export interface OrderItem {
   totalPrice: number;
 }
 
+export interface SellerOrder {
+  id: string;
+  orderId: string;
+  sellerId: string;
+  status: OrderStatus;
+  totalPrice: number;
+  currency: string;
+  items: OrderItem[];
+}
+
 export interface Order {
   id: string;
   clientId: string;
@@ -28,6 +38,7 @@ export interface Order {
   totalPrice: number;
   currency: string;
   items: OrderItem[];
+  sellerOrders: SellerOrder[];
   confirmedOnUtc: string | null;
   paidOnUtc: string | null;
   shippedOnUtc: string | null;

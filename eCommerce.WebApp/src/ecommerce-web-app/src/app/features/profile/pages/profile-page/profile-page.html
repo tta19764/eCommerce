@@ -1,141 +1,138 @@
-<section class="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
-  <div class="mb-8">
-    <h1 class="text-3xl font-bold">My profile</h1>
-    <p class="mt-2 text-slate-500">Review and update your personal information.</p>
+<section class="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8 space-y-6">
+  
+  <div class="border-b border-slate-800 pb-4">
+    <span class="inline-flex items-center gap-2 rounded-full bg-indigo-500/10 border border-indigo-500/30 px-3 py-1 text-xs font-bold text-indigo-400">
+      👤 Account Settings
+    </span>
+    <h1 class="mt-2 text-3xl font-extrabold text-white sm:text-4xl">User Profile</h1>
+    <p class="mt-1 text-xs sm:text-sm text-slate-400">Review your profile details and upload custom avatars.</p>
   </div>
 
   @if (loading()) {
-    <p class="text-slate-500">Loading your profile…</p>
+    <div class="h-64 animate-pulse rounded-2xl bg-slate-800/50"></div>
   } @else if (!profile()) {
-    <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
-      {{ error() || 'Your profile could not be loaded.' }}
+    <div class="rounded-2xl border border-rose-500/30 bg-rose-500/10 p-6 text-center text-rose-300">
+      {{ error() || 'Your user profile details could not be loaded.' }}
     </div>
   } @else {
     @let currentProfile = profile()!;
     @let profileImage = imageUrl();
 
-    <div class="grid gap-6 md:grid-cols-[16rem_1fr]">
-      <aside
-        class="self-start rounded-xl border border-slate-200 bg-white p-6 text-center shadow-sm"
-      >
-        <div
-          class="mx-auto flex h-32 w-32 items-center justify-center overflow-hidden rounded-full bg-brand-100"
-        >
+    <div class="grid gap-6 md:grid-cols-[18rem_1fr]">
+      <!-- Profile Picture Sidebar -->
+      <aside class="glass-panel rounded-2xl p-6 text-center border border-slate-800 shadow-xl space-y-4 self-start">
+        <div class="mx-auto flex h-32 w-32 items-center justify-center overflow-hidden rounded-2xl bg-slate-950 border-2 border-indigo-500/50 shadow-inner">
           @if (profileImage) {
-            <img
-              class="h-full w-full object-cover"
-              [src]="profileImage"
-              [alt]="currentProfile.fullName"
-            />
+            <img [src]="profileImage" [alt]="currentProfile.fullName" class="h-full w-full object-cover" />
           } @else {
-            <span class="text-4xl font-bold text-brand-700">
+            <span class="text-3xl font-extrabold text-indigo-400">
               {{ currentProfile.firstName.charAt(0) }}{{ currentProfile.lastName.charAt(0) }}
             </span>
           }
         </div>
 
-        <h2 class="mt-4 text-lg font-bold">{{ currentProfile.fullName }}</h2>
-        <p class="mt-1 break-all text-sm text-slate-500">{{ currentProfile.email }}</p>
+        <div>
+          <h2 class="text-base font-bold text-white">{{ currentProfile.fullName }}</h2>
+          <p class="text-xs text-slate-400 font-mono mt-0.5 break-all">{{ currentProfile.email }}</p>
+        </div>
 
         <input
           #profileImageInput
-          class="hidden"
           type="file"
           accept="image/jpeg,image/png,image/webp,image/gif"
           (change)="updateImage($event)"
+          class="hidden"
         />
         <button
-          class="mt-5 w-full rounded-lg border border-brand-600 px-4 py-2 text-sm font-semibold text-brand-700 hover:bg-brand-50 disabled:border-slate-300 disabled:text-slate-400"
           type="button"
           [disabled]="uploadingImage()"
           (click)="profileImageInput.click()"
+          class="w-full rounded-xl bg-indigo-500/10 border border-indigo-500/30 py-2.5 text-xs font-bold text-indigo-300 hover:bg-indigo-500/20 disabled:opacity-40 transition-all"
         >
-          {{ uploadingImage() ? 'Uploading…' : 'Update profile picture' }}
+          {{ uploadingImage() ? 'Uploading Image...' : 'Upload Profile Picture' }}
         </button>
 
         @if (currentProfile.imageId) {
           <button
-            class="mt-2 text-sm font-semibold text-red-600 hover:text-red-800 disabled:text-slate-300"
             type="button"
             [disabled]="saving() || uploadingImage()"
             (click)="removeImage()"
+            class="text-xs font-semibold text-rose-400 hover:text-rose-300 transition-colors"
           >
-            Remove picture
+            Remove Picture
           </button>
         }
       </aside>
 
-      <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 class="text-xl font-bold">Personal information</h2>
-        <p class="mt-1 text-sm text-slate-500">
-          Your email address is managed by your authentication account.
-        </p>
+      <!-- Profile Information Body -->
+      <div class="glass-panel rounded-2xl p-6 sm:p-8 border border-slate-800 shadow-2xl space-y-6">
+        <div>
+          <h2 class="text-lg font-bold text-white">Personal Information</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Your email address is managed via your identity credentials.</p>
+        </div>
 
         @if (success()) {
-          <div class="mt-5 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-emerald-700">
+          <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs font-semibold text-emerald-300">
             {{ success() }}
           </div>
         }
 
         @if (error()) {
-          <div class="mt-5 rounded-lg border border-red-200 bg-red-50 p-3 text-red-700">
+          <div class="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs font-semibold text-rose-300">
             {{ error() }}
           </div>
         }
 
         @if (!editing()) {
-          <dl class="mt-6 grid gap-5 sm:grid-cols-2">
+          <dl class="grid gap-5 sm:grid-cols-2 text-xs border-t border-slate-800/80 pt-5">
             <div>
-              <dt class="text-sm font-medium text-slate-500">First name</dt>
-              <dd class="mt-1 font-semibold">{{ currentProfile.firstName }}</dd>
+              <dt class="text-slate-400 uppercase font-semibold">First Name</dt>
+              <dd class="text-slate-100 font-bold text-sm mt-1">{{ currentProfile.firstName }}</dd>
             </div>
             <div>
-              <dt class="text-sm font-medium text-slate-500">Last name</dt>
-              <dd class="mt-1 font-semibold">{{ currentProfile.lastName }}</dd>
+              <dt class="text-slate-400 uppercase font-semibold">Last Name</dt>
+              <dd class="text-slate-100 font-bold text-sm mt-1">{{ currentProfile.lastName }}</dd>
             </div>
             <div class="sm:col-span-2">
-              <dt class="text-sm font-medium text-slate-500">Email address</dt>
-              <dd class="mt-1 font-semibold">{{ currentProfile.email }}</dd>
+              <dt class="text-slate-400 uppercase font-semibold">Email Address</dt>
+              <dd class="text-slate-100 font-bold text-sm mt-1 font-mono">{{ currentProfile.email }}</dd>
             </div>
           </dl>
-          <button
-            class="mt-7 rounded-lg bg-brand-600 px-5 py-2.5 font-semibold text-white hover:bg-brand-700"
-            type="button"
-            (click)="startEditing()"
-          >
-            Update profile
-          </button>
+
+          <div class="pt-4 border-t border-slate-800">
+            <button
+              type="button"
+              (click)="startEditing()"
+              class="gradient-button rounded-xl px-5 py-2.5 text-xs font-bold text-white shadow-md"
+            >
+              Edit Profile Info
+            </button>
+          </div>
         } @else {
-          <form class="mt-6 space-y-5" [formGroup]="form" (ngSubmit)="save()">
-            <label class="block text-sm font-medium">
-              First name
-              <input
-                class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
-                formControlName="firstName"
-              />
-            </label>
+          <form class="space-y-4 border-t border-slate-800/80 pt-5" [formGroup]="form" (ngSubmit)="save()">
+            <div>
+              <label class="block text-xs font-bold text-slate-300 mb-1">First Name</label>
+              <input formControlName="firstName" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs" />
+            </div>
 
-            <label class="block text-sm font-medium">
-              Last name
-              <input
-                class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
-                formControlName="lastName"
-              />
-            </label>
+            <div>
+              <label class="block text-xs font-bold text-slate-300 mb-1">Last Name</label>
+              <input formControlName="lastName" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs" />
+            </div>
 
-            <div class="flex gap-3">
+            <div class="flex gap-3 pt-2">
               <button
-                class="rounded-lg bg-brand-600 px-5 py-2.5 font-semibold text-white hover:bg-brand-700 disabled:bg-slate-300"
                 type="submit"
                 [disabled]="saving()"
+                class="gradient-button rounded-xl px-5 py-2.5 text-xs font-bold text-white shadow-md disabled:opacity-40"
               >
-                {{ saving() ? 'Saving…' : 'Save changes' }}
+                {{ saving() ? 'Saving Changes...' : 'Save Profile' }}
               </button>
               <button
-                class="rounded-lg border border-slate-300 px-5 py-2.5 font-semibold text-slate-700 hover:bg-slate-100"
                 type="button"
                 [disabled]="saving()"
                 (click)="cancelEditing()"
+                class="rounded-xl bg-slate-800 border border-slate-700/60 px-5 py-2.5 text-xs font-semibold text-slate-300 hover:bg-slate-700 hover:text-white"
               >
                 Cancel
               </button>

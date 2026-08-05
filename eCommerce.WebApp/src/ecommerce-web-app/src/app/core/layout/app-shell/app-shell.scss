@@ -1,3 +1,8 @@
 :host {
   display: block;
+  min-height: 100vh;
+}
+
+header {
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }

@@ -9,10 +9,11 @@ import {
   ProductTypeOption,
 } from '../../../../core/models/product.models';
 import { ProductCard } from '../../../../shared/ui/product-card/product-card';
+import { CategoryPicker } from '../../../../shared/ui/category-picker/category-picker';
 
 @Component({
   selector: 'app-catalog-page',
-  imports: [ProductCard, ReactiveFormsModule],
+  imports: [ProductCard, CategoryPicker, ReactiveFormsModule],
   templateUrl: './catalog-page.html',
   styleUrl: './catalog-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -27,6 +28,7 @@ export class CatalogPage {
   protected readonly error = signal('');
   protected readonly page = signal(1);
   protected readonly total = signal(0);
+  protected readonly filtersOpen = signal(false);
   protected readonly sortOptions: ProductSortBy[] = ['Default', 'Name', 'Price', 'Rating'];
 
   protected readonly filterForm = new FormGroup({
@@ -107,6 +109,11 @@ export class CatalogPage {
       next: (categories) => this.categories.set(categories),
       error: () => this.categories.set([]),
     });
+  }
+
+  protected onCategorySelected(categoryId: string | null): void {
+    this.filterForm.patchValue({ categoryId: categoryId ?? '' });
+    this.applyFilters();
   }
 
   private loadProductTypes(): void {

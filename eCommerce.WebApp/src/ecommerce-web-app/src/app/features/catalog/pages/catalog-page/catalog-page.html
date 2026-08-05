@@ -1,175 +1,248 @@
-<section class="border-b border-slate-200 bg-white">
-  <div class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-    <span class="rounded-full bg-brand-100 px-3 py-1 text-sm font-semibold text-brand-700">
-      eCommerce catalog
-    </span>
-    <h1 class="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">Find your next product</h1>
-    <p class="mt-4 max-w-2xl text-lg text-slate-600">
-      Browse available products, check availability and ratings, and add items to your cart.
-    </p>
+<!-- Hero Banner Section -->
+<section class="relative overflow-hidden border-b border-slate-800 bg-slate-950 py-16 lg:py-24">
+  <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#6366f1_1px,transparent_1px)] [background-size:16px_16px]"></div>
+  <div class="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="max-w-3xl">
+      <span class="inline-flex items-center gap-2 rounded-full bg-indigo-500/10 border border-indigo-500/30 px-3.5 py-1 text-xs font-bold text-indigo-400">
+        <span class="h-2 w-2 rounded-full bg-indigo-400 animate-pulse"></span>
+        ApexStore Catalog
+      </span>
+      <h1 class="mt-4 text-4xl font-extrabold tracking-tight text-white sm:text-6xl leading-tight">
+        Discover Next-Gen Products & Microservices
+      </h1>
+      <p class="mt-4 text-base sm:text-lg text-slate-400 leading-relaxed">
+        Browse curated physical items, digital assets, license keys, and seller marketplace products with instant real-time search & subcategory filtering.
+      </p>
+    </div>
   </div>
 </section>
 
-<section class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-  <form
-    class="mb-8 grid gap-4 rounded-lg border border-slate-200 bg-white p-4 shadow-sm lg:grid-cols-6"
-    [formGroup]="filterForm"
-    (ngSubmit)="applyFilters()"
-  >
-    <label class="text-sm font-medium lg:col-span-2">
-      Search
-      <input
-        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
-        formControlName="query"
-        placeholder="Name or description"
-      />
-    </label>
-
-    <label class="text-sm font-medium">
-      Category
-      <select
-        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
-        formControlName="categoryId"
-      >
-        <option value="">All categories</option>
-        @for (category of categories(); track category.id) {
-          <option [value]="category.id">{{ category.path }}</option>
-        }
-      </select>
-    </label>
-
-    <label class="text-sm font-medium">
-      Type
-      <select
-        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
-        formControlName="productType"
-      >
-        <option value="">All types</option>
-        @for (type of productTypes(); track type.value) {
-          <option [value]="type.value">{{ type.label }}</option>
-        }
-      </select>
-    </label>
-
-    <label class="text-sm font-medium">
-      Sort
-      <select
-        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
-        formControlName="sortBy"
-      >
-        @for (sortOption of sortOptions; track sortOption) {
-          <option [value]="sortOption">{{ sortOption }}</option>
-        }
-      </select>
-    </label>
-
-    <label class="flex items-end gap-2 pb-2 text-sm font-medium">
-      <input class="h-4 w-4 rounded border-slate-300" type="checkbox" formControlName="inStock" />
-      In stock
-    </label>
-
-    <label class="text-sm font-medium">
-      Min price
-      <input
-        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
-        type="number"
-        min="0"
-        step="0.01"
-        formControlName="minPrice"
-      />
-    </label>
-
-    <label class="text-sm font-medium">
-      Max price
-      <input
-        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
-        type="number"
-        min="0"
-        step="0.01"
-        formControlName="maxPrice"
-      />
-    </label>
-
-    <label class="text-sm font-medium">
-      Min rating
-      <input
-        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
-        type="number"
-        min="0"
-        max="5"
-        step="0.5"
-        formControlName="minRating"
-      />
-    </label>
-
-    <label class="flex items-end gap-2 pb-2 text-sm font-medium">
-      <input
-        class="h-4 w-4 rounded border-slate-300"
-        type="checkbox"
-        formControlName="includeSubcategories"
-      />
-      Subcategories
-    </label>
-
-    <label class="flex items-end gap-2 pb-2 text-sm font-medium">
-      <input
-        class="h-4 w-4 rounded border-slate-300"
-        type="checkbox"
-        formControlName="sortDescending"
-      />
-      Descending
-    </label>
-
-    <div class="flex items-end gap-2">
-      <button
-        class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
-        type="submit"
-      >
-        Apply
-      </button>
-      <button
-        class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
-        type="button"
-        (click)="clearFilters()"
-      >
-        Clear
-      </button>
+<!-- Main Catalog Container -->
+<section class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-6">
+  
+  <!-- Category Selector Widget -->
+  <div class="glass-panel rounded-2xl p-6 shadow-xl">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-xs font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-2">
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+        Explore Categories
+      </h3>
     </div>
-  </form>
-
-  <div class="mb-6 flex items-end justify-between border-b border-slate-200 pb-4">
-    <div>
-      <h2 class="text-2xl font-bold">Products</h2>
-      <p class="mt-1 text-sm text-slate-500">Available from the product service</p>
-    </div>
-    <span class="rounded-full bg-slate-200 px-3 py-1 text-sm">{{ total() }} products</span>
+    <app-category-picker
+      [categories]="categories()"
+      [selectedId]="filterForm.controls.categoryId.value"
+      (categorySelected)="onCategorySelected($event)"
+    />
   </div>
 
+  <!-- Search & Filter Controls Panel -->
+  <div class="glass-panel rounded-2xl p-6 shadow-xl">
+    <form
+      [formGroup]="filterForm"
+      (ngSubmit)="applyFilters()"
+      class="space-y-4"
+    >
+      <!-- Top Primary Search Bar & Action Buttons -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+        <!-- Search Input -->
+        <div class="md:col-span-6 relative">
+          <svg class="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            type="text"
+            formControlName="query"
+            placeholder="Search products by title or description..."
+            class="w-full glass-input rounded-xl pl-10 pr-4 py-2.5 text-sm"
+          />
+        </div>
+
+        <!-- Product Type Dropdown -->
+        <div class="md:col-span-3">
+          <select
+            formControlName="productType"
+            class="w-full glass-input rounded-xl px-3 py-2.5 text-sm"
+          >
+            <option value="" class="bg-slate-900 text-slate-200">All Product Types</option>
+            @for (type of productTypes(); track type.value) {
+              <option [value]="type.value" class="bg-slate-900 text-slate-200">{{ type.label }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Sort By Dropdown -->
+        <div class="md:col-span-3">
+          <select
+            formControlName="sortBy"
+            class="w-full glass-input rounded-xl px-3 py-2.5 text-sm"
+          >
+            @for (sortOption of sortOptions; track sortOption) {
+              <option [value]="sortOption" class="bg-slate-900 text-slate-200">Sort by {{ sortOption }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <!-- Advanced Filter Toggle Bar -->
+      <div class="flex items-center justify-between pt-2 border-t border-slate-800/60 text-xs">
+        <button
+          type="button"
+          (click)="filtersOpen.set(!filtersOpen())"
+          class="text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1.5 transition-colors"
+        >
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+          </svg>
+          <span>{{ filtersOpen() ? 'Hide Advanced Filters' : 'Show Advanced Filters (Price, Rating, Stock)' }}</span>
+        </button>
+
+        <div class="flex items-center gap-2">
+          <button
+            type="submit"
+            class="gradient-button rounded-xl px-4 py-2 text-xs font-bold text-white shadow-md flex items-center gap-1.5"
+          >
+            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            Apply Filters
+          </button>
+          <button
+            type="button"
+            (click)="clearFilters()"
+            class="rounded-xl bg-slate-800/80 border border-slate-700/60 px-3.5 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-700 hover:text-white transition-all"
+          >
+            Reset
+          </button>
+        </div>
+      </div>
+
+      <!-- Expandable Filters Grid -->
+      @if (filtersOpen()) {
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-slate-800/80 text-xs">
+          <!-- Min Price -->
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">Min Price ($)</label>
+            <input
+              type="number"
+              min="0"
+              step="1"
+              formControlName="minPrice"
+              placeholder="e.g. 10"
+              class="w-full glass-input rounded-xl px-3 py-2 text-xs"
+            />
+          </div>
+
+          <!-- Max Price -->
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">Max Price ($)</label>
+            <input
+              type="number"
+              min="0"
+              step="1"
+              formControlName="maxPrice"
+              placeholder="e.g. 500"
+              class="w-full glass-input rounded-xl px-3 py-2 text-xs"
+            />
+          </div>
+
+          <!-- Min Rating -->
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">Min Rating (0 to 5)</label>
+            <input
+              type="number"
+              min="0"
+              max="5"
+              step="0.5"
+              formControlName="minRating"
+              placeholder="e.g. 4.0"
+              class="w-full glass-input rounded-xl px-3 py-2 text-xs"
+            />
+          </div>
+
+          <!-- Checkbox Options -->
+          <div class="flex flex-col justify-end space-y-2">
+            <label class="flex items-center gap-2 text-slate-300 font-medium cursor-pointer">
+              <input
+                type="checkbox"
+                formControlName="inStock"
+                class="rounded bg-slate-900 border-slate-700 text-indigo-500 focus:ring-indigo-500"
+              />
+              In Stock Only
+            </label>
+            <label class="flex items-center gap-2 text-slate-300 font-medium cursor-pointer">
+              <input
+                type="checkbox"
+                formControlName="includeSubcategories"
+                class="rounded bg-slate-900 border-slate-700 text-indigo-500 focus:ring-indigo-500"
+              />
+              Include Subcategories
+            </label>
+            <label class="flex items-center gap-2 text-slate-300 font-medium cursor-pointer">
+              <input
+                type="checkbox"
+                formControlName="sortDescending"
+                class="rounded bg-slate-900 border-slate-700 text-indigo-500 focus:ring-indigo-500"
+              />
+              Descending Order
+            </label>
+          </div>
+        </div>
+      }
+    </form>
+  </div>
+
+  <!-- Header Results Bar -->
+  <div class="flex items-center justify-between border-b border-slate-800 pb-4 pt-2">
+    <div>
+      <h2 class="text-xl font-extrabold text-white">Catalog Results</h2>
+      <p class="text-xs text-slate-400">Showing available products from verified sellers</p>
+    </div>
+    <span class="rounded-full bg-slate-800/80 border border-slate-700/60 px-3 py-1 text-xs font-bold text-indigo-300">
+      {{ total() }} {{ total() === 1 ? 'product' : 'products' }} found
+    </span>
+  </div>
+
+  <!-- Products Content Grid -->
   @if (loading()) {
-    <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
-      @for (item of [1, 2, 3, 4]; track item) {
-        <div class="h-96 animate-pulse rounded-xl bg-slate-200"></div>
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      @for (item of [1, 2, 3, 4, 5, 6, 7, 8]; track item) {
+        <div class="h-80 animate-pulse rounded-2xl bg-slate-800/50 border border-slate-700/40"></div>
       }
     </div>
   } @else if (error()) {
-    <div
-      class="flex items-center justify-between rounded-lg border border-red-200 bg-red-50 p-4 text-red-800"
-    >
-      <span>{{ error() }}</span>
+    <div class="rounded-2xl border border-rose-500/30 bg-rose-500/10 p-6 text-center text-rose-300 space-y-3">
+      <p class="font-semibold text-sm">{{ error() }}</p>
       <button
-        class="rounded-lg bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-700"
         type="button"
         (click)="load()"
+        class="rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white hover:bg-rose-700"
       >
-        Try again
+        Try Again
       </button>
     </div>
   } @else if (!products().length) {
-    <div class="rounded-lg border border-blue-200 bg-blue-50 p-4 text-blue-800">
-      No products have been added yet.
+    <div class="glass-panel rounded-2xl p-12 text-center text-slate-400 space-y-4">
+      <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+        <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+        </svg>
+      </div>
+      <h3 class="text-base font-bold text-white">No products found</h3>
+      <p class="text-xs text-slate-400 max-w-sm mx-auto">
+        No items match your active filters. Try adjusting your query search terms or resetting category selection.
+      </p>
+      <button
+        type="button"
+        (click)="clearFilters()"
+        class="rounded-xl gradient-button px-4 py-2 text-xs font-bold text-white"
+      >
+        Reset Filters
+      </button>
     </div>
   } @else {
-    <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       @for (product of products(); track product.id) {
         <app-product-card [product]="product" />
       }

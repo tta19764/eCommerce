@@ -54,8 +54,10 @@ export class AdminUsersPage {
     });
   }
 
-  protected applicationRole(account: Account): 'Admin' | 'Customer' {
-    return account.roles.some((role) => role.name.toLowerCase() === 'admin') ? 'Admin' : 'Customer';
+  protected applicationRole(account: Account): 'Admin' | 'Seller' | 'Customer' {
+    if (account.roles.some((role) => role.name.toLowerCase() === 'admin')) return 'Admin';
+    if (account.roles.some((role) => role.name.toLowerCase() === 'seller')) return 'Seller';
+    return 'Customer';
   }
 
   protected createAdmin(): void {

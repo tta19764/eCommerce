@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs';
 import { AuthStore } from '../../auth/auth.store';
 import { CartStore } from '../../../features/cart/data-access/cart.store';
+import { MessagingService } from '../../api/messaging.service';
 
 @Component({
   selector: 'app-shell',
@@ -14,10 +15,31 @@ import { CartStore } from '../../../features/cart/data-access/cart.store';
 })
 export class AppShell {
   private readonly router = inject(Router);
+  private readonly messaging = inject(MessagingService);
 
   protected readonly auth = inject(AuthStore);
   protected readonly cart = inject(CartStore);
   protected readonly menuOpen = signal(false);
+  protected readonly profileMenuOpen = signal(false);
+
+  constructor() {
+    effect(() => {
+      if (this.auth.isAuthenticated()) {
+        this.messaging.startConnection();
+      } else {
+        this.messaging.stopConnection();
+      }
+    });
+
+    // Close mobile menu on navigation
+    this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd)
+    ).subscribe(() => {
+      this.menuOpen.set(false);
+      this.profileMenuOpen.set(false);
+    });
+  }
+
   protected readonly isAdminPortal = toSignal(
     this.router.events.pipe(
       filter((event): event is NavigationEnd => event instanceof NavigationEnd),
@@ -25,6 +47,7 @@ export class AppShell {
     ),
     { initialValue: this.router.url.startsWith('/admin') },
   );
+
   protected readonly isSellerPortal = toSignal(
     this.router.events.pipe(
       filter((event): event is NavigationEnd => event instanceof NavigationEnd),
@@ -34,8 +57,8 @@ export class AppShell {
   );
 
   protected logout(): void {
-    // Clear client credentials before returning to the public storefront.
     this.auth.logout();
+    this.profileMenuOpen.set(false);
     this.router.navigate(['/']);
   }
 }
