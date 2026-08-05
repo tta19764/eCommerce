@@ -59,6 +59,7 @@ public class Order : Entity
     /// <summary>
     /// Adds a product snapshot to the order.
     /// </summary>
+    /// <param name="sellerId">The seller identifier.</param>
     /// <param name="productId">The product identifier.</param>
     /// <param name="productName">The product name at purchase time.</param>
     /// <param name="unitPrice">The unit price at purchase time.</param>

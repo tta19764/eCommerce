@@ -1,5 +1,7 @@
 using Asp.Versioning;
 using MessagingApi.Api.Endpoints;
+using MessagingApi.Api.Realtime;
+using MessagingApi.Application.Abstractions.Realtime;
 
 namespace MessagingApi.Api.Extensions;
 
@@ -15,6 +17,9 @@ public static class ServiceCollectionExtensions
     {
         services.AddOpenApi();
         services.AddEndpointsApiExplorer();
+
+        services.AddSignalR();
+        services.AddSingleton<IConversationsRealtimeNotifier, SignalRConversationsRealtimeNotifier>();
 
         services
             .AddApiVersioning(options =>

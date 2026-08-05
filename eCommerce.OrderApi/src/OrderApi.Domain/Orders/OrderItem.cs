@@ -60,6 +60,8 @@ public class OrderItem : Entity
     /// Executes the Create operation.
     /// </summary>
     /// <param name="orderId">The orderId value.</param>
+    /// <param name="sellerOrderId">The sellerOrderId value.</param>
+    /// <param name="sellerId">The sellerId value.</param>
     /// <param name="productId">The productId value.</param>
     /// <param name="productName">The productName value.</param>
     /// <param name="unitPrice">The unitPrice value.</param>

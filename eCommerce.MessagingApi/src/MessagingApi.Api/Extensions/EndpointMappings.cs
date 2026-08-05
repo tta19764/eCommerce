@@ -1,5 +1,6 @@
 using MessagingApi.Api.Endpoints;
 using MessagingApi.Api.Endpoints.Conversations;
+using MessagingApi.Api.Hubs;
 
 namespace MessagingApi.Api.Extensions;
 
@@ -23,6 +24,7 @@ public static class EndpointMappings
             .WithApiVersionSet(versionSet);
 
         api.MapConversationEndpoints();
+        api.MapHub<ConversationsHub>("/hubs/conversations");
 
         return builder;
     }
