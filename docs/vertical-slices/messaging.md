@@ -17,8 +17,8 @@ Messaging enables customer-seller communication for a marketplace with both prod
 4. A customer or seller opens an order conversation from a seller-order group.
 5. MessagingApi requests seller-order conversation details from OrderApi and verifies the current user is either the customer or seller.
 6. Messages are stored in `messaging_db`.
-7. After a message is saved, MessagingApi publishes `MessageSentIntegrationEvent`.
-8. NotificationApi consumes the event and creates a durable email job only if the recipient has confirmed email.
+7. After a message is saved, MessagingApi publishes `MessageSentIntegrationEvent` for email notifications and broadcasts `MessageSent` via SignalR for real-time UI updates.
+8. NotificationApi consumes the integration event and creates a durable email job only if the recipient has confirmed email.
 
 ## Endpoints
 
@@ -28,6 +28,7 @@ Messaging enables customer-seller communication for a marketplace with both prod
 - `GET /messaging-api/v1/conversations/{conversationId}/messages?page=1&pageSize=50`
 - `POST /messaging-api/v1/conversations/{conversationId}/messages`
 - `POST /messaging-api/v1/conversations/{conversationId}/read`
+- `SignalR Hub: /messaging-api/hubs/conversations`
 
 ## Persistence
 
@@ -40,4 +41,21 @@ Unique indexes prevent duplicate product inquiry conversations for the same cust
 
 ## Notifications
 
-Chat notifications use NotificationApi's existing durable job processor. Delivery is asynchronous and retryable, so saving a message does not wait for SMTP delivery.
+Messaging provides both real-time and asynchronous notifications.
+
+### Real-time Notifications (SignalR)
+
+MessagingApi uses SignalR to provide instant updates to connected clients:
+- **Hub Endpoint**: `/messaging-api/hubs/conversations`
+- **Events**:
+  - `MessageSent`: Broadcast to participants when a new message arrives.
+  - `ConversationCreated`: Broadcast to participants when a new conversation starts.
+  - `ConversationRead`: Broadcast when a participant marks a conversation as read.
+
+Clients must provide a JWT in the `access_token` query string to authenticate the WebSocket connection.
+
+### Email Notifications
+
+Asynchronous email notifications use NotificationApi's existing durable job processor. Delivery is asynchronous and retryable, so saving a message does not wait for SMTP delivery.
+1. After a message is saved, MessagingApi publishes `MessageSentIntegrationEvent`.
+2. NotificationApi consumes the event and creates a durable email job only if the recipient has confirmed email.

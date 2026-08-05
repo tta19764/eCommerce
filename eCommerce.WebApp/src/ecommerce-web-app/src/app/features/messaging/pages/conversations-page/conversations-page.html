@@ -1,0 +1,220 @@
+<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+  
+  <!-- Header Title -->
+  <div class="flex items-center justify-between mb-6 border-b border-slate-800 pb-4">
+    <div>
+      <span class="inline-flex items-center gap-2 rounded-full bg-indigo-500/10 border border-indigo-500/30 px-3 py-1 text-xs font-bold text-indigo-400">
+        💬 Marketplace Messaging Hub
+      </span>
+      <h1 class="mt-2 text-3xl font-extrabold text-white sm:text-4xl">Customer & Seller Conversations</h1>
+      <p class="mt-1 text-xs sm:text-sm text-slate-400">
+        Manage customer-seller order inquiries and product communications in real-time.
+      </p>
+    </div>
+
+    <!-- SignalR Status Indicator -->
+    <div class="hidden sm:flex items-center gap-2 rounded-xl bg-slate-900 border border-slate-800 px-3.5 py-2 text-xs">
+      <span
+        [class]="messagingService.isConnected() ? 'bg-emerald-400' : 'bg-amber-400'"
+        class="h-2.5 w-2.5 rounded-full animate-pulse"
+      ></span>
+      <span class="text-slate-300 font-semibold">
+        {{ messagingService.isConnected() ? 'SignalR Connected' : 'Connecting Realtime...' }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Dashboard Split Pane Container -->
+  <div class="glass-panel rounded-2xl border border-slate-800 overflow-hidden shadow-2xl h-[40rem] grid grid-cols-1 md:grid-cols-12">
+    
+    <!-- Left Pane: Conversation List -->
+    <div
+      class="md:col-span-4 lg:col-span-4 border-r border-slate-800 flex flex-col bg-slate-950/60"
+      [class.hidden]="activeConversation() !== null"
+      [class.md:flex]="true"
+    >
+      <!-- Search Input -->
+      <div class="p-3.5 border-b border-slate-800">
+        <div class="relative">
+          <svg class="absolute left-3 top-3 h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            type="text"
+            [(ngModel)]="searchQuery"
+            placeholder="Search conversations..."
+            class="w-full glass-input rounded-xl pl-9 pr-3 py-2 text-xs"
+          />
+        </div>
+      </div>
+
+      <!-- Conversations Scroll List -->
+      <div class="flex-1 overflow-y-auto divide-y divide-slate-800/60">
+        @if (loadingConversations()) {
+          <div class="p-4 space-y-3">
+            @for (item of [1, 2, 3, 4]; track item) {
+              <div class="h-16 animate-pulse rounded-xl bg-slate-800/50"></div>
+            }
+          </div>
+        } @else if (!filteredConversations.length) {
+          <div class="p-8 text-center text-slate-500 space-y-2">
+            <p class="text-xs font-semibold text-slate-400">No active conversations</p>
+            <p class="text-[11px]">Conversations started from seller orders will appear here.</p>
+          </div>
+        } @else {
+          @for (conv of filteredConversations; track conv.id) {
+            <button
+              type="button"
+              (click)="selectConversation(conv)"
+              [class]="activeConversation()?.id === conv.id ? 'bg-indigo-600/15 border-l-4 border-indigo-500' : 'hover:bg-slate-900/60'"
+              class="w-full text-left p-4 transition-all flex flex-col gap-1.5"
+            >
+              <div class="flex items-center justify-between">
+                <span class="inline-flex items-center gap-1 rounded-md bg-slate-800 border border-slate-700/60 px-2 py-0.5 text-[10px] font-bold text-indigo-300">
+                  @if (conv.sellerOrderId) {
+                    Seller Order #{{ conv.sellerOrderId.slice(0, 8) }}
+                  } @else if (conv.productId) {
+                    Product #{{ conv.productId.slice(0, 8) }}
+                  } @else {
+                    Order Inquiry
+                  }
+                </span>
+
+                @if (conv.lastMessageAtUtc) {
+                  <span class="text-[10px] text-slate-500">
+                    {{ conv.lastMessageAtUtc | date: 'shortTime' }}
+                  </span>
+                }
+              </div>
+
+              <div class="flex items-center justify-between mt-1 text-xs">
+                <span class="text-slate-300 font-semibold">{{ conv.type || 'Seller Conversation' }}</span>
+                <span class="text-[10px] text-indigo-400 font-mono">Status: {{ conv.status }}</span>
+              </div>
+            </button>
+          }
+        }
+      </div>
+    </div>
+
+    <!-- Right Pane: Active Thread View -->
+    <div
+      class="md:col-span-8 lg:col-span-8 flex flex-col bg-slate-900/40"
+      [class.hidden]="activeConversation() === null"
+      [class.md:flex]="true"
+    >
+      @if (activeConversation(); as conv) {
+        
+        <!-- Active Thread Header -->
+        <header class="flex items-center justify-between border-b border-slate-800 bg-slate-950/80 px-6 py-4">
+          <div class="flex items-center gap-3">
+            <!-- Mobile Back Button -->
+            <button
+              type="button"
+              (click)="activeConversation.set(null)"
+              class="md:hidden rounded-lg p-1 text-slate-400 hover:text-white"
+            >
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+
+            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white font-bold text-base shadow-sm">
+              💬
+            </div>
+
+            <div>
+              <h3 class="font-bold text-sm text-white flex items-center gap-2">
+                <span>Conversation Thread</span>
+                <span class="rounded-full bg-indigo-500/20 border border-indigo-500/30 px-2 py-0.5 text-[10px] text-indigo-300">Active</span>
+              </h3>
+              <p class="text-[11px] text-slate-400">
+                @if (conv.sellerOrderId) {
+                  Linked to Seller Order: <strong class="text-indigo-400">#{{ conv.sellerOrderId }}</strong>
+                } @else {
+                  Linked to Product: <strong class="text-indigo-400">#{{ conv.productId }}</strong>
+                }
+              </p>
+            </div>
+          </div>
+        </header>
+
+        <!-- Message History Body -->
+        <div #scrollContainer class="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-950/20">
+          @if (loadingMessages()) {
+            <div class="flex flex-col items-center justify-center h-full text-slate-500 space-y-2">
+              <svg class="h-6 w-6 animate-spin text-indigo-500" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span class="text-xs">Loading thread messages...</span>
+            </div>
+          } @else if (!messages().length) {
+            <div class="flex flex-col items-center justify-center h-full text-slate-500 text-center space-y-2">
+              <p class="text-xs font-semibold text-slate-300">No messages in this conversation yet</p>
+              <p class="text-[11px]">Type below to start messaging the seller.</p>
+            </div>
+          } @else {
+            @for (msg of messages(); track msg.id) {
+              <div class="flex flex-col" [class]="msg.senderUserId === currentUserId() ? 'items-end' : 'items-start'">
+                <div
+                  class="max-w-[75%] rounded-2xl px-4 py-2.5 text-xs shadow-md space-y-1"
+                  [class]="msg.senderUserId === currentUserId()
+                    ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 text-white rounded-br-none'
+                    : 'bg-slate-800/90 text-slate-200 border border-slate-700/80 rounded-bl-none'"
+                >
+                  <p class="leading-relaxed whitespace-pre-wrap">{{ msg.body }}</p>
+                  <span
+                    class="block text-[9px] text-right font-medium"
+                    [class]="msg.senderUserId === currentUserId() ? 'text-indigo-200' : 'text-slate-400'"
+                  >
+                    {{ msg.createdAtUtc | date: 'mediumTime' }}
+                  </span>
+                </div>
+              </div>
+            }
+          }
+        </div>
+
+        <!-- Compose Message Footer -->
+        <footer class="border-t border-slate-800 bg-slate-950/90 p-4">
+          <form (ngSubmit)="sendMessage()" class="flex items-center gap-3">
+            <input
+              type="text"
+              [(ngModel)]="newMessage"
+              name="message"
+              placeholder="Type your message to the seller..."
+              class="flex-1 glass-input rounded-xl px-4 py-2.5 text-xs focus:ring-1 focus:ring-indigo-500"
+              [disabled]="sending()"
+            />
+            <button
+              type="submit"
+              [disabled]="!newMessage.trim() || sending()"
+              class="rounded-xl gradient-button px-5 py-2.5 text-xs font-bold text-white shadow-md disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
+            >
+              <span>Send</span>
+              <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              </svg>
+            </button>
+          </form>
+        </footer>
+
+      } @else {
+        <!-- Empty State Select Conversation -->
+        <div class="flex flex-col items-center justify-center h-full text-slate-500 text-center p-8 space-y-3">
+          <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+            <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+            </svg>
+          </div>
+          <h3 class="text-base font-bold text-white">Select a Conversation</h3>
+          <p class="text-xs text-slate-400 max-w-sm">
+            Choose a thread from the list on the left to view customer-seller message history and send messages in real-time.
+          </p>
+        </div>
+      }
+    </div>
+
+  </div>
+</div>

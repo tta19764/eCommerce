@@ -1,4 +1,7 @@
 using MassTransit;
+using MessagingApi.Application.Abstractions.Realtime;
+using MessagingApi.Application.Conversations;
+using MessagingApi.Application.Conversations.RealTime;
 using MessagingApi.Domain.Conversations;
 using MessagingApi.Messages.Conversations;
 using SharedLibrary.Application.Abstractions.Messaging;
@@ -12,7 +15,8 @@ namespace MessagingApi.Application.Conversations.SendConversationMessage;
 public sealed class SendConversationMessageCommandHandler(
     IConversationRepository conversationRepository,
     IUnitOfWork unitOfWork,
-    IPublishEndpoint publishEndpoint)
+    IPublishEndpoint publishEndpoint,
+    IConversationsRealtimeNotifier realtimeNotifier)
     : ICommandHandler<SendConversationMessageCommand, Guid>
 {
     /// <summary>
@@ -61,6 +65,20 @@ public sealed class SendConversationMessageCommandHandler(
                 recipientUserId,
                 message.Body,
                 sentAtUtc),
+            cancellationToken);
+
+        await realtimeNotifier.NotifyMessageSentAsync(
+            new MessageSentRealtimeEvent(
+                conversation.Id,
+                new ConversationMessageResponse(
+                    message.Id,
+                    message.ConversationId,
+                    message.SenderUserId,
+                    message.Body,
+                    message.Type,
+                    message.CreatedAtUtc),
+                conversation.CustomerUserId,
+                conversation.SellerUserId),
             cancellationToken);
 
         return Result.Success(message.Id);

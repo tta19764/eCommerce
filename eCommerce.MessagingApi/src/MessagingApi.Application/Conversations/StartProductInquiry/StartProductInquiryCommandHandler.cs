@@ -1,4 +1,7 @@
 using MassTransit;
+using MessagingApi.Application.Abstractions.Realtime;
+using MessagingApi.Application.Conversations;
+using MessagingApi.Application.Conversations.RealTime;
 using MessagingApi.Domain.Conversations;
 using ProductApi.Messages.Products;
 using SharedLibrary.Application.Abstractions.Messaging;
@@ -12,7 +15,8 @@ namespace MessagingApi.Application.Conversations.StartProductInquiry;
 public sealed class StartProductInquiryCommandHandler(
     IConversationRepository conversationRepository,
     IUnitOfWork unitOfWork,
-    IRequestClient<GetProductDetailsRequest> productClient)
+    IRequestClient<GetProductDetailsRequest> productClient,
+    IConversationsRealtimeNotifier realtimeNotifier)
     : ICommandHandler<StartProductInquiryCommand, Guid>
 {
     /// <summary>
@@ -54,6 +58,25 @@ public sealed class StartProductInquiryCommandHandler(
 
         conversationRepository.Add(conversation);
         await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await realtimeNotifier.NotifyConversationCreatedAsync(
+            new ConversationCreatedRealtimeEvent(
+                new ConversationResponse(
+                    conversation.Id,
+                    conversation.Type,
+                    conversation.CustomerUserId,
+                    conversation.SellerUserId,
+                    conversation.ProductId,
+                    conversation.OrderId,
+                    conversation.SellerOrderId,
+                    conversation.Status,
+                    conversation.CreatedAtUtc,
+                    conversation.LastMessageAtUtc,
+                    conversation.CustomerReadAtUtc,
+                    conversation.SellerReadAtUtc),
+                conversation.CustomerUserId,
+                conversation.SellerUserId),
+            cancellationToken);
 
         return Result.Success(conversation.Id);
     }
