@@ -8,5 +8,5 @@ public sealed record ProductCategoryResponse(
     string Name,
     string Slug,
     Guid? ParentCategoryId,
-    string Path,
-    int Depth);
+    int Depth,
+    IReadOnlyCollection<ProductCategoryResponse> Subcategories);
