@@ -1,0 +1,180 @@
+<div class="space-y-6">
+  
+  <!-- Header Info Bar -->
+  <div class="glass-panel rounded-2xl p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 border border-slate-800 shadow-xl">
+    <div>
+      <h2 class="text-xl font-extrabold text-white">Product Category Management</h2>
+      <p class="text-xs text-slate-400 mt-1">
+        View hierarchical taxonomy, slugs, and create root categories or subcategories.
+      </p>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-3">
+      <input
+        type="text"
+        [(ngModel)]="searchQuery"
+        placeholder="Filter categories..."
+        class="glass-input rounded-xl px-3.5 py-2 text-xs w-56 sm:w-64"
+      />
+      <button
+        type="button"
+        (click)="toggleAddForm()"
+        class="rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-3.5 py-2 text-xs font-bold text-white shadow-md hover:from-indigo-500 hover:to-purple-500 transition-all flex items-center gap-1.5"
+      >
+        <span class="text-sm">+</span>
+        <span>{{ showAddForm() ? 'Cancel' : 'Add Category' }}</span>
+      </button>
+      <button
+        type="button"
+        (click)="loadCategories()"
+        class="rounded-xl bg-slate-800 border border-slate-700/60 px-3.5 py-2 text-xs font-semibold text-slate-300 hover:text-white transition-all flex items-center gap-1.5"
+      >
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+        Refresh
+      </button>
+    </div>
+  </div>
+
+  @if (success()) {
+    <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-xs font-semibold text-emerald-300">
+      {{ success() }}
+    </div>
+  }
+
+  @if (error()) {
+    <div class="rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 text-xs font-semibold text-rose-300">
+      {{ error() }}
+    </div>
+  }
+
+  <!-- Add Category Form Panel -->
+  @if (showAddForm()) {
+    <form (ngSubmit)="createCategory()" class="glass-panel rounded-2xl p-6 border border-indigo-500/40 space-y-4 shadow-2xl bg-indigo-950/20">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="font-extrabold text-sm text-white flex items-center gap-2">
+          <span>🏷️</span>
+          <span>Create Category or Subcategory</span>
+        </h3>
+        <span class="text-[11px] text-indigo-400">Endpoint: POST /product-api/v1/products/categories</span>
+      </div>
+
+      <div class="grid gap-4 sm:grid-cols-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1">Category Name *</label>
+          <input
+            type="text"
+            [(ngModel)]="newCategoryName"
+            (ngModelChange)="onNameChange()"
+            name="categoryName"
+            required
+            placeholder="e.g. Wireless Headphones"
+            class="w-full glass-input rounded-xl px-3.5 py-2 text-xs"
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1">URL Slug (Auto-generated)</label>
+          <input
+            type="text"
+            [(ngModel)]="newCategorySlug"
+            name="categorySlug"
+            placeholder="e.g. wireless-headphones"
+            class="w-full glass-input rounded-xl px-3.5 py-2 text-xs font-mono"
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1">Parent Category (Optional)</label>
+          <select
+            [(ngModel)]="selectedParentId"
+            name="parentCategoryId"
+            class="w-full glass-input rounded-xl px-3.5 py-2 text-xs"
+          >
+            <option [value]="null" class="bg-slate-900 text-slate-400">-- None (Root Category) --</option>
+            @for (cat of flatCategories(); track cat.id) {
+              <option [value]="cat.id" class="bg-slate-900 text-slate-200">{{ cat.fullPath }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 pt-2">
+        <button
+          type="button"
+          (click)="toggleAddForm()"
+          class="rounded-xl bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          [disabled]="creating() || !newCategoryName.trim()"
+          class="rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-5 py-2 text-xs font-bold text-white shadow-md disabled:opacity-40"
+        >
+          {{ creating() ? 'Saving Category...' : 'Save Category' }}
+        </button>
+      </div>
+    </form>
+  }
+
+  <!-- Category Hierarchy Cards List -->
+  @if (loading()) {
+    <div class="space-y-4">
+      @for (item of [1, 2, 3]; track item) {
+        <div class="h-32 animate-pulse rounded-2xl bg-slate-800/50"></div>
+      }
+    </div>
+  } @else if (!filteredCategories.length) {
+    <div class="glass-panel rounded-2xl p-12 text-center text-slate-400 space-y-3">
+      <h3 class="text-base font-bold text-white">No Categories Found</h3>
+      <p class="text-xs text-slate-400">No category matches your filter term.</p>
+    </div>
+  } @else {
+    <div class="space-y-4">
+      @for (cat of filteredCategories; track cat.id) {
+        <div class="glass-panel rounded-2xl border border-slate-800 p-5 space-y-3 shadow-lg">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 font-bold text-xs">
+                🏷️
+              </div>
+              <div>
+                <h3 class="font-bold text-sm text-white flex items-center gap-2">
+                  <span>{{ cat.name }}</span>
+                  <span class="rounded-md bg-slate-800 px-2 py-0.5 font-mono text-[10px] text-slate-400">
+                    slug: {{ cat.slug }}
+                  </span>
+                </h3>
+                <span class="text-[11px] text-slate-500 font-mono">ID: {{ cat.id }}</span>
+              </div>
+            </div>
+
+            <span class="rounded-full bg-slate-800/80 border border-slate-700/60 px-3 py-1 text-[10px] font-bold text-indigo-300">
+              Depth {{ cat.depth }} · {{ cat.subcategories.length }} subcategories
+            </span>
+          </div>
+
+          <!-- Nested Subcategories Display -->
+          @if (cat.subcategories && cat.subcategories.length > 0) {
+            <div class="pt-3 border-t border-slate-800/80 pl-4 border-l-2 border-indigo-500/30 space-y-2">
+              <h4 class="text-[11px] font-bold text-indigo-400 uppercase tracking-wider">Subcategories</h4>
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                @for (sub of cat.subcategories; track sub.id) {
+                  <div class="rounded-xl bg-slate-900/60 border border-slate-800 p-3 text-xs flex items-center justify-between">
+                    <div>
+                      <span class="font-bold text-slate-200 block">{{ sub.name }}</span>
+                      <span class="text-[10px] text-slate-500 font-mono">{{ sub.slug }}</span>
+                    </div>
+                    <span class="text-[9px] bg-slate-800 px-2 py-0.5 rounded text-slate-400">Depth {{ sub.depth }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

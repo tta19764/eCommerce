@@ -6,6 +6,7 @@ import { ApiResponse, PagedList, PageQuery } from '../models/api.models';
 import {
   Product,
   ProductCategory,
+  CreateCategoryRequest,
   CreateProductRequest,
   ProductReview,
   ProductSearchQuery,
@@ -32,6 +33,12 @@ export class ProductsApiClient {
   getCategories() {
     return this.http
       .get<ApiResponse<ProductCategory[]>>(`${this.url}/categories`)
+      .pipe(map(apiData));
+  }
+
+  createCategory(request: CreateCategoryRequest) {
+    return this.http
+      .post<ApiResponse<string>>(`${this.url}/categories`, request)
       .pipe(map(apiData));
   }
 

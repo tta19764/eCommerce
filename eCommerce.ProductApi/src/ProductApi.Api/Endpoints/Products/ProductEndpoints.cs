@@ -1,5 +1,6 @@
 using MediatR;
 using ProductApi.Application.Categories;
+using ProductApi.Application.Categories.CreateCategory;
 using ProductApi.Application.Categories.GetCategories;
 using ProductApi.Application.Products;
 using ProductApi.Application.Products.CreateProduct;
@@ -52,6 +53,14 @@ public static class ProductEndpoints
             .WithName(nameof(GetCategories))
             .WithSummary("Get product categories")
             .Produces<ApiResponse<IReadOnlyCollection<ProductCategoryResponse>>>();
+
+        group.MapPost("categories", CreateCategory)
+            .WithName(nameof(CreateCategory))
+            .WithSummary("Create a product category or subcategory")
+            .Produces<ApiResponse<Guid>>(StatusCodes.Status201Created)
+            .Produces<ApiResponse<Guid>>(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status401Unauthorized)
+            .RequireAuthorization(ApplicationPermissions.ProductCreate);
 
         group.MapGet("types", GetProductTypes)
             .WithName(nameof(GetProductTypes))
@@ -317,6 +326,26 @@ public static class ProductEndpoints
 
         return result.Error.Code.EndsWith(".NotFound", StringComparison.Ordinal)
             ? Results.NotFound(result.MapToApiResponse())
+            : Results.BadRequest(result.MapToApiResponse());
+    }
+
+    /// <summary>
+    /// Creates a product category or subcategory.
+    /// </summary>
+    public static async Task<IResult> CreateCategory(
+        CreateCategoryRequest request,
+        ISender sender,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new CreateCategoryCommand(request.Name, request.Slug, request.ParentCategoryId),
+            cancellationToken);
+
+        return result.IsSuccess
+            ? Results.CreatedAtRoute(
+                nameof(GetCategories),
+                new { version = ProductApiApiVersions.V1RouteValue },
+                result.MapToApiResponse())
             : Results.BadRequest(result.MapToApiResponse());
     }
 }
