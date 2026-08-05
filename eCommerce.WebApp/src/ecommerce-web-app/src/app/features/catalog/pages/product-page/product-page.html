@@ -1,122 +1,138 @@
-<section class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+<section class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-6">
   <a
-    class="mb-6 inline-block text-sm font-semibold text-brand-600 hover:text-brand-700"
     routerLink="/"
+    class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-400 hover:text-indigo-300 transition-colors"
   >
-    ← Back to products
+    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+    </svg>
+    Back to Catalog
   </a>
 
   @if (loading()) {
-    <p class="text-slate-500">Loading product…</p>
+    <div class="h-96 animate-pulse rounded-2xl bg-slate-800/50"></div>
   } @else if (failed() || !product()) {
-    <div class="rounded-lg bg-amber-50 p-4 text-amber-800">
-      <h1 class="font-bold">Product not found</h1>
-      <p>This product may no longer be available.</p>
+    <div class="glass-panel rounded-2xl p-8 text-center text-amber-300 border border-amber-500/30 bg-amber-500/10 space-y-2">
+      <h1 class="font-bold text-base">Product Not Found</h1>
+      <p class="text-xs text-amber-400">This product listing may no longer be available in the marketplace.</p>
     </div>
   } @else {
     @let currentProduct = product()!;
 
-    <div class="grid gap-10 lg:grid-cols-[1.35fr_0.65fr]">
-      <div>
+    <div class="grid gap-8 lg:grid-cols-12">
+      <!-- Product Images Showcase -->
+      <div class="lg:col-span-7 space-y-4">
         @if (currentProduct.imageIds.length) {
           <div class="grid gap-4 sm:grid-cols-2">
             @for (image of orderedImageIds(currentProduct); track image) {
-              <img
-                class="w-full rounded-xl border border-slate-200 bg-white object-cover"
-                [src]="imageUrl(image)"
-                [alt]="currentProduct.name"
-              />
+              <div class="overflow-hidden rounded-2xl border border-slate-800 bg-slate-950 aspect-square">
+                <img
+                  class="h-full w-full object-cover hover:scale-105 transition-transform duration-500"
+                  [src]="imageUrl(image)"
+                  [alt]="currentProduct.name"
+                />
+              </div>
             }
           </div>
         } @else {
-          <div
-            class="flex min-h-96 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-3xl font-bold text-slate-300"
-          >
-            eCommerce
+          <div class="flex h-96 items-center justify-center rounded-2xl border border-slate-800 bg-slate-950 text-slate-600 font-bold text-lg">
+            Apex Showcase
           </div>
         }
       </div>
 
-      <div
-        class="self-start rounded-xl border border-slate-200 bg-white p-6 shadow-sm lg:sticky lg:top-24"
-      >
-        <div class="flex items-center gap-2 text-sm">
-          <span class="rounded-full bg-brand-100 px-2 py-1 font-semibold text-brand-700">
-            Product
-          </span>
-          <span class="text-slate-500">
-            ★ {{ currentProduct.rating || 'New' }} · {{ currentProduct.reviewsCount }} reviews
-          </span>
-        </div>
-        <h1 class="mt-4 text-3xl font-bold">{{ currentProduct.name }}</h1>
-        <p class="mt-2 text-xl font-semibold">
-          {{ currentProduct.price | currency: currentProduct.currency }}
-        </p>
-        <p class="mt-4 text-slate-600">{{ currentProduct.description }}</p>
-        <div
-          class="mt-5 rounded-lg p-3 text-sm"
-          [class.bg-emerald-50]="currentProduct.quantity"
-          [class.text-emerald-700]="currentProduct.quantity"
-          [class.bg-slate-100]="!currentProduct.quantity"
-          [class.text-slate-600]="!currentProduct.quantity"
-        >
-          {{ currentProduct.quantity ? 'In stock' : 'Out of stock' }}
-        </div>
-        <div class="mt-5 flex gap-2">
-          @if (choosingQuantity() && currentProduct.quantity) {
-            <div class="flex items-center rounded-lg border border-slate-300">
-              <button
-                class="px-3 py-2 font-bold disabled:text-slate-300"
-                type="button"
-                aria-label="Decrease quantity"
-                [disabled]="quantity() === 1"
-                (click)="decreaseQuantity()"
-              >
-                −
-              </button>
-              <span class="min-w-8 text-center font-semibold">{{ quantity() }}</span>
-              <button
-                class="px-3 py-2 font-bold"
-                type="button"
-                aria-label="Increase quantity"
-                (click)="increaseQuantity()"
-              >
-                +
-              </button>
+      <!-- Sticky Product Details Card -->
+      <div class="lg:col-span-5">
+        <div class="glass-panel rounded-2xl border border-slate-800 p-6 sm:p-8 space-y-6 shadow-2xl sticky top-24">
+          <div class="flex items-center justify-between text-xs">
+            <span class="rounded-full bg-indigo-500/20 border border-indigo-500/30 px-3 py-1 font-bold text-indigo-300">
+              {{ currentProduct.productType }}
+            </span>
+            <div class="flex items-center gap-1 text-slate-300">
+              <svg class="h-4 w-4 text-amber-400 fill-amber-400" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+              <strong class="font-bold">{{ currentProduct.rating ? currentProduct.rating.toFixed(1) : 'New' }}</strong>
+              <span class="text-slate-500">({{ currentProduct.reviewsCount }} reviews)</span>
             </div>
-          }
-          <button
-            class="flex-1 rounded-lg bg-brand-600 px-4 py-2 font-semibold text-white hover:bg-brand-700 disabled:bg-slate-300"
-            type="button"
-            [disabled]="!currentProduct.quantity"
-            (click)="addToCart()"
+          </div>
+
+          <div>
+            <h1 class="text-2xl font-extrabold text-white sm:text-3xl leading-snug">{{ currentProduct.name }}</h1>
+            <p class="mt-2 text-2xl font-black gradient-text">
+              {{ currentProduct.price | currency: currentProduct.currency }}
+            </p>
+          </div>
+
+          <p class="text-xs text-slate-300 leading-relaxed">{{ currentProduct.description }}</p>
+
+          <div
+            class="rounded-xl border px-3.5 py-2.5 text-xs font-bold"
+            [class]="currentProduct.quantity ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-rose-500/10 border-rose-500/30 text-rose-400'"
           >
-            {{ currentProduct.quantity ? 'Add to cart' : 'Out of stock' }}
-          </button>
+            {{ currentProduct.quantity ? 'In Stock' : 'Out of stock' }}
+          </div>
+
+          <div class="flex items-center gap-2 pt-2">
+            @if (choosingQuantity() && currentProduct.quantity) {
+              <div class="flex items-center rounded-xl bg-slate-950 border border-slate-700/80 p-0.5">
+                <button
+                  type="button"
+                  [disabled]="quantity() === 1"
+                  (click)="decreaseQuantity()"
+                  class="flex h-9 w-9 items-center justify-center rounded-lg text-slate-300 hover:bg-slate-800 disabled:opacity-30 font-bold"
+                >
+                  −
+                </button>
+                <span class="min-w-8 text-center text-xs font-bold text-slate-100">{{ quantity() }}</span>
+                <button
+                  type="button"
+                  [disabled]="quantity() >= currentProduct.quantity"
+                  (click)="increaseQuantity()"
+                  class="flex h-9 w-9 items-center justify-center rounded-lg text-slate-300 hover:bg-slate-800 disabled:opacity-30 font-bold"
+                >
+                  +
+                </button>
+              </div>
+            }
+
+            <button
+              type="button"
+              [disabled]="!currentProduct.quantity"
+              (click)="addToCart()"
+              class="flex-1 rounded-xl gradient-button py-3 px-4 text-xs font-bold text-white shadow-md disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+              <span>{{ !currentProduct.quantity ? 'Out of Stock' : (choosingQuantity() ? 'Confirm Add to Bag' : 'Add to Bag') }}</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="mt-12 border-t border-slate-200 pt-8">
-      <h2 class="text-2xl font-bold">Customer reviews</h2>
+    <!-- Customer Reviews Section -->
+    <div class="mt-12 border-t border-slate-800 pt-8 space-y-4">
+      <h2 class="text-xl font-extrabold text-white">Verified Customer Reviews</h2>
+      
       @if (!reviews().length) {
-        <p class="mt-4 rounded-lg bg-blue-50 p-4 text-blue-700">
-          There are no reviews for this product yet.
-        </p>
+        <div class="glass-panel rounded-2xl p-6 text-center text-slate-400 text-xs">
+          No customer reviews have been submitted for this product yet.
+        </div>
+      } @else {
+        <div class="space-y-3">
+          @for (review of reviews(); track review.id) {
+            <article class="glass-panel rounded-2xl p-5 border border-slate-800 space-y-2">
+              <div class="flex items-center justify-between text-xs">
+                <span class="text-amber-400 font-bold tracking-widest">{{ '★'.repeat(review.rating) }}</span>
+                <time class="text-slate-500">{{ review.createdAtUtc | date: 'mediumDate' }}</time>
+              </div>
+              <p class="text-xs text-slate-300 leading-relaxed">{{ review.comment }}</p>
+            </article>
+          }
+        </div>
       }
-      <div class="mt-5 divide-y divide-slate-200 rounded-xl border border-slate-200 bg-white">
-        @for (review of reviews(); track review.id) {
-          <article class="p-5">
-            <div class="flex justify-between">
-              <span class="text-amber-500">{{ '★'.repeat(review.rating) }}</span>
-              <time class="text-sm text-slate-500">
-                {{ review.createdAtUtc | date: 'mediumDate' }}
-              </time>
-            </div>
-            <p class="mt-2">{{ review.comment }}</p>
-          </article>
-        }
-      </div>
     </div>
   }
 </section>
