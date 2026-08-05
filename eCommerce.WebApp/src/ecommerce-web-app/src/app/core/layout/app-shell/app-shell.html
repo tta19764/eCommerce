@@ -73,6 +73,22 @@
         </a>
       }
 
+      <!-- Theme Switcher Toggle -->
+      <button
+        type="button"
+        (click)="themeService.toggleTheme()"
+        class="flex items-center gap-2 rounded-xl bg-slate-800/80 border border-slate-700/60 px-3 py-2 text-xs font-semibold text-slate-200 hover:text-white transition-all shadow-sm group"
+        [title]="'Switch to ' + (themeService.currentTheme() === 'dark' ? 'Light' : 'Dark') + ' Mode'"
+      >
+        @if (themeService.currentTheme() === 'dark') {
+          <span class="text-amber-400 group-hover:scale-110 transition-transform">☀️</span>
+          <span>Light</span>
+        } @else {
+          <span class="text-indigo-400 group-hover:scale-110 transition-transform">🌙</span>
+          <span>Dark</span>
+        }
+      </button>
+
       <!-- Cart Button -->
       <a
         routerLink="/cart"
@@ -233,7 +249,19 @@
       </div>
 
       <!-- Mobile Auth Action Buttons -->
-      <div class="pt-3 border-t border-slate-800 flex items-center justify-between">
+      <div class="pt-3 border-t border-slate-800 flex items-center justify-between gap-3">
+        <button
+          type="button"
+          (click)="themeService.toggleTheme()"
+          class="flex items-center gap-1.5 rounded-lg bg-slate-800 border border-slate-700/60 px-3 py-2 text-xs font-semibold text-slate-200"
+        >
+          @if (themeService.currentTheme() === 'dark') {
+            <span>☀️ Light</span>
+          } @else {
+            <span>🌙 Dark</span>
+          }
+        </button>
+
         <a
           routerLink="/cart"
           class="flex items-center gap-2 rounded-lg bg-slate-800 px-3 py-2 text-sm font-medium text-slate-200"

@@ -5,6 +5,7 @@ import { filter, map } from 'rxjs';
 import { AuthStore } from '../../auth/auth.store';
 import { CartStore } from '../../../features/cart/data-access/cart.store';
 import { MessagingService } from '../../api/messaging.service';
+import { ThemeService } from '../../theme/theme.service';
 
 @Component({
   selector: 'app-shell',
@@ -19,6 +20,7 @@ export class AppShell {
 
   protected readonly auth = inject(AuthStore);
   protected readonly cart = inject(CartStore);
+  protected readonly themeService = inject(ThemeService);
   protected readonly menuOpen = signal(false);
   protected readonly profileMenuOpen = signal(false);
 
