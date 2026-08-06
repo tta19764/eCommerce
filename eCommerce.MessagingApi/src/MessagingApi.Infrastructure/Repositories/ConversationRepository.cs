@@ -81,7 +81,10 @@ public sealed class ConversationRepository(MessagingDbContext dbContext) : IConv
     /// <inheritdoc />
     public void Update(Conversation conversation)
     {
-        dbContext.Conversations.Update(conversation);
+        if (dbContext.Entry(conversation).State == EntityState.Detached)
+        {
+            dbContext.Conversations.Update(conversation);
+        }
     }
 }
 

@@ -24,7 +24,8 @@ public static class EndpointMappings
             .WithApiVersionSet(versionSet);
 
         api.MapConversationEndpoints();
-        api.MapHub<ConversationsHub>("/hubs/conversations")
+
+        builder.MapHub<ConversationsHub>("/api/hubs/conversations")
             .RequireAuthorization();
 
         return builder;

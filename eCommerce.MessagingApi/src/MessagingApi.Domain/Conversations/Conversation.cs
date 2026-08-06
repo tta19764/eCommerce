@@ -94,17 +94,18 @@ public sealed class Conversation : Entity
             createdAtUtc);
     }
 
-    public Result AddMessage(Guid? senderUserId, string body, ConversationMessageType type, DateTime createdAtUtc)
+    public Result<ConversationMessage> AddMessage(Guid? senderUserId, string body, ConversationMessageType type, DateTime createdAtUtc)
     {
         if (string.IsNullOrWhiteSpace(body))
         {
-            return Result.Failure(ConversationErrors.EmptyMessage);
+            return Result.Failure<ConversationMessage>(ConversationErrors.EmptyMessage);
         }
 
-        _messages.Add(ConversationMessage.Create(Id, senderUserId, body.Trim(), type, createdAtUtc));
+        var message = ConversationMessage.Create(Id, senderUserId, body.Trim(), type, createdAtUtc);
+        _messages.Add(message);
         LastMessageAtUtc = createdAtUtc;
 
-        return Result.Success();
+        return Result.Success(message);
     }
 
     public void MarkRead(Guid userId, DateTime readAtUtc)

@@ -15,6 +15,7 @@ internal sealed class ConversationMessageConfiguration : IEntityTypeConfiguratio
         builder.ToTable("ConversationMessages");
 
         builder.HasKey(message => message.Id);
+        builder.Property(message => message.Id).ValueGeneratedNever();
 
         builder.Property(message => message.ConversationId).IsRequired();
         builder.Property(message => message.Body).HasMaxLength(4000).IsRequired();

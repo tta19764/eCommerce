@@ -15,6 +15,7 @@ internal sealed class ConversationConfiguration : IEntityTypeConfiguration<Conve
         builder.ToTable("Conversations");
 
         builder.HasKey(conversation => conversation.Id);
+        builder.Property(conversation => conversation.Id).ValueGeneratedNever();
 
         builder.Property(conversation => conversation.Type).IsRequired();
         builder.Property(conversation => conversation.CustomerUserId).IsRequired();
