@@ -14,6 +14,7 @@ import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { MessagingApiClient } from '../../../../core/api/messaging-api';
 import { MessagingService } from '../../../../core/api/messaging-service';
+import { UsersApiClient } from '../../../../core/api/users-api';
 import { AuthStore } from '../../../../core/auth/auth-store';
 import { Conversation, ConversationMessage } from '../../../../core/models/messaging-model';
 
@@ -28,6 +29,7 @@ import { Conversation, ConversationMessage } from '../../../../core/models/messa
 export class ConversationsPage implements OnInit, OnDestroy {
   private readonly messagingApi = inject(MessagingApiClient);
   protected readonly messagingService = inject(MessagingService);
+  private readonly usersApi = inject(UsersApiClient);
   private readonly auth = inject(AuthStore);
   private subscription = new Subscription();
 
@@ -39,7 +41,7 @@ export class ConversationsPage implements OnInit, OnDestroy {
   protected readonly loadingConversations = signal(true);
   protected readonly loadingMessages = signal(false);
   protected readonly sending = signal(false);
-  protected readonly currentUserId = signal(this.auth.user()?.id);
+  protected readonly applicationUserId = signal<string | null>(null);
   protected searchQuery = '';
   protected newMessage = '';
 
@@ -50,13 +52,38 @@ export class ConversationsPage implements OnInit, OnDestroy {
     });
   }
 
+  protected isSentByCurrentUser(msg: ConversationMessage): boolean {
+    if (!msg.senderUserId) return false;
+    const s = String(msg.senderUserId).toLowerCase().trim();
+
+    const appUser = this.applicationUserId()?.toLowerCase().trim();
+    if (appUser && s === appUser) return true;
+
+    const u = this.auth.user();
+    if (!u) return false;
+
+    return (
+      (!!u.id && s === u.id.toLowerCase().trim()) ||
+      (!!u.userId && s === u.userId.toLowerCase().trim()) ||
+      (!!u.email && s === u.email.toLowerCase().trim())
+    );
+  }
+
   ngOnInit() {
     this.loadConversations();
     this.subscribeToRealtime();
+    this.loadApplicationUserId();
   }
 
   ngOnDestroy() {
     this.subscription.unsubscribe();
+  }
+
+  private loadApplicationUserId() {
+    this.usersApi.getOwn().subscribe({
+      next: (profile) => this.applicationUserId.set(profile.id),
+      error: () => {},
+    });
   }
 
   protected get filteredConversations(): Conversation[] {
@@ -95,7 +122,8 @@ export class ConversationsPage implements OnInit, OnDestroy {
     this.loadingMessages.set(true);
     this.messagingApi.getMessages(conversationId, { pageSize: 100 }).subscribe({
       next: (result) => {
-        this.messages.set([...result.items].reverse());
+        // Backend returns messages in chronological order (CreatedAtUtc ascending). Do not reverse.
+        this.messages.set(result.items);
         this.loadingMessages.set(false);
       },
       error: () => this.loadingMessages.set(false),
@@ -135,12 +163,30 @@ export class ConversationsPage implements OnInit, OnDestroy {
     if (!active || !body || this.sending()) return;
 
     this.sending.set(true);
-    this.messagingApi.sendMessage(active.id, { body }).subscribe({
-      next: () => {
-        this.newMessage = '';
+    const text = body;
+    this.newMessage = '';
+
+    this.messagingApi.sendMessage(active.id, { body: text }).subscribe({
+      next: (messageId) => {
         this.sending.set(false);
+        const senderId = this.applicationUserId() ?? this.auth.user()?.id ?? '';
+        const newMsg: ConversationMessage = {
+          id: messageId || `msg-${Date.now()}`,
+          conversationId: active.id,
+          senderUserId: senderId,
+          body: text,
+          type: 'Text',
+          createdAtUtc: new Date().toISOString(),
+        };
+
+        if (!this.messages().some((m) => m.id === newMsg.id)) {
+          this.messages.update((msgs) => [...msgs, newMsg]);
+        }
       },
-      error: () => this.sending.set(false),
+      error: () => {
+        this.sending.set(false);
+        this.newMessage = text;
+      },
     });
   }
 

@@ -76,6 +76,11 @@ export interface ProductReview {
   createdAtUtc: string;
 }
 
+export interface CreateReviewRequest {
+  rating: number;
+  comment: string;
+}
+
 export interface CreateProductRequest {
   name: string;
   description: string;

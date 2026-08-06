@@ -60,6 +60,16 @@ export class ProductsApiClient {
       .pipe(map(apiData));
   }
 
+  createReview(productId: string, request: { rating: number; comment: string }) {
+    return this.http
+      .post<ApiResponse<ProductReview>>(`${this.url}/${productId}/reviews`, request)
+      .pipe(map(apiData));
+  }
+
+  deleteReview(productId: string, reviewId: string) {
+    return this.http.delete<void>(`${this.url}/${productId}/reviews/${reviewId}`);
+  }
+
   create(request: CreateProductRequest) {
     return this.http.post<ApiResponse<string>>(this.url, request).pipe(map(apiData));
   }
