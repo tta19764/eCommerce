@@ -22,7 +22,8 @@ public static class GatewayExtensions
                 policy
                     .AllowAnyHeader()
                     .AllowAnyMethod()
-                    .SetIsOriginAllowed(_ => true);
+                    .SetIsOriginAllowed(_ => true)
+                    .AllowCredentials();
             });
         });
 

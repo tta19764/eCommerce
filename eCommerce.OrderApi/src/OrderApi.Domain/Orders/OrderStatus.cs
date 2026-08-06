@@ -1,8 +1,11 @@
+using System.Text.Json.Serialization;
+
 namespace OrderApi.Domain.Orders;
 
 /// <summary>
 /// Order lifecycle state.
 /// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum OrderStatus
 {
     Pending = 1,
