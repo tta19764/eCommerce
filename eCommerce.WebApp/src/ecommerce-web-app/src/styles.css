@@ -17,186 +17,537 @@
   }
   
   body {
-    @apply min-w-80 bg-slate-900 text-slate-100 antialiased font-sans selection:bg-indigo-500 selection:text-white transition-colors duration-300;
-    background-image: 
-      radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.12) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.08) 0px, transparent 50%);
-    background-attachment: fixed;
+    @apply min-w-80 bg-slate-950 text-slate-100 antialiased font-sans selection:bg-indigo-600 selection:text-white transition-colors duration-200;
   }
 
-  /* Light Theme Root Adjustments */
+  /* Universal Interactive Pointer Standard */
+  button,
+  a,
+  summary,
+  select,
+  [role="button"],
+  [type="button"],
+  [type="submit"],
+  [type="reset"],
+  .category-chip-inactive,
+  .category-chip-active,
+  .conv-item,
+  .user-menu-button,
+  .user-menu-item,
+  .user-menu-item-logout {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  input:disabled,
+  select:disabled,
+  textarea:disabled,
+  a.disabled,
+  .disabled {
+    cursor: not-allowed !important;
+  }
+
+  /* Universal Tactile Hover & Press Micro-Interactions for Buttons */
+  button:not(:disabled),
+  [role="button"]:not(:disabled),
+  input[type="button"]:not(:disabled),
+  input[type="submit"]:not(:disabled),
+  .app-btn-primary,
+  .gradient-button,
+  .user-menu-button {
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), filter 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+  }
+
+  button:not(:disabled):hover,
+  [role="button"]:not(:disabled):hover,
+  input[type="button"]:not(:disabled):hover,
+  input[type="submit"]:not(:disabled):hover,
+  .app-btn-primary:hover,
+  .gradient-button:hover,
+  .user-menu-button:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.08);
+  }
+
+  button:not(:disabled):active,
+  [role="button"]:not(:disabled):active,
+  input[type="button"]:not(:disabled):active,
+  input[type="submit"]:not(:disabled):active,
+  .app-btn-primary:active,
+  .gradient-button:active,
+  .user-menu-button:active {
+    transform: translateY(0) scale(0.98);
+    filter: brightness(0.95);
+  }
+
+  /* Light Theme Root Adjustments - Soft Neutral Palette */
   html.light body {
-    background-color: #f8fafc;
-    color: #0f172a;
-    background-image: 
-      radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.05) 0px, transparent 50%);
+    background-color: #edf2f7;
+    color: #1e293b;
   }
 
-  /* Custom scrollbar */
+  /* Strict custom scrollbar */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
 
   ::-webkit-scrollbar-track {
-    background: rgba(15, 23, 42, 0.6);
+    background: rgba(15, 23, 42, 0.8);
   }
 
   html.light ::-webkit-scrollbar-track {
-    background: #f1f5f9;
+    background: #e2e8f0;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: rgba(99, 102, 241, 0.3);
-    border-radius: 9999px;
+    background: rgba(100, 116, 139, 0.4);
+    border-radius: 4px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(99, 102, 241, 0.6);
+    background: rgba(100, 116, 139, 0.7);
   }
 }
 
-/* Reusable Glassmorphism & Accent Utilities */
+/* Strict Enterprise Utility Classes */
+.app-card,
 .glass-panel {
-  background: rgba(30, 41, 59, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background-color: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 0.5rem;
 }
 
+html.light .app-card,
 html.light .glass-panel {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+  background-color: #f1f5f9;
+  border: 1px solid #94a3b8;
+  box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.12), 0 2px 6px -1px rgba(15, 23, 42, 0.08);
 }
 
+.app-card-hover,
 .glass-panel-hover {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
 }
 
+.app-card-hover:hover,
 .glass-panel-hover:hover {
-  background: rgba(30, 41, 59, 0.85);
-  border-color: rgba(99, 102, 241, 0.3);
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(79, 70, 229, 0.1);
+  border-color: #334155;
+  background-color: #1e293b;
 }
 
+html.light .app-card-hover:hover,
 html.light .glass-panel-hover:hover {
-  background: #ffffff;
-  border-color: rgba(99, 102, 241, 0.4);
-  box-shadow: 0 12px 24px -5px rgba(0, 0, 0, 0.08);
+  border-color: #64748b;
+  background-color: #e2e8f0;
+  box-shadow: 0 8px 20px -3px rgba(15, 23, 42, 0.16), 0 4px 8px -2px rgba(15, 23, 42, 0.1);
 }
 
+.app-input,
 .glass-input {
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: #090d16;
+  border: 1px solid #334155;
   color: #f8fafc;
-  transition: all 0.2s ease;
+  border-radius: 0.375rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
+html.light .app-input,
 html.light .glass-input {
-  background: #ffffff;
-  border: 1px solid #cbd5e1;
+  background-color: #e2e8f0;
+  border: 1px solid #94a3b8;
   color: #0f172a;
+  box-shadow: inset 0 1px 2px 0 rgba(15, 23, 42, 0.06);
 }
 
+.app-input:focus,
 .glass-input:focus {
   outline: none;
   border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
-  background: rgba(15, 23, 42, 0.85);
+  box-shadow: 0 0 0 1px #6366f1;
 }
 
+html.light .app-input:focus,
 html.light .glass-input:focus {
-  background: #ffffff;
-  border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.25);
 }
 
+/* Solid Non-Gradient Text & Buttons */
 .gradient-text {
-  background: linear-gradient(135deg, #a5b4fc 0%, #6366f1 50%, #818cf8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #f8fafc;
+  background: none;
+  -webkit-text-fill-color: initial;
 }
 
 html.light .gradient-text {
-  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 50%, #4338ca 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #0f172a;
+  background: none;
+  -webkit-text-fill-color: initial;
 }
 
-.gradient-button {
-  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
-  transition: all 0.2s ease;
+.gradient-button,
+.app-btn-primary {
+  background-color: #4f46e5;
+  color: #ffffff;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.gradient-button:hover {
-  background: linear-gradient(135deg, #4338ca 0%, #4f46e5 100%);
-  box-shadow: 0 4px 14px 0 rgba(79, 70, 229, 0.4);
+.gradient-button:hover,
+.app-btn-primary:hover {
+  background-color: #4338ca;
+  box-shadow: none;
 }
 
-/* Light Theme Overrides for Text & Background Tokens */
-html.light .text-white,
+html.light .gradient-button,
+html.light .app-btn-primary {
+  box-shadow: 0 2px 6px -1px rgba(79, 70, 229, 0.4);
+}
+
+/* Refined Light Theme Overrides - High Contrast Non-White Soft Slate Palette */
+html.light body {
+  background-color: #e2e8f0;
+  color: #0f172a;
+}
+
 html.light .text-slate-100,
 html.light .text-slate-200 {
   color: #0f172a !important;
 }
 
+html.light .bg-indigo-600,
+html.light .bg-indigo-600 *,
+html.light .bg-indigo-700,
+html.light .bg-indigo-700 *,
+html.light .app-btn-primary,
+html.light .gradient-button {
+  color: #ffffff !important;
+}
+
+/* Page Card Content High Contrast in Light Mode */
+html.light app-profile-page h1:not(.messaging-header-banner *),
+html.light app-profile-page h2:not(.messaging-header-banner *),
+html.light app-profile-page h3:not(.messaging-header-banner *),
+html.light app-profile-page dt,
+html.light app-profile-page dd,
+html.light app-profile-page label,
+html.light app-profile-page p:not(.messaging-header-banner *),
+html.light app-cart-page h1:not(.messaging-header-banner *),
+html.light app-cart-page h2:not(.messaging-header-banner *),
+html.light app-cart-page h3:not(.messaging-header-banner *),
+html.light app-cart-page p:not(.messaging-header-banner *),
+html.light app-cart-page span:not(.messaging-header-banner *):not(.bg-indigo-600 *):not(.bg-white *),
+html.light app-login-page h1,
+html.light app-login-page h2,
+html.light app-login-page label,
+html.light app-login-page p:not(.text-rose-500):not(.text-rose-600),
+html.light app-register-page h1,
+html.light app-register-page h2,
+html.light app-register-page legend,
+html.light app-register-page label,
+html.light app-register-page p:not(.text-rose-500):not(.text-rose-600),
+html.light app-seller-products-page h1:not(.messaging-header-banner *),
+html.light app-seller-products-page h2:not(.messaging-header-banner *),
+html.light app-seller-products-page h3:not(.messaging-header-banner *),
+html.light app-seller-products-page h4:not(.messaging-header-banner *),
+html.light app-seller-products-page label,
+html.light app-seller-products-page legend,
+html.light app-seller-products-page p:not(.messaging-header-banner *):not(.text-emerald-400):not(.text-emerald-600):not(.text-rose-500):not(.text-rose-600):not(.text-indigo-400):not(.text-indigo-600),
+html.light app-seller-products-page span:not(.messaging-header-banner *):not(.text-emerald-400):not(.text-emerald-600):not(.text-rose-500):not(.text-rose-600):not(.text-indigo-400):not(.text-indigo-600):not(.bg-indigo-600 *):not(.bg-emerald-600 *):not(.bg-white *) {
+  color: #0f172a !important;
+}
+
+html.light app-seller-products-page select,
+html.light app-seller-products-page select option {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
 html.light .text-slate-300,
 html.light .text-slate-400 {
-  color: #475569 !important;
+  color: #334155 !important;
 }
 
 html.light .text-slate-500 {
+  color: #475569 !important;
+}
+
+html.light .text-indigo-400,
+html.light .text-indigo-300 {
+  color: #4338ca !important;
+}
+
+html.light .text-indigo-200 {
+  color: #3730a3 !important;
+}
+
+html.light .text-emerald-400,
+html.light .text-emerald-300 {
+  color: #047857 !important;
+}
+
+html.light .text-amber-400,
+html.light .text-amber-300 {
+  color: #b45309 !important;
+}
+
+html.light .text-rose-400,
+html.light .text-rose-300 {
+  color: #b91c1c !important;
+}
+
+/* Hero & Featured Banner Backgrounds in Light Mode (Primary Indigo Tone) */
+html.light .hero-bg {
+  background-color: #3730a3 !important;
+  color: #ffffff !important;
+}
+
+html.light .hero-bg h1,
+html.light .hero-bg h2,
+html.light .hero-bg h3,
+html.light .hero-bg span.text-white {
+  color: #ffffff !important;
+}
+
+html.light .hero-bg p,
+html.light .hero-bg .text-slate-400 {
+  color: #e0e7ff !important;
+}
+
+/* Category & Subcategory Picker Chips */
+html.light .category-chip-inactive {
+  background-color: #cbd5e1 !important;
+  color: #0f172a !important;
+  border-color: #94a3b8 !important;
+}
+
+html.light .category-chip-inactive:hover {
+  background-color: #e0e7ff !important;
+  color: #4338ca !important;
+  border-color: #6366f1 !important;
+}
+
+html.light .category-chip-active {
+  background-color: #4f46e5 !important;
+  color: #ffffff !important;
+  border-color: #4338ca !important;
+}
+
+/* Light Theme Chat Area & Customer Message Bubbles */
+html.light .chat-window-header {
+  background-color: #cbd5e1 !important;
+  border-color: #94a3b8 !important;
+}
+
+html.light .chat-window-header h3,
+html.light .chat-window-header h2 {
+  color: #0f172a !important;
+}
+
+html.light .chat-stream-bg {
+  background-color: #f8fafc !important;
+}
+
+html.light .chat-bubble-received {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.08) !important;
+}
+
+html.light .chat-bubble-received p {
+  color: #0f172a !important;
+}
+
+html.light .chat-bubble-received span {
   color: #64748b !important;
 }
 
-html.light .bg-slate-900,
-html.light .bg-slate-950 {
-  background-color: #ffffff !important;
+html.light .chat-bubble-sent {
+  background-color: #4f46e5 !important;
+  color: #ffffff !important;
+  box-shadow: 0 1px 3px 0 rgba(79, 70, 229, 0.3) !important;
 }
 
-html.light .bg-slate-800 {
+html.light .chat-bubble-sent p,
+html.light .chat-bubble-sent span {
+  color: #ffffff !important;
+}
+
+/* Conversations Sidebar Left Pane in Light Mode */
+html.light .conv-sidebar-pane {
+  background-color: #f1f5f9 !important;
+  border-right-color: #cbd5e1 !important;
+}
+
+html.light .conv-item {
+  background-color: transparent !important;
+  color: #0f172a !important;
+}
+
+html.light .conv-item:hover {
+  background-color: #e2e8f0 !important;
+}
+
+html.light .conv-item-active {
+  background-color: #e0e7ff !important;
+  color: #0f172a !important;
+  border-left-color: #4f46e5 !important;
+}
+
+/* Messaging Header Banner in Light Mode */
+.messaging-header-banner {
+  background-color: #4f46e5 !important;
+  color: #ffffff !important;
+}
+
+html.light .messaging-header-banner {
+  background-color: #4f46e5 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px -2px rgba(79, 70, 229, 0.35) !important;
+}
+
+html.light .messaging-header-banner h1,
+html.light .messaging-header-banner p,
+html.light .messaging-header-banner span {
+  color: #ffffff !important;
+}
+
+/* Empty State Container Titles & Descriptions */
+html.light .empty-state-title {
+  color: #0f172a !important;
+}
+
+html.light .empty-state-desc {
+  color: #334155 !important;
+}
+
+/* User Profile Menu Dropdown in Light Mode */
+html.light .user-menu-button {
+  background-color: #cbd5e1 !important;
+  border-color: #94a3b8 !important;
+  color: #0f172a !important;
+}
+
+html.light .user-menu-email {
+  color: #0f172a !important;
+}
+
+html.light .user-menu-dropdown {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.18) !important;
+}
+
+html.light .user-email-text {
+  color: #0f172a !important;
+}
+
+html.light .user-role-badge {
+  color: #4338ca !important;
+}
+
+html.light .user-menu-item {
+  color: #0f172a !important;
+  background-color: transparent !important;
+}
+
+html.light .user-menu-item:hover {
+  background-color: #e0e7ff !important;
+  color: #4338ca !important;
+}
+
+html.light .user-menu-item-logout {
+  color: #dc2626 !important;
+  background-color: transparent !important;
+}
+
+html.light .user-menu-item-logout:hover {
+  background-color: #fee2e2 !important;
+  color: #b91c1c !important;
+}
+
+/* Profile Page Glass Panels & Inputs in Light Mode */
+html.light .glass-panel {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08) !important;
+}
+
+html.light .glass-input {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+html.light .bg-slate-900,
+html.light .bg-slate-900\/60,
+html.light .bg-slate-900\/40 {
   background-color: #f1f5f9 !important;
 }
 
-html.light .bg-slate-800\/80,
-html.light .bg-slate-800\/90,
-html.light .bg-slate-900\/95,
-html.light .bg-slate-950\/80 {
-  background-color: rgba(255, 255, 255, 0.95) !important;
+html.light .bg-slate-800,
+html.light .bg-slate-800\/50,
+html.light .bg-slate-800\/80 {
+  background-color: #cbd5e1 !important;
+  color: #0f172a !important;
 }
 
+html.light .hover\:bg-slate-900:hover,
+html.light .hover\:bg-slate-800:hover {
+  background-color: #cbd5e1 !important;
+}
+
+html.light .bg-indigo-600\/20 {
+  background-color: #c7d2fe !important;
+}
+
+html.light .bg-indigo-500\/10 {
+  background-color: #e0e7ff !important;
+}
+
+html.light .bg-emerald-500\/10 {
+  background-color: #d1fae5 !important;
+}
+
+html.light .bg-rose-500\/10 {
+  background-color: #ffe4e6 !important;
+}
+
+html.light .bg-amber-500\/10 {
+  background-color: #fef3c7 !important;
+}
+
+/* Highly Visible Borders & Shadows in Light Mode */
 html.light .border-slate-800,
-html.light .border-slate-800\/80 {
-  border-color: #e2e8f0 !important;
+html.light .border-slate-800\/80,
+html.light .divide-slate-800 > * + * {
+  border-color: #94a3b8 !important;
 }
 
 html.light .border-slate-700,
 html.light .border-slate-700\/60,
 html.light .border-slate-700\/80 {
-  border-color: #cbd5e1 !important;
+  border-color: #64748b !important;
 }
 
-html.light header {
-  background-color: rgba(255, 255, 255, 0.85) !important;
-  border-color: #e2e8f0 !important;
+html.light header,
+html.light nav {
+  background-color: #f1f5f9 !important;
+  border-color: #94a3b8 !important;
+  box-shadow: 0 2px 8px -2px rgba(15, 23, 42, 0.1) !important;
 }
 
 html.light footer {
-  background-color: #f1f5f9 !important;
-  border-color: #e2e8f0 !important;
+  background-color: #e2e8f0 !important;
+  border-color: #94a3b8 !important;
+  box-shadow: 0 -2px 8px -2px rgba(15, 23, 42, 0.08) !important;
 }
 
-/* Animations */
-@keyframes pulse-subtle {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
-}
-
-.animate-pulse-subtle {
-  animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+html.light .shadow-xl,
+html.light .shadow-lg,
+html.light .shadow-md {
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.18), 0 4px 10px -2px rgba(15, 23, 42, 0.12) !important;
 }
