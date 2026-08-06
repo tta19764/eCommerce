@@ -109,7 +109,10 @@ public abstract class Repository<T, TContext>(TContext dbContext)
     /// <param name="entity">The entity to update.</param>
     public virtual void Update(T entity)
     {
-        DbContext.Update(entity);
+        if (DbContext.Entry(entity).State == EntityState.Detached)
+        {
+            DbContext.Update(entity);
+        }
     }
 
     /// <summary>

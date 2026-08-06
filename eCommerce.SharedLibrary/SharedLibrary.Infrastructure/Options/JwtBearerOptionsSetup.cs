@@ -32,7 +32,7 @@ public sealed class JwtBearerOptionsSetup(IOptions<AuthenticationOptions> option
                 // If the request is for our hub...
                 var path = context.HttpContext.Request.Path;
                 if (!string.IsNullOrEmpty(accessToken) &&
-                    path.StartsWithSegments("/hubs"))
+                    (path.StartsWithSegments("/hubs") || path.StartsWithSegments("/api/hubs") || path.Value?.Contains("/hubs") == true))
                 {
                     // Read the token out of the query string
                     context.Token = accessToken;
