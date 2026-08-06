@@ -48,11 +48,10 @@ public sealed class SendConversationMessageCommandHandler(
             return Result.Failure<Guid>(addResult.Error);
         }
 
+        var message = addResult.Value;
         conversation.MarkRead(request.CurrentUserId, sentAtUtc);
-        conversationRepository.Update(conversation);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        var message = conversation.Messages.OrderByDescending(item => item.CreatedAtUtc).First();
         var recipientUserId = request.CurrentUserId == conversation.CustomerUserId
             ? conversation.SellerUserId
             : conversation.CustomerUserId;

@@ -34,7 +34,6 @@ public sealed class MarkConversationReadCommandHandler(
 
         var readAtUtc = DateTime.UtcNow;
         conversation.MarkRead(request.CurrentUserId, readAtUtc);
-        conversationRepository.Update(conversation);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         var otherParticipantUserId = request.CurrentUserId == conversation.CustomerUserId
