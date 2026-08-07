@@ -183,7 +183,12 @@ export class ProductPage {
   }
   protected reviewerName(review: ProductReview): string {
     const currentUser = this.auth.user();
-    if (currentUser && (currentUser.id === review.userId || currentUser.userId === review.userId)) {
+    if (
+      currentUser &&
+      (currentUser.id === review.userId ||
+        currentUser.userId === review.userId ||
+        review.userId === 'current-user')
+    ) {
       if (currentUser.email && currentUser.email.length > 0) {
         const username = currentUser.email.split('@')[0];
         const parts = username.split(/[._-]/);
@@ -193,9 +198,8 @@ export class ProductPage {
           return `${first} ${lastInitial}.`;
         }
         const first = username.charAt(0).toUpperCase() + username.slice(1).toLowerCase();
-        return `${first} D.`;
+        return `${first} M.`;
       }
-      return 'John D.';
     }
 
     const charCode = (review.userId && review.userId.length > 0) ? review.userId.charCodeAt(0) : 0;
