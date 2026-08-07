@@ -2,6 +2,7 @@ using MassTransit;
 using Microsoft.Extensions.Logging;
 using OrderApi.Domain.Orders;
 using ProductApi.Messages.Products;
+using SharedLibrary.Application.Abstractions.Caching;
 using SharedLibrary.Application.Abstractions.Messaging;
 using SharedLibrary.Application.Pagination;
 using SharedLibrary.Domain.Abstractions;
@@ -14,6 +15,7 @@ namespace OrderApi.Application.Orders.GetOrdersByClient;
 public sealed class GetOrdersByClientIdQueryHandler(
     IOrderRepository orderRepository,
     IRequestClient<GetUserProductReviewsRequest> userReviewsClient,
+    ICacheService cacheService,
     ILogger<GetOrdersByClientIdQueryHandler> logger)
     : IQueryHandler<GetOrdersByClientIdQuery, PagedListResponse<OrderResponse>>
 {
@@ -27,6 +29,7 @@ public sealed class GetOrdersByClientIdQueryHandler(
         GetOrdersByClientIdQuery request,
         CancellationToken cancellationToken)
     {
+        await OrderCacheKeys.TrackKeyAsync(cacheService, request.CacheKey, cancellationToken);
         var page = NormalizePage(request.Page);
         var pageSize = NormalizePageSize(request.PageSize);
 

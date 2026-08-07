@@ -1,4 +1,5 @@
 using OrderApi.Domain.Orders;
+using SharedLibrary.Application.Abstractions.Caching;
 using SharedLibrary.Application.Abstractions.Messaging;
 using SharedLibrary.Application.Pagination;
 using SharedLibrary.Domain.Abstractions;
@@ -8,7 +9,9 @@ namespace OrderApi.Application.Orders.GetSellerOrders;
 /// <summary>
 /// Handles seller-order collection queries.
 /// </summary>
-public sealed class GetSellerOrdersQueryHandler(IOrderRepository orderRepository)
+public sealed class GetSellerOrdersQueryHandler(
+    IOrderRepository orderRepository,
+    ICacheService cacheService)
     : IQueryHandler<GetSellerOrdersQuery, PagedListResponse<SellerOrderResponse>>
 {
     /// <inheritdoc />
@@ -16,6 +19,7 @@ public sealed class GetSellerOrdersQueryHandler(IOrderRepository orderRepository
         GetSellerOrdersQuery request,
         CancellationToken cancellationToken)
     {
+        await OrderCacheKeys.TrackKeyAsync(cacheService, request.CacheKey, cancellationToken);
         var page = request.Page < 1 ? 1 : request.Page;
         var pageSize = request.PageSize switch
         {

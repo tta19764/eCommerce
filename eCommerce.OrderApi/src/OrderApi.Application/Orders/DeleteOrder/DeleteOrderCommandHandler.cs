@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using OrderApi.Domain.Orders;
+using SharedLibrary.Application.Abstractions.Caching;
 using SharedLibrary.Application.Abstractions.Messaging;
 using SharedLibrary.Domain.Abstractions;
 
@@ -11,6 +12,7 @@ namespace OrderApi.Application.Orders.DeleteOrder;
 public sealed class DeleteOrderCommandHandler(
     IOrderRepository orderRepository,
     IUnitOfWork unitOfWork,
+    ICacheService cacheService,
     ILogger<DeleteOrderCommandHandler> logger) : ICommandHandler<DeleteOrderCommand>
 {
     /// <summary>
@@ -31,6 +33,8 @@ public sealed class DeleteOrderCommandHandler(
 
         orderRepository.Delete(order);
         await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await OrderCacheKeys.InvalidateCacheAsync(cacheService, cancellationToken);
 
         logger.LogInformation("Deleted order {OrderId}", request.OrderId);
 

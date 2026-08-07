@@ -2,6 +2,7 @@ using MassTransit;
 using Microsoft.Extensions.Logging;
 using OrderApi.Domain.Orders;
 using ProductApi.Messages.Products;
+using SharedLibrary.Application.Abstractions.Caching;
 using SharedLibrary.Application.Abstractions.Messaging;
 using SharedLibrary.Domain.Abstractions;
 using SharedLibrary.Domain.Money;
@@ -15,6 +16,7 @@ public sealed class CreateOrderCommandHandler(
     IOrderRepository orderRepository,
     IUnitOfWork unitOfWork,
     IRequestClient<GetProductDetailsRequest> productClient,
+    ICacheService cacheService,
     ILogger<CreateOrderCommandHandler> logger) : ICommandHandler<CreateOrderCommand, Guid>
 {
     /// <summary>
@@ -62,6 +64,8 @@ public sealed class CreateOrderCommandHandler(
 
         orderRepository.Add(order);
         await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await OrderCacheKeys.InvalidateCacheAsync(cacheService, cancellationToken);
 
         logger.LogInformation("Created order {OrderId}", order.Id);
 

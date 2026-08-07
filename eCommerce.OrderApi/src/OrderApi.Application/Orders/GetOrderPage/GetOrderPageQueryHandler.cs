@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using OrderApi.Domain.Orders;
+using SharedLibrary.Application.Abstractions.Caching;
 using SharedLibrary.Application.Abstractions.Messaging;
 using SharedLibrary.Application.Pagination;
 using SharedLibrary.Domain.Abstractions;
@@ -11,6 +12,7 @@ namespace OrderApi.Application.Orders.GetOrderPage;
 /// </summary>
 public sealed class GetOrderPageQueryHandler(
     IOrderRepository orderRepository,
+    ICacheService cacheService,
     ILogger<GetOrderPageQueryHandler> logger) : IQueryHandler<GetOrderPageQuery, PagedListResponse<OrderResponse>>
 {
     /// <summary>
@@ -23,6 +25,8 @@ public sealed class GetOrderPageQueryHandler(
         GetOrderPageQuery request,
         CancellationToken cancellationToken)
     {
+        await OrderCacheKeys.TrackKeyAsync(cacheService, request.CacheKey, cancellationToken);
+
         var page = NormalizePage(request.Page);
         var pageSize = NormalizePageSize(request.PageSize);
 

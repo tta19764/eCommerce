@@ -9,6 +9,8 @@ using ProductApi.Messages.Products;
 using SharedLibrary.Domain.Abstractions;
 using Xunit;
 
+using SharedLibrary.Application.Abstractions.Caching;
+
 namespace OrderApi.Application.UnitTests.Orders;
 
 public class CreateOrderCommandHandlerTests
@@ -17,6 +19,7 @@ public class CreateOrderCommandHandlerTests
     private readonly IUnitOfWork _unitOfWorkMock = Substitute.For<IUnitOfWork>();
     private readonly IRequestClient<GetProductDetailsRequest> _productClientMock =
         Substitute.For<IRequestClient<GetProductDetailsRequest>>();
+    private readonly ICacheService _cacheServiceMock = Substitute.For<ICacheService>();
 
     [Fact]
     public async Task Handle_Should_CreateOrderWithProductSnapshot_WhenProductExists()
@@ -39,6 +42,7 @@ public class CreateOrderCommandHandlerTests
             _orderRepositoryMock,
             _unitOfWorkMock,
             _productClientMock,
+            _cacheServiceMock,
             NullLogger<CreateOrderCommandHandler>.Instance);
 
         var command = new CreateOrderCommand(
@@ -86,6 +90,7 @@ public class CreateOrderCommandHandlerTests
             _orderRepositoryMock,
             _unitOfWorkMock,
             _productClientMock,
+            _cacheServiceMock,
             NullLogger<CreateOrderCommandHandler>.Instance);
 
         var command = new CreateOrderCommand(

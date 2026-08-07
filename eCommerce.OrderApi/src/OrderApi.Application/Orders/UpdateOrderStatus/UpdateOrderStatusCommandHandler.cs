@@ -2,6 +2,7 @@ using MassTransit;
 using Microsoft.Extensions.Logging;
 using OrderApi.Domain.Orders;
 using ProductApi.Messages.Products;
+using SharedLibrary.Application.Abstractions.Caching;
 using SharedLibrary.Application.Abstractions.Messaging;
 using SharedLibrary.Domain.Abstractions;
 
@@ -14,6 +15,7 @@ public sealed class UpdateOrderStatusCommandHandler(
     IOrderRepository orderRepository,
     IUnitOfWork unitOfWork,
     IRequestClient<AdjustProductQuantitiesRequest> productQuantityClient,
+    ICacheService cacheService,
     ILogger<UpdateOrderStatusCommandHandler> logger) : ICommandHandler<UpdateOrderStatusCommand>
 {
     /// <summary>
@@ -55,6 +57,8 @@ public sealed class UpdateOrderStatusCommandHandler(
 
         orderRepository.Update(order);
         await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await OrderCacheKeys.InvalidateCacheAsync(cacheService, cancellationToken);
 
         logger.LogInformation("Updated order {OrderId} status from {PreviousStatus} to {Status}", order.Id, previousStatus, order.Status);
 

@@ -9,6 +9,8 @@ using SharedLibrary.Domain.Abstractions;
 using SharedLibrary.Domain.Money;
 using Xunit;
 
+using SharedLibrary.Application.Abstractions.Caching;
+
 namespace OrderApi.Application.UnitTests.Orders;
 
 public class UpdateOrderStatusCommandHandlerTests
@@ -17,6 +19,7 @@ public class UpdateOrderStatusCommandHandlerTests
     private readonly IUnitOfWork _unitOfWorkMock = Substitute.For<IUnitOfWork>();
     private readonly IRequestClient<AdjustProductQuantitiesRequest> _productQuantityClientMock =
         Substitute.For<IRequestClient<AdjustProductQuantitiesRequest>>();
+    private readonly ICacheService _cacheServiceMock = Substitute.For<ICacheService>();
 
     [Fact]
     public async Task Handle_Should_DecrementProductQuantity_WhenOrderIsConfirmed()
@@ -89,6 +92,7 @@ public class UpdateOrderStatusCommandHandlerTests
             _orderRepositoryMock,
             _unitOfWorkMock,
             _productQuantityClientMock,
+            _cacheServiceMock,
             NullLogger<UpdateOrderStatusCommandHandler>.Instance);
     }
 
