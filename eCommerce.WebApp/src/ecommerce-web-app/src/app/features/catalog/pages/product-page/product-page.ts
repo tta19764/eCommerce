@@ -5,7 +5,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { ImagesApiClient } from '../../../../core/api/images-api';
 import { ProductsApiClient } from '../../../../core/api/products-api';
-import { Product, ProductReview } from '../../../../core/models/product-model';
+import { Product, ProductReview, ProductReviewEligibility } from '../../../../core/models/product-model';
 import { AuthStore } from '../../../../core/auth/auth-store';
 import { UserStore } from '../../../../core/user/user-store';
 import { CartStore } from '../../../cart/data-access/cart-store';
@@ -35,6 +35,7 @@ export class ProductPage {
 
   protected readonly product = signal<Product | null>(null);
   protected readonly reviews = signal<ProductReview[]>([]);
+  protected readonly reviewEligibility = signal<ProductReviewEligibility | null>(null);
   protected readonly loading = signal(true);
   protected readonly failed = signal(false);
   protected readonly quantity = signal(1);
@@ -162,10 +163,13 @@ export class ProductPage {
         this.newRating.set(5);
         this.submittingReview.set(false);
         this.reviewSuccess.set('Thank you! Your review has been published successfully.');
+        this.api.getById(p.id).subscribe((upd) => this.product.set(upd));
+        this.api.getReviews(p.id).subscribe((revs) => this.reviews.set(revs.items || []));
+        this.api.getReviewEligibility(p.id).subscribe((el) => this.reviewEligibility.set(el));
       },
       error: (err) => {
         this.submittingReview.set(false);
-        const detail = err?.error?.detail || err?.error?.title || 'Failed to publish review. Please try again.';
+        const detail = err?.error?.error?.message || err?.error?.detail || err?.error?.title || 'Failed to publish review. Please check your eligibility and try again.';
         this.reviewError.set(detail);
       },
     });
@@ -224,13 +228,22 @@ export class ProductPage {
       return;
     }
 
-    forkJoin({
+    const requests: Record<string, any> = {
       product: this.api.getById(productId),
       reviews: this.api.getReviews(productId),
-    }).subscribe({
-      next: ({ product, reviews }) => {
-        this.product.set(product);
-        this.reviews.set(reviews.items || []);
+    };
+
+    if (this.auth.isAuthenticated()) {
+      requests['eligibility'] = this.api.getReviewEligibility(productId);
+    }
+
+    forkJoin(requests).subscribe({
+      next: (res: any) => {
+        this.product.set(res.product);
+        this.reviews.set(res.reviews?.items || []);
+        if (res.eligibility) {
+          this.reviewEligibility.set(res.eligibility);
+        }
         this.loading.set(false);
       },
       error: () => {

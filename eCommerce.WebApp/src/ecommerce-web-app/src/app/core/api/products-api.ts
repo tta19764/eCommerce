@@ -10,6 +10,7 @@ import {
   CreateProductRequest,
   CreateReviewRequest,
   ProductReview,
+  ProductReviewEligibility,
   ProductSearchQuery,
   ProductTypeOption,
   UpdateProductRequest,
@@ -64,6 +65,12 @@ export class ProductsApiClient {
   createReview(productId: string, request: { rating: number; comment: string; userId?: string }) {
     return this.http
       .post<ApiResponse<string>>(`${this.url}/${productId}/reviews`, request)
+      .pipe(map(apiData));
+  }
+
+  getReviewEligibility(productId: string) {
+    return this.http
+      .get<ApiResponse<ProductReviewEligibility>>(`${this.url}/${productId}/review-eligibility`)
       .pipe(map(apiData));
   }
 

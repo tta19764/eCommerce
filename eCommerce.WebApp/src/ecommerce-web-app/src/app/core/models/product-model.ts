@@ -82,6 +82,12 @@ export interface CreateReviewRequest {
   comment: string;
 }
 
+export interface ProductReviewEligibility {
+  canReview: boolean;
+  hasReview: boolean;
+  reviewId: string | null;
+}
+
 export interface CreateProductRequest {
   name: string;
   description: string;

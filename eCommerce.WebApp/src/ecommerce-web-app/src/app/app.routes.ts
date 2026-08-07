@@ -17,6 +17,12 @@ export const routes: Routes = [
     title: 'Product · eCommerce',
   },
   {
+    path: 'products/:id/review',
+    loadComponent: () =>
+      import('./features/catalog/pages/product-page/product-page').then((m) => m.ProductPage),
+    title: 'Write Review · eCommerce',
+  },
+  {
     path: 'cart',
     loadComponent: () =>
       import('./features/cart/pages/cart-page/cart-page').then((m) => m.CartPage),

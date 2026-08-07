@@ -10,6 +10,8 @@ export interface UpdateOrderStatusRequest {
   status: OrderStatus;
 }
 
+export type ReviewState = 'Eligible' | 'Reviewed' | 'NotEligible';
+
 export interface OrderItem {
   id: string;
   productId: string;
@@ -18,6 +20,8 @@ export interface OrderItem {
   currency: string;
   quantity: number;
   totalPrice: number;
+  reviewState?: ReviewState;
+  reviewId?: string | null;
 }
 
 export interface SellerOrder {
