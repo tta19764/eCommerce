@@ -13,4 +13,5 @@ public sealed record CreateProductReviewCommand(
     Guid ProductId,
     Guid UserId,
     int Rating,
-    string Comment) : ICommand<Guid>;
+    string Comment,
+    string ReviewerName = "Verified Customer") : ICommand<Guid>;

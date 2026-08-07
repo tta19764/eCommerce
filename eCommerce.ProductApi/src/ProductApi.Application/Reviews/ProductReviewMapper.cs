@@ -10,6 +10,7 @@ internal static class ProductReviewMapper
             review.Id,
             review.ProductId,
             review.UserId,
+            string.IsNullOrWhiteSpace(review.ReviewerName) ? "Verified Customer" : review.ReviewerName,
             review.Rating,
             review.Comment,
             review.CreatedAtUtc);

@@ -9,4 +9,5 @@ namespace ProductApi.Api.Endpoints.Products;
 public sealed record CreateProductReviewRequest(
     Guid UserId = default,
     int Rating = 0,
-    string Comment = "");
+    string Comment = "",
+    string ReviewerName = "");

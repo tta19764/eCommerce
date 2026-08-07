@@ -13,6 +13,7 @@ public sealed record ProductReviewResponse(
     Guid Id,
     Guid ProductId,
     Guid UserId,
+    string ReviewerName,
     int Rating,
     string Comment,
     DateTime CreatedAtUtc);

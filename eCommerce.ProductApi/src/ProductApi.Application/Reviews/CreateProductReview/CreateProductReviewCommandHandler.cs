@@ -45,6 +45,7 @@ public sealed class CreateProductReviewCommandHandler(
         var reviewResult = ProductReview.Create(
             request.ProductId,
             request.UserId,
+            request.ReviewerName,
             request.Rating,
             request.Comment,
             DateTime.UtcNow);

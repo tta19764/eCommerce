@@ -300,12 +300,21 @@ public static class ProductEndpoints
             ? request.UserId
             : (Guid.TryParse(identityIdStr, out var parsedId) ? parsedId : Guid.Empty);
 
+        var nameClaim = user.FindFirstValue("name") ??
+                        user.FindFirstValue("preferred_username") ??
+                        user.FindFirstValue(ClaimTypes.Name);
+
+        var reviewerName = !string.IsNullOrWhiteSpace(request.ReviewerName)
+            ? request.ReviewerName
+            : (!string.IsNullOrWhiteSpace(nameClaim) ? nameClaim : "Verified Customer");
+
         var result = await sender.Send(
             new CreateProductReviewCommand(
                 productId,
                 userId,
                 request.Rating,
-                request.Comment),
+                request.Comment,
+                reviewerName),
             cancellationToken);
 
         if (result.IsSuccess)

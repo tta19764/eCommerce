@@ -71,6 +71,7 @@ export interface ProductReview {
   id: string;
   productId: string;
   userId: string;
+  reviewerName?: string;
   rating: number;
   comment: string;
   createdAtUtc: string;
