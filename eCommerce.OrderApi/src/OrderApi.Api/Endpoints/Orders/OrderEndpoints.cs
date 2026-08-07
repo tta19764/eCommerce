@@ -3,6 +3,7 @@ using AuthenticationApi.Messages.Accounts;
 using MassTransit;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using SharedLibrary.Api.Extensions;
 using OrderApi.Api.Endpoints;
 using OrderApi.Application.Orders;
 using OrderApi.Application.Orders.CreateOrder;
@@ -175,7 +176,7 @@ public static class OrderEndpoints
         ClaimsPrincipal user,
         CancellationToken cancellationToken)
     {
-        var currentUserId = await GetCurrentUserIdAsync(user, accountClient, cancellationToken);
+        var currentUserId = await user.GetCurrentUserIdAsync(accountClient, cancellationToken);
 
         if (currentUserId is null)
         {
@@ -288,7 +289,7 @@ public static class OrderEndpoints
         ClaimsPrincipal user,
         CancellationToken cancellationToken)
     {
-        var currentUserId = await GetCurrentUserIdAsync(user, accountClient, cancellationToken);
+        var currentUserId = await user.GetCurrentUserIdAsync(accountClient, cancellationToken);
 
         if (currentUserId is null)
         {
@@ -314,7 +315,7 @@ public static class OrderEndpoints
         ClaimsPrincipal user,
         CancellationToken cancellationToken)
     {
-        var currentUserId = await GetCurrentUserIdAsync(user, accountClient, cancellationToken);
+        var currentUserId = await user.GetCurrentUserIdAsync(accountClient, cancellationToken);
 
         if (currentUserId is null)
         {
@@ -459,7 +460,7 @@ public static class OrderEndpoints
         IRequestClient<GetAccountUserIdByIdentityIdRequest> accountClient,
         CancellationToken cancellationToken)
     {
-        var currentUserId = await GetCurrentUserIdAsync(user, accountClient, cancellationToken);
+        var currentUserId = await user.GetCurrentUserIdAsync(accountClient, cancellationToken);
 
         if (currentUserId is null)
         {
@@ -523,30 +524,6 @@ public static class OrderEndpoints
         IRequestClient<GetAccountUserIdByIdentityIdRequest> accountClient,
         CancellationToken cancellationToken)
     {
-        return await GetCurrentUserIdAsync(user, accountClient, cancellationToken) == userId;
-    }
-
-    private static async Task<Guid?> GetCurrentUserIdAsync(
-        ClaimsPrincipal user,
-        IRequestClient<GetAccountUserIdByIdentityIdRequest> accountClient,
-        CancellationToken cancellationToken)
-    {
-        var identityId = user.FindFirstValue("identity_id") ??
-            user.FindFirstValue("IdentityId") ??
-            user.FindFirstValue(ClaimTypes.NameIdentifier) ??
-            user.FindFirstValue("sub");
-
-        if (string.IsNullOrWhiteSpace(identityId))
-        {
-            return null;
-        }
-
-        var response = await accountClient.GetResponse<GetAccountUserIdByIdentityIdResponse>(
-            new GetAccountUserIdByIdentityIdRequest(identityId),
-            cancellationToken);
-
-        return response.Message.Found
-            ? response.Message.UserId
-            : null;
+        return await user.GetCurrentUserIdAsync(accountClient, cancellationToken) == userId;
     }
 }

@@ -93,7 +93,7 @@ public static class ConversationEndpoints
         IRequestClient<GetAccountUserIdByIdentityIdRequest> accountClient,
         CancellationToken cancellationToken)
     {
-        var currentUserId = await GetCurrentUserIdAsync(user, accountClient, cancellationToken);
+        var currentUserId = await user.GetCurrentUserIdAsync(accountClient, cancellationToken);
 
         if (currentUserId is null)
         {
@@ -127,7 +127,7 @@ public static class ConversationEndpoints
         IRequestClient<GetAccountUserIdByIdentityIdRequest> accountClient,
         CancellationToken cancellationToken)
     {
-        var currentUserId = await GetCurrentUserIdAsync(user, accountClient, cancellationToken);
+        var currentUserId = await user.GetCurrentUserIdAsync(accountClient, cancellationToken);
 
         if (currentUserId is null)
         {
@@ -164,7 +164,7 @@ public static class ConversationEndpoints
         IRequestClient<GetAccountUserIdByIdentityIdRequest> accountClient,
         CancellationToken cancellationToken)
     {
-        var currentUserId = await GetCurrentUserIdAsync(user, accountClient, cancellationToken);
+        var currentUserId = await user.GetCurrentUserIdAsync(accountClient, cancellationToken);
 
         if (currentUserId is null)
         {
@@ -189,7 +189,7 @@ public static class ConversationEndpoints
         IRequestClient<GetAccountUserIdByIdentityIdRequest> accountClient,
         CancellationToken cancellationToken)
     {
-        var currentUserId = await GetCurrentUserIdAsync(user, accountClient, cancellationToken);
+        var currentUserId = await user.GetCurrentUserIdAsync(accountClient, cancellationToken);
 
         if (currentUserId is null)
         {
@@ -225,7 +225,7 @@ public static class ConversationEndpoints
         IRequestClient<GetAccountUserIdByIdentityIdRequest> accountClient,
         CancellationToken cancellationToken)
     {
-        var currentUserId = await GetCurrentUserIdAsync(user, accountClient, cancellationToken);
+        var currentUserId = await user.GetCurrentUserIdAsync(accountClient, cancellationToken);
 
         if (currentUserId is null)
         {
@@ -264,7 +264,7 @@ public static class ConversationEndpoints
         IRequestClient<GetAccountUserIdByIdentityIdRequest> accountClient,
         CancellationToken cancellationToken)
     {
-        var currentUserId = await GetCurrentUserIdAsync(user, accountClient, cancellationToken);
+        var currentUserId = await user.GetCurrentUserIdAsync(accountClient, cancellationToken);
 
         if (currentUserId is null)
         {
@@ -283,30 +283,6 @@ public static class ConversationEndpoints
         return result.Error == ConversationErrors.Forbidden
             ? Results.Forbid()
             : Results.NotFound(result.MapToApiResponse());
-    }
-
-    private static async Task<Guid?> GetCurrentUserIdAsync(
-        ClaimsPrincipal user,
-        IRequestClient<GetAccountUserIdByIdentityIdRequest> accountClient,
-        CancellationToken cancellationToken)
-    {
-        var identityId = user.FindFirstValue("identity_id") ??
-            user.FindFirstValue("IdentityId") ??
-            user.FindFirstValue(ClaimTypes.NameIdentifier) ??
-            user.FindFirstValue("sub");
-
-        if (string.IsNullOrWhiteSpace(identityId))
-        {
-            return null;
-        }
-
-        var response = await accountClient.GetResponse<GetAccountUserIdByIdentityIdResponse>(
-            new GetAccountUserIdByIdentityIdRequest(identityId),
-            cancellationToken);
-
-        return response.Message.Found
-            ? response.Message.UserId
-            : null;
     }
 }
 
