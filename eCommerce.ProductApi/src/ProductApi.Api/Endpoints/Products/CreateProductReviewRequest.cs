@@ -7,6 +7,6 @@ namespace ProductApi.Api.Endpoints.Products;
 /// <param name="Rating">The review rating from one to five.</param>
 /// <param name="Comment">The review text.</param>
 public sealed record CreateProductReviewRequest(
-    Guid UserId,
-    int Rating,
-    string Comment);
+    Guid UserId = default,
+    int Rating = 0,
+    string Comment = "");

@@ -12,6 +12,8 @@ using ProductApi.Application.Products.UpdateProduct;
 using ProductApi.Application.Reviews;
 using ProductApi.Application.Reviews.CreateProductReview;
 using ProductApi.Application.Reviews.GetProductReviewsPage;
+using System.Security.Claims;
+using ProductApi.Application.Reviews.DeleteProductReview;
 using SharedLibrary.Api.Contracts;
 using SharedLibrary.Api.Extensions;
 using SharedLibrary.Application.Authorization;
@@ -105,6 +107,14 @@ public static class ProductEndpoints
             .Produces<ApiResponse<PagedListResponse<ProductReviewResponse>>>()
             .Produces<ApiResponse<PagedListResponse<ProductReviewResponse>>>(StatusCodes.Status400BadRequest)
             .Produces<ApiResponse<PagedListResponse<ProductReviewResponse>>>(StatusCodes.Status404NotFound);
+
+        group.MapDelete("{productId:guid}/reviews/{reviewId:guid}", DeleteProductReview)
+            .WithName(nameof(DeleteProductReview))
+            .WithSummary("Delete a product review")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status401Unauthorized)
+            .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
+            .RequireAuthorization(ApplicationPermissions.ProductRead);
 
         return builder;
     }
@@ -278,12 +288,22 @@ public static class ProductEndpoints
         Guid productId,
         CreateProductReviewRequest request,
         ISender sender,
+        ClaimsPrincipal user,
         CancellationToken cancellationToken)
     {
+        var identityIdStr = user.FindFirstValue("identity_id") ??
+                            user.FindFirstValue("IdentityId") ??
+                            user.FindFirstValue(ClaimTypes.NameIdentifier) ??
+                            user.FindFirstValue("sub");
+
+        Guid userId = request.UserId != Guid.Empty
+            ? request.UserId
+            : (Guid.TryParse(identityIdStr, out var parsedId) ? parsedId : Guid.Empty);
+
         var result = await sender.Send(
             new CreateProductReviewCommand(
                 productId,
-                request.UserId,
+                userId,
                 request.Rating,
                 request.Comment),
             cancellationToken);
@@ -294,6 +314,29 @@ public static class ProductEndpoints
                 nameof(GetProductReviewsPage),
                 new { productId, version = ProductApiApiVersions.V1RouteValue },
                 result.MapToApiResponse());
+        }
+
+        return result.Error.Code.EndsWith(".NotFound", StringComparison.Ordinal)
+            ? Results.NotFound(result.MapToApiResponse())
+            : Results.BadRequest(result.MapToApiResponse());
+    }
+
+    /// <summary>
+    /// Deletes a product review.
+    /// </summary>
+    public static async Task<IResult> DeleteProductReview(
+        Guid productId,
+        Guid reviewId,
+        ISender sender,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new DeleteProductReviewCommand(productId, reviewId),
+            cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            return Results.NoContent();
         }
 
         return result.Error.Code.EndsWith(".NotFound", StringComparison.Ordinal)

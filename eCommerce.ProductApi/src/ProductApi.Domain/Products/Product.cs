@@ -215,6 +215,32 @@ public class Product : Entity
     }
 
     /// <summary>
+    /// Removes a review rating from the denormalized rating summary.
+    /// </summary>
+    /// <param name="rating">The review rating being removed.</param>
+    /// <returns>A success result, or a validation failure.</returns>
+    public Result RemoveReview(int rating)
+    {
+        if (rating is < 1 or > 5)
+        {
+            return Result.Failure(ProductErrors.InvalidReviewRating);
+        }
+
+        if (ReviewsCount <= 1)
+        {
+            Rating = 0.0m;
+            ReviewsCount = 0;
+            return Result.Success();
+        }
+
+        var newTotal = (Rating * ReviewsCount) - rating;
+        ReviewsCount--;
+        Rating = Math.Max(0.0m, Math.Round(newTotal / ReviewsCount, 1, MidpointRounding.AwayFromZero));
+
+        return Result.Success();
+    }
+
+    /// <summary>
     /// Executes the AdjustQuantity operation.
     /// </summary>
     /// <param name="quantityDelta">The quantityDelta value.</param>

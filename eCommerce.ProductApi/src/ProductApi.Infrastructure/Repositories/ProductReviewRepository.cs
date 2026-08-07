@@ -33,6 +33,12 @@ public sealed class ProductReviewRepository(ProductDbContext dbContext)
     }
 
     /// <inheritdoc />
+    public void Remove(ProductReview review)
+    {
+        DbSet.Remove(review);
+    }
+
+    /// <inheritdoc />
     public Task<bool> ExistsByProductAndUserAsync(
         Guid productId,
         Guid userId,

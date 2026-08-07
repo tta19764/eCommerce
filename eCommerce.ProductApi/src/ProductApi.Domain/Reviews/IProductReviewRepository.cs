@@ -25,6 +25,16 @@ public interface IProductReviewRepository
     Task<int> CountByProductIdAsync(Guid productId, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Gets a product review by identifier.
+    /// </summary>
+    Task<ProductReview?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Removes a product review.
+    /// </summary>
+    void Remove(ProductReview review);
+
+    /// <summary>
     /// Checks whether a user already reviewed a product.
     /// </summary>
     Task<bool> ExistsByProductAndUserAsync(
