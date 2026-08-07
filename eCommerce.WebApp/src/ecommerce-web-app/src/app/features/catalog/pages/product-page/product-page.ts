@@ -186,19 +186,32 @@ export class ProductPage {
     if (currentUser && (currentUser.id === review.userId || currentUser.userId === review.userId)) {
       if (currentUser.email && currentUser.email.length > 0) {
         const username = currentUser.email.split('@')[0];
-        return `${username} (You)`;
+        const parts = username.split(/[._-]/);
+        if (parts.length >= 2) {
+          const first = parts[0].charAt(0).toUpperCase() + parts[0].slice(1).toLowerCase();
+          const lastInitial = parts[1].charAt(0).toUpperCase();
+          return `${first} ${lastInitial}.`;
+        }
+        const first = username.charAt(0).toUpperCase() + username.slice(1).toLowerCase();
+        return `${first} D.`;
       }
-      return 'You (Verified Buyer)';
+      return 'John D.';
     }
 
     const charCode = (review.userId && review.userId.length > 0) ? review.userId.charCodeAt(0) : 0;
-    const names = ['Alex Miller', 'Sarah Connor', 'David Kim', 'Taylor Smith', 'Jordan Lee', 'Morgan Davis'];
-    return names[charCode % names.length];
+    const charCode2 = (review.userId && review.userId.length > 1) ? review.userId.charCodeAt(1) : 1;
+    const firstNames = ['Alex', 'Sarah', 'David', 'Taylor', 'Jordan', 'Morgan', 'Emily', 'Marcus', 'Chloe', 'James'];
+    const lastInitials = ['M.', 'C.', 'K.', 'S.', 'L.', 'D.', 'B.', 'R.', 'H.', 'W.'];
+
+    const firstName = firstNames[charCode % firstNames.length];
+    const lastInitial = lastInitials[charCode2 % lastInitials.length];
+
+    return `${firstName} ${lastInitial}`;
   }
 
   protected reviewerInitials(review: ProductReview): string {
     const name = this.reviewerName(review);
-    const parts = name.replace('(You)', '').trim().split(' ').filter((p) => p.length > 0);
+    const parts = name.split(' ').filter((p) => p.length > 0);
     if (parts.length >= 2) {
       return (parts[0][0] + parts[1][0]).toUpperCase();
     }
