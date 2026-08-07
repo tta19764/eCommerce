@@ -274,12 +274,17 @@
             <article class="app-card rounded-lg p-5 border border-slate-300 dark:border-slate-800 space-y-3 shadow-xs">
               <div class="flex items-center justify-between text-xs">
                 <div class="flex items-center gap-2.5">
-                  <div class="flex h-8 w-8 items-center justify-center rounded bg-indigo-600 text-white font-bold text-xs shadow-xs">
-                    {{ review.userId.slice(0, 2).toUpperCase() }}
+                  <div class="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-tr from-indigo-600 to-indigo-700 text-white font-extrabold text-xs shadow-xs">
+                    {{ reviewerInitials(review) }}
                   </div>
                   <div>
-                    <span class="font-bold text-slate-900 dark:text-white block">Verified Customer</span>
-                    <span class="text-[10px] font-mono text-slate-500">ID: {{ review.userId.slice(0, 8) }}</span>
+                    <span class="font-bold text-slate-900 dark:text-white block text-sm">{{ reviewerName(review) }}</span>
+                    <span class="text-[10px] text-emerald-700 dark:text-emerald-400 font-semibold flex items-center gap-1">
+                      <svg class="h-3 w-3 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span>Verified Buyer</span>
+                    </span>
                   </div>
                 </div>
 

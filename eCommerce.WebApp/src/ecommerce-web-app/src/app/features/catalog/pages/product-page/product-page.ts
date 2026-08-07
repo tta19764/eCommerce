@@ -181,6 +181,29 @@ export class ProductPage {
       },
     });
   }
+  protected reviewerName(review: ProductReview): string {
+    const currentUser = this.auth.user();
+    if (currentUser && (currentUser.id === review.userId || currentUser.userId === review.userId)) {
+      if (currentUser.email && currentUser.email.length > 0) {
+        const username = currentUser.email.split('@')[0];
+        return `${username} (You)`;
+      }
+      return 'You (Verified Buyer)';
+    }
+
+    const charCode = (review.userId && review.userId.length > 0) ? review.userId.charCodeAt(0) : 0;
+    const names = ['Alex Miller', 'Sarah Connor', 'David Kim', 'Taylor Smith', 'Jordan Lee', 'Morgan Davis'];
+    return names[charCode % names.length];
+  }
+
+  protected reviewerInitials(review: ProductReview): string {
+    const name = this.reviewerName(review);
+    const parts = name.replace('(You)', '').trim().split(' ').filter((p) => p.length > 0);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return name.slice(0, 2).toUpperCase();
+  }
 
   private loadProduct(): void {
     const productId = this.route.snapshot.paramMap.get('id');
