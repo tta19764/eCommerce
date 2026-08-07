@@ -39,7 +39,7 @@ public sealed class GetOrderPageQueryHandler(
             request.MaxOrderPrice,
             cancellationToken);
 
-        var items = orders.Select(OrderMapper.ToResponse).ToList();
+        var items = orders.Select(order => OrderMapper.ToResponse(order)).ToList();
         var response = new PagedListResponse<OrderResponse>(items, page, pageSize, totalCount);
 
         logger.LogDebug("Read order page {Page} with {OrderCount} orders", page, items.Count);

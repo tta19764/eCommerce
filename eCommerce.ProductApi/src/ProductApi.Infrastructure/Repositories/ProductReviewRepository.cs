@@ -48,4 +48,34 @@ public sealed class ProductReviewRepository(ProductDbContext dbContext)
             review => review.ProductId == productId && review.UserId == userId,
             cancellationToken);
     }
+
+    /// <inheritdoc />
+    public Task<ProductReview?> GetByProductAndUserAsync(
+        Guid productId,
+        Guid userId,
+        CancellationToken cancellationToken = default)
+    {
+        return DbSet
+            .AsNoTracking()
+            .FirstOrDefaultAsync(
+                review => review.ProductId == productId && review.UserId == userId,
+                cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<IReadOnlyCollection<ProductReview>> GetReviewsByUserAndProductsAsync(
+        Guid userId,
+        IReadOnlyCollection<Guid> productIds,
+        CancellationToken cancellationToken = default)
+    {
+        if (productIds.Count == 0)
+        {
+            return Array.Empty<ProductReview>();
+        }
+
+        return await DbSet
+            .AsNoTracking()
+            .Where(review => review.UserId == userId && productIds.Contains(review.ProductId))
+            .ToListAsync(cancellationToken);
+    }
 }

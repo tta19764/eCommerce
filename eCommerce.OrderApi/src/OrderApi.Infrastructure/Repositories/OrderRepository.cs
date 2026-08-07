@@ -207,4 +207,18 @@ public class OrderRepository(OrderDbContext dbContext) : Repository<Order, Order
                 .ThenBy(order => order.Id);
     }
 
+    /// <inheritdoc />
+    public async Task<(bool HasPurchased, bool HasCompletedOrder)> GetPurchaseStatusAsync(
+        Guid clientId,
+        Guid productId,
+        CancellationToken cancellationToken = default)
+    {
+        var matchingOrders = await DbSet
+            .AsNoTracking()
+            .Where(order => order.ClientId == clientId && order.Items.Any(item => item.ProductId == productId))
+            .Select(order => new { order.Status })
+            .ToListAsync(cancellationToken);
+
+        return (matchingOrders.Count > 0, matchingOrders.Any(order => order.Status == OrderStatus.Completed));
+    }
 }

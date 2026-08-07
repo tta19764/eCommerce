@@ -17,6 +17,7 @@ using ProductApi.Application.Reviews.CreateProductReview;
 using ProductApi.Application.Reviews.GetProductReviewsPage;
 using System.Security.Claims;
 using ProductApi.Application.Reviews.DeleteProductReview;
+using ProductApi.Application.Reviews.GetReviewEligibility;
 using SharedLibrary.Api.Contracts;
 using SharedLibrary.Api.Extensions;
 using SharedLibrary.Application.Authorization;
@@ -118,6 +119,12 @@ public static class ProductEndpoints
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces<ApiResponse<object>>(StatusCodes.Status404NotFound)
             .RequireAuthorization(ApplicationPermissions.ProductRead);
+
+        group.MapGet("{productId:guid}/review-eligibility", GetProductReviewEligibility)
+            .WithName(nameof(GetProductReviewEligibility))
+            .WithSummary("Check product review eligibility for current user")
+            .Produces<ApiResponse<ProductReviewEligibilityResponse>>()
+            .Produces<ApiResponse<ProductReviewEligibilityResponse>>(StatusCodes.Status404NotFound);
 
         return builder;
     }
@@ -413,6 +420,32 @@ public static class ProductEndpoints
                 nameof(GetCategories),
                 new { version = ProductApiApiVersions.V1RouteValue },
                 result.MapToApiResponse())
+            : Results.BadRequest(result.MapToApiResponse());
+    }
+
+    /// <summary>
+    /// Checks whether the current user is eligible to review a product.
+    /// </summary>
+    public static async Task<IResult> GetProductReviewEligibility(
+        Guid productId,
+        ISender sender,
+        ClaimsPrincipal user,
+        IRequestClient<GetAccountUserIdByIdentityIdRequest> accountClient,
+        CancellationToken cancellationToken)
+    {
+        var currentUserId = user.Identity?.IsAuthenticated == true
+            ? await user.GetCurrentUserIdAsync(accountClient, cancellationToken)
+            : null;
+
+        var result = await sender.Send(new GetProductReviewEligibilityQuery(productId, currentUserId), cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            return Results.Ok(result.MapToApiResponse());
+        }
+
+        return result.Error.Code.EndsWith(".NotFound", StringComparison.Ordinal)
+            ? Results.NotFound(result.MapToApiResponse())
             : Results.BadRequest(result.MapToApiResponse());
     }
 }

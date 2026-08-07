@@ -19,4 +19,6 @@ public static class ProductErrors
     public static readonly Error InvalidReviewUser = new Error("Product.InvalidReviewUser", "Review user identifier is invalid");
     public static readonly Error DuplicateReview = new Error("Product.DuplicateReview", "User already reviewed this product");
     public static readonly Error ReviewDeletionForbidden = new Error("Product.ReviewDeletionForbidden", "User is not allowed to delete this review");
+    public static readonly Error ProductNotPurchased = new Error("Product.NotPurchased", "Product has not been purchased by the user");
+    public static readonly Error OrderNotCompleted = new Error("Product.OrderNotCompleted", "Order containing the product has not been completed");
 }

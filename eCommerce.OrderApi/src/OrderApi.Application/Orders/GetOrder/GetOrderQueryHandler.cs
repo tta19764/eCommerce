@@ -1,5 +1,7 @@
+using MassTransit;
 using Microsoft.Extensions.Logging;
 using OrderApi.Domain.Orders;
+using ProductApi.Messages.Products;
 using SharedLibrary.Application.Abstractions.Messaging;
 using SharedLibrary.Domain.Abstractions;
 
@@ -10,6 +12,7 @@ namespace OrderApi.Application.Orders.GetOrder;
 /// </summary>
 public sealed class GetOrderQueryHandler(
     IOrderRepository orderRepository,
+    IRequestClient<GetUserProductReviewsRequest> userReviewsClient,
     ILogger<GetOrderQueryHandler> logger) : IQueryHandler<GetOrderQuery, OrderDetailsResponse>
 {
     /// <summary>
@@ -28,6 +31,18 @@ public sealed class GetOrderQueryHandler(
             return Result.Failure<OrderDetailsResponse>(OrderErrors.NotFound);
         }
 
-        return Result.Success(OrderMapper.ToDetailsResponse(order));
+        Dictionary<Guid, Guid>? userReviews = null;
+
+        if (order.Status == OrderStatus.Completed && order.Items.Count > 0)
+        {
+            var productIds = order.Items.Select(item => item.ProductId).Distinct().ToList();
+            var reviewsResponse = await userReviewsClient.GetResponse<GetUserProductReviewsResponse>(
+                new GetUserProductReviewsRequest(order.ClientId, productIds),
+                cancellationToken);
+
+            userReviews = reviewsResponse.Message.Reviews.ToDictionary(r => r.ProductId, r => r.ReviewId);
+        }
+
+        return Result.Success(OrderMapper.ToDetailsResponse(order, userReviews));
     }
 }

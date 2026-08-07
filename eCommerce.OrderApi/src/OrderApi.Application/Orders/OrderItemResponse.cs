@@ -12,6 +12,8 @@ namespace OrderApi.Application.Orders;
 /// <param name="Currency">The unit price currency code.</param>
 /// <param name="Quantity">The ordered quantity.</param>
 /// <param name="TotalPrice">The total price for this line.</param>
+/// <param name="ReviewState">The review state ("Eligible", "Reviewed", "NotEligible").</param>
+/// <param name="ReviewId">The created review identifier, when applicable.</param>
 public sealed record OrderItemResponse(
     Guid Id,
     Guid SellerOrderId,
@@ -21,4 +23,6 @@ public sealed record OrderItemResponse(
     decimal UnitPrice,
     string Currency,
     int Quantity,
-    decimal TotalPrice);
+    decimal TotalPrice,
+    string ReviewState = "NotEligible",
+    Guid? ReviewId = null);

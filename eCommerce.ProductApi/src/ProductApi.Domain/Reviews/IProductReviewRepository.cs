@@ -41,4 +41,20 @@ public interface IProductReviewRepository
         Guid productId,
         Guid userId,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets a user review for a specific product when present.
+    /// </summary>
+    Task<ProductReview?> GetByProductAndUserAsync(
+        Guid productId,
+        Guid userId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets all reviews written by a user for a collection of product identifiers.
+    /// </summary>
+    Task<IReadOnlyCollection<ProductReview>> GetReviewsByUserAndProductsAsync(
+        Guid userId,
+        IReadOnlyCollection<Guid> productIds,
+        CancellationToken cancellationToken = default);
 }

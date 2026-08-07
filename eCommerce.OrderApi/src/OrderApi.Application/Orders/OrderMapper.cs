@@ -14,13 +14,19 @@ internal static class OrderMapper
     /// </summary>
     /// <param name="order">The order aggregate to map.</param>
     /// <returns>The order response.</returns>
-    internal static OrderResponse ToResponse(Order order)
+    /// <summary>
+    /// Converts an order aggregate to the collection read model.
+    /// </summary>
+    /// <param name="order">The order aggregate to map.</param>
+    /// <param name="userReviews">Optional map of ProductId to ReviewId for the order client.</param>
+    /// <returns>The order response.</returns>
+    internal static OrderResponse ToResponse(Order order, IDictionary<Guid, Guid>? userReviews = null)
     {
         var items = order.Items
-            .Select(ToItemResponse)
+            .Select(item => ToItemResponse(item, order.Status, userReviews))
             .ToList();
         var sellerOrders = order.SellerOrders
-            .Select(sellerOrder => ToSellerOrderResponse(sellerOrder, order.Items))
+            .Select(sellerOrder => ToSellerOrderResponse(sellerOrder, order.Items, order.Status, userReviews))
             .ToList();
 
         return new OrderResponse(
@@ -43,14 +49,15 @@ internal static class OrderMapper
     /// Converts an order aggregate to the detailed single-order read model.
     /// </summary>
     /// <param name="order">The order aggregate to map.</param>
+    /// <param name="userReviews">Optional map of ProductId to ReviewId for the order client.</param>
     /// <returns>The detailed order response.</returns>
-    internal static OrderDetailsResponse ToDetailsResponse(Order order)
+    internal static OrderDetailsResponse ToDetailsResponse(Order order, IDictionary<Guid, Guid>? userReviews = null)
     {
         var items = order.Items
-            .Select(ToDetailsItemResponse)
+            .Select(item => ToDetailsItemResponse(item, order.Status, userReviews))
             .ToList();
         var sellerOrders = order.SellerOrders
-            .Select(sellerOrder => ToSellerOrderResponse(sellerOrder, order.Items))
+            .Select(sellerOrder => ToSellerOrderResponse(sellerOrder, order.Items, order.Status, userReviews))
             .ToList();
 
         return new OrderDetailsResponse(
@@ -114,8 +121,27 @@ internal static class OrderMapper
             order.CancelledOnUtc);
     }
 
-    private static OrderItemResponse ToItemResponse(OrderItem item)
+    private static OrderItemResponse ToItemResponse(
+        OrderItem item,
+        OrderStatus orderStatus = OrderStatus.Pending,
+        IDictionary<Guid, Guid>? userReviews = null)
     {
+        string reviewState = "NotEligible";
+        Guid? reviewId = null;
+
+        if (orderStatus == OrderStatus.Completed)
+        {
+            if (userReviews is not null && userReviews.TryGetValue(item.ProductId, out var foundReviewId))
+            {
+                reviewState = "Reviewed";
+                reviewId = foundReviewId;
+            }
+            else
+            {
+                reviewState = "Eligible";
+            }
+        }
+
         return new OrderItemResponse(
             item.Id,
             item.SellerOrderId,
@@ -125,11 +151,32 @@ internal static class OrderMapper
             item.UnitPrice.Amount,
             item.UnitPrice.Currency.Code,
             item.Quantity.Value,
-            item.TotalPrice.Amount);
+            item.TotalPrice.Amount,
+            reviewState,
+            reviewId);
     }
 
-    private static OrderDetailsItemResponse ToDetailsItemResponse(OrderItem item)
+    private static OrderDetailsItemResponse ToDetailsItemResponse(
+        OrderItem item,
+        OrderStatus orderStatus = OrderStatus.Pending,
+        IDictionary<Guid, Guid>? userReviews = null)
     {
+        string reviewState = "NotEligible";
+        Guid? reviewId = null;
+
+        if (orderStatus == OrderStatus.Completed)
+        {
+            if (userReviews is not null && userReviews.TryGetValue(item.ProductId, out var foundReviewId))
+            {
+                reviewState = "Reviewed";
+                reviewId = foundReviewId;
+            }
+            else
+            {
+                reviewState = "Eligible";
+            }
+        }
+
         return new OrderDetailsItemResponse(
             item.Id,
             item.SellerOrderId,
@@ -139,16 +186,20 @@ internal static class OrderMapper
             item.UnitPrice.Amount,
             item.UnitPrice.Currency.Code,
             item.Quantity.Value,
-            item.TotalPrice.Amount);
+            item.TotalPrice.Amount,
+            reviewState,
+            reviewId);
     }
 
     internal static SellerOrderResponse ToSellerOrderResponse(
         SellerOrder sellerOrder,
-        IEnumerable<OrderItem> orderItems)
+        IEnumerable<OrderItem> orderItems,
+        OrderStatus parentOrderStatus = OrderStatus.Pending,
+        IDictionary<Guid, Guid>? userReviews = null)
     {
         var items = orderItems
             .Where(item => item.SellerOrderId == sellerOrder.Id)
-            .Select(ToItemResponse)
+            .Select(item => ToItemResponse(item, parentOrderStatus, userReviews))
             .ToList();
 
         return new SellerOrderResponse(

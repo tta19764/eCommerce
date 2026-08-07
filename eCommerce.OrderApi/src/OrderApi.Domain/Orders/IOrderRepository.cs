@@ -120,4 +120,12 @@ public interface IOrderRepository
     /// </summary>
     /// <param name="order">The order to add.</param>
     public void Add(Order order);
+
+    /// <summary>
+    /// Checks purchase status for a client and product.
+    /// </summary>
+    public Task<(bool HasPurchased, bool HasCompletedOrder)> GetPurchaseStatusAsync(
+        Guid clientId,
+        Guid productId,
+        CancellationToken cancellationToken = default);
 }

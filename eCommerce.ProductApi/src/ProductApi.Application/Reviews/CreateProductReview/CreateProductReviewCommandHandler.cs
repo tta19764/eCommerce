@@ -1,4 +1,6 @@
+using MassTransit;
 using Microsoft.Extensions.Logging;
+using OrderApi.Messages.Orders;
 using ProductApi.Application.Products;
 using ProductApi.Domain.Products;
 using ProductApi.Domain.Reviews;
@@ -16,6 +18,7 @@ public sealed class CreateProductReviewCommandHandler(
     IProductReviewRepository productReviewRepository,
     IUnitOfWork unitOfWork,
     ICacheService cacheService,
+    IRequestClient<GetUserProductPurchaseStatusRequest> purchaseStatusClient,
     ILogger<CreateProductReviewCommandHandler> logger) : ICommandHandler<CreateProductReviewCommand, Guid>
 {
     /// <summary>
@@ -40,6 +43,20 @@ public sealed class CreateProductReviewCommandHandler(
         if (alreadyReviewed)
         {
             return Result.Failure<Guid>(ProductErrors.DuplicateReview);
+        }
+
+        var purchaseStatusResponse = await purchaseStatusClient.GetResponse<GetUserProductPurchaseStatusResponse>(
+            new GetUserProductPurchaseStatusRequest(request.UserId, request.ProductId),
+            cancellationToken);
+
+        if (!purchaseStatusResponse.Message.HasPurchased)
+        {
+            return Result.Failure<Guid>(ProductErrors.ProductNotPurchased);
+        }
+
+        if (!purchaseStatusResponse.Message.HasCompletedOrder)
+        {
+            return Result.Failure<Guid>(ProductErrors.OrderNotCompleted);
         }
 
         var reviewResult = ProductReview.Create(
