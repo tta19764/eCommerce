@@ -307,7 +307,7 @@
 
                   <time class="text-slate-500 font-medium text-[11px]">{{ review.createdAtUtc | date: 'mediumDate' }}</time>
 
-                  @if (auth.user()?.id === review.userId || auth.isAdmin()) {
+                  @if (canDeleteReview(review)) {
                     <button
                       type="button"
                       (click)="deleteReview(review.id)"

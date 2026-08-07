@@ -69,7 +69,15 @@
 
         <div>
           <label class="block text-xs font-bold text-slate-900 dark:text-slate-300 mb-1">Seller Account ID</label>
-          <input formControlName="sellerId" class="w-full app-input rounded-md px-3.5 py-2.5 text-xs font-mono" />
+          <input
+            formControlName="sellerId"
+            class="w-full app-input rounded-md px-3.5 py-2.5 text-xs font-mono disabled:opacity-60 disabled:cursor-not-allowed"
+          />
+          @if (editingProduct()) {
+            <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium mt-1 block">
+              Seller Account ID cannot be changed after creation.
+            </span>
+          }
         </div>
 
         <div>

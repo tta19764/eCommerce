@@ -78,6 +78,7 @@ export class AdminProductsPage {
 
   protected openCreateForm(): void {
     this.editingProduct.set(null);
+    this.form.controls.sellerId.enable();
     this.resetForm();
     this.productImageIds.set([]);
     this.formOpen.set(true);
@@ -96,6 +97,7 @@ export class AdminProductsPage {
       categoryId: product.categoryId,
       productType: product.productType,
     });
+    this.form.controls.sellerId.disable();
     this.productImageIds.set(this.orderedImageIds(product));
     this.formOpen.set(true);
     this.clearMessages();
@@ -104,6 +106,7 @@ export class AdminProductsPage {
   protected closeForm(): void {
     this.formOpen.set(false);
     this.editingProduct.set(null);
+    this.form.controls.sellerId.enable();
     this.resetForm();
     this.productImageIds.set([]);
   }

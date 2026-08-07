@@ -7,6 +7,7 @@ import { ImagesApiClient } from '../../../../core/api/images-api';
 import { ProductsApiClient } from '../../../../core/api/products-api';
 import { Product, ProductReview } from '../../../../core/models/product-model';
 import { AuthStore } from '../../../../core/auth/auth-store';
+import { UserStore } from '../../../../core/user/user-store';
 import { CartStore } from '../../../cart/data-access/cart-store';
 
 export interface RatingDistributionRow {
@@ -28,6 +29,7 @@ export class ProductPage {
   private readonly route = inject(ActivatedRoute);
 
   protected readonly auth = inject(AuthStore);
+  protected readonly userStore = inject(UserStore);
   protected readonly cart = inject(CartStore);
   protected readonly Math = Math;
 
@@ -144,13 +146,13 @@ export class ProductPage {
 
     const userId = this.auth.user()?.id ?? '';
 
-    this.api.createReview(p.id, { rating, comment, userId }).subscribe({
+    this.api.createReview(p.id, { rating, comment }).subscribe({
       next: (createdId) => {
         const newReview: ProductReview = {
           id: createdId || `rev-${Date.now()}`,
           productId: p.id,
           userId: userId || 'current-user',
-          reviewerName: this.auth.user()?.email || 'Verified Customer',
+          reviewerName: this.userStore.getFormattedReviewerName(),
           rating,
           comment,
           createdAtUtc: new Date().toISOString(),
@@ -182,20 +184,26 @@ export class ProductPage {
       },
     });
   }
-  protected reviewerName(review: ProductReview): string {
-    const rawName = (review.reviewerName && review.reviewerName.length > 0)
-      ? review.reviewerName
-      : (this.auth.user()?.email || 'Verified Customer');
 
-    const username = rawName.split('@')[0];
-    const parts = username.split(/[._\s-]/).filter((p) => p.length > 0);
-    if (parts.length >= 2) {
-      const first = parts[0].charAt(0).toUpperCase() + parts[0].slice(1).toLowerCase();
-      const lastInitial = parts[1].charAt(0).toUpperCase();
-      return `${first} ${lastInitial}.`;
+  protected canDeleteReview(review: ProductReview): boolean {
+    if (this.auth.isAdmin()) return true;
+    if (!this.auth.isAuthenticated()) return false;
+    const userApiId = this.userStore.userId();
+    return !!userApiId && userApiId === review.userId;
+  }
+
+  protected reviewerName(review: ProductReview): string {
+    if (review.reviewerName && review.reviewerName.trim().length > 0) {
+      const name = review.reviewerName.trim();
+      const parts = name.split(/\s+/).filter((p) => p.length > 0);
+      if (parts.length >= 2) {
+        const first = parts[0].charAt(0).toUpperCase() + parts[0].slice(1).toLowerCase();
+        const lastInitial = parts[1].charAt(0).toUpperCase();
+        return `${first} ${lastInitial}.`;
+      }
+      return parts[0].charAt(0).toUpperCase() + parts[0].slice(1).toLowerCase();
     }
-    const first = parts[0].charAt(0).toUpperCase() + parts[0].slice(1).toLowerCase();
-    return `${first} M.`;
+    return 'Verified Customer';
   }
 
   protected reviewerInitials(review: ProductReview): string {

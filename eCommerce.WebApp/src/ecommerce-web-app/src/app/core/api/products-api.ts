@@ -8,6 +8,7 @@ import {
   ProductCategory,
   CreateCategoryRequest,
   CreateProductRequest,
+  CreateReviewRequest,
   ProductReview,
   ProductSearchQuery,
   ProductTypeOption,
