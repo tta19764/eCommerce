@@ -63,19 +63,6 @@ public sealed class ProductReview : Entity
     public DateTime CreatedAtUtc { get; private set; }
 
     /// <summary>
-    /// Creates a product review when supplied values satisfy review invariants.
-    /// </summary>
-    public static Result<ProductReview> Create(
-        Guid productId,
-        Guid userId,
-        int rating,
-        string comment,
-        DateTime createdAtUtc)
-    {
-        return Create(productId, userId, "Verified Customer", rating, comment, createdAtUtc);
-    }
-
-    /// <summary>
     /// Creates a product review with a reviewer name when supplied values satisfy review invariants.
     /// </summary>
     public static Result<ProductReview> Create(

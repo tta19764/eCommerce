@@ -7,4 +7,8 @@ namespace ProductApi.Application.Reviews.DeleteProductReview;
 /// </summary>
 /// <param name="ProductId">The product identifier.</param>
 /// <param name="ReviewId">The review identifier to delete.</param>
-public sealed record DeleteProductReviewCommand(Guid ProductId, Guid ReviewId) : ICommand;
+public sealed record DeleteProductReviewCommand(
+    Guid ProductId,
+    Guid ReviewId,
+    Guid CurrentUserId = default,
+    bool IsAdmin = false) : ICommand;

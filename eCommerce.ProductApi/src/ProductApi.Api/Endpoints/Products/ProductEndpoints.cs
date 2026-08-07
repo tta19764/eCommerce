@@ -1,4 +1,7 @@
+using AuthenticationApi.Messages.Accounts;
+using MassTransit;
 using MediatR;
+using UserApi.Messages.Users;
 using ProductApi.Application.Categories;
 using ProductApi.Application.Categories.CreateCategory;
 using ProductApi.Application.Categories.GetCategories;
@@ -289,24 +292,26 @@ public static class ProductEndpoints
         CreateProductReviewRequest request,
         ISender sender,
         ClaimsPrincipal user,
+        IRequestClient<GetAccountUserIdByIdentityIdRequest> accountClient,
+        IRequestClient<GetUserDetailsRequest> userClient,
         CancellationToken cancellationToken)
     {
-        var identityIdStr = user.FindFirstValue("identity_id") ??
-                            user.FindFirstValue("IdentityId") ??
-                            user.FindFirstValue(ClaimTypes.NameIdentifier) ??
-                            user.FindFirstValue("sub");
+        var resolvedUserId = await user.GetCurrentUserIdAsync(accountClient, cancellationToken);
+        var userId = resolvedUserId ?? Guid.Empty;
 
-        Guid userId = request.UserId != Guid.Empty
-            ? request.UserId
-            : (Guid.TryParse(identityIdStr, out var parsedId) ? parsedId : Guid.Empty);
+        var reviewerName = "Verified Customer";
 
-        var nameClaim = user.FindFirstValue("name") ??
-                        user.FindFirstValue("preferred_username") ??
-                        user.FindFirstValue(ClaimTypes.Name);
+        if (resolvedUserId.HasValue && resolvedUserId.Value != Guid.Empty)
+        {
+            var userDetailsResponse = await userClient.GetResponse<GetUserDetailsResponse>(
+                new GetUserDetailsRequest(resolvedUserId.Value),
+                cancellationToken);
 
-        var reviewerName = !string.IsNullOrWhiteSpace(request.ReviewerName)
-            ? request.ReviewerName
-            : (!string.IsNullOrWhiteSpace(nameClaim) ? nameClaim : "Verified Customer");
+            if (userDetailsResponse.Message.Found && !string.IsNullOrWhiteSpace(userDetailsResponse.Message.FullName))
+            {
+                reviewerName = userDetailsResponse.Message.FullName;
+            }
+        }
 
         var result = await sender.Send(
             new CreateProductReviewCommand(
@@ -337,15 +342,25 @@ public static class ProductEndpoints
         Guid productId,
         Guid reviewId,
         ISender sender,
+        ClaimsPrincipal user,
+        IRequestClient<GetAccountUserIdByIdentityIdRequest> accountClient,
         CancellationToken cancellationToken)
     {
+        var currentUserId = await user.GetCurrentUserIdAsync(accountClient, cancellationToken);
+        var isAdmin = user.IsInRole("Admin");
+
         var result = await sender.Send(
-            new DeleteProductReviewCommand(productId, reviewId),
+            new DeleteProductReviewCommand(productId, reviewId, currentUserId ?? Guid.Empty, isAdmin),
             cancellationToken);
 
         if (result.IsSuccess)
         {
             return Results.NoContent();
+        }
+
+        if (result.Error.Code.EndsWith(".ReviewDeletionForbidden", StringComparison.Ordinal))
+        {
+            return Results.Forbid();
         }
 
         return result.Error.Code.EndsWith(".NotFound", StringComparison.Ordinal)

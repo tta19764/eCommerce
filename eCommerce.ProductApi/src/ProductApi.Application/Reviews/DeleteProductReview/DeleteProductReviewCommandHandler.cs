@@ -39,6 +39,17 @@ public sealed class DeleteProductReviewCommandHandler(
             return Result.Failure(ProductErrors.NotFound);
         }
 
+        if (!request.IsAdmin && request.CurrentUserId != Guid.Empty && review.UserId != request.CurrentUserId)
+        {
+            logger.LogWarning(
+                "User {UserId} attempted to delete review {ReviewId} owned by user {OwnerId}",
+                request.CurrentUserId,
+                request.ReviewId,
+                review.UserId);
+
+            return Result.Failure(ProductErrors.ReviewDeletionForbidden);
+        }
+
         product.RemoveReview(review.Rating);
         productReviewRepository.Remove(review);
         productRepository.Update(product);

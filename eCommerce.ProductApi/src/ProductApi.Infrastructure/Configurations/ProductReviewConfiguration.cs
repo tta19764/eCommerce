@@ -32,6 +32,9 @@ public sealed class ProductReviewConfiguration : IEntityTypeConfiguration<Produc
         builder.Property(review => review.Comment)
             .HasMaxLength(2000)
             .IsRequired();
+        
+        builder.Property(review => review.ReviewerName)
+            .HasMaxLength(200);
 
         builder.Property(review => review.CreatedAtUtc)
             .IsRequired();
