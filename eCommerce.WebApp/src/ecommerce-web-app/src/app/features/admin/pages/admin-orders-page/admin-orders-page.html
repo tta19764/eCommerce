@@ -167,56 +167,68 @@
           </header>
 
           <!-- Admin Global State Trigger Bar -->
-          <div class="bg-indigo-500/5 dark:bg-indigo-950/20 px-6 py-3 border-b border-slate-300 dark:border-slate-800/80 flex flex-wrap items-center justify-between gap-3 text-xs">
-            <span class="font-bold text-slate-800 dark:text-slate-200">Global State Transition:</span>
-            
-            <div class="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                [disabled]="order.status === 'Confirmed' || order.status === 'Completed' || order.status === 'Cancelled' || updatingId() === order.id"
-                (click)="updateOrderStatus(order.id, 'Confirmed')"
-                class="rounded bg-indigo-600 hover:bg-indigo-700 px-3 py-1 text-[11px] font-bold text-white shadow-xs disabled:opacity-30"
-              >
-                Confirm Order
-              </button>
+          @if (order.status !== 'Completed' && order.status !== 'Cancelled') {
+            <div class="bg-indigo-500/5 dark:bg-indigo-950/20 px-6 py-3 border-b border-slate-300 dark:border-slate-800/80 flex flex-wrap items-center justify-between gap-3 text-xs">
+              <span class="font-bold text-slate-800 dark:text-slate-200">Global State Transition:</span>
+              
+              <div class="flex flex-wrap items-center gap-2">
+                @if (order.status === 'Pending') {
+                  <button
+                    type="button"
+                    [disabled]="updatingId() === order.id"
+                    (click)="updateOrderStatus(order.id, 'Confirmed')"
+                    class="rounded bg-indigo-600 hover:bg-indigo-700 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs disabled:opacity-30 transition-all flex items-center gap-1.5"
+                  >
+                    <span>Confirm Order</span>
+                  </button>
+                }
 
-              <button
-                type="button"
-                [disabled]="order.status === 'Paid' || order.status === 'Completed' || order.status === 'Cancelled' || updatingId() === order.id"
-                (click)="updateOrderStatus(order.id, 'Paid')"
-                class="rounded bg-blue-600 hover:bg-blue-700 px-3 py-1 text-[11px] font-bold text-white shadow-xs disabled:opacity-30"
-              >
-                Mark Paid
-              </button>
+                @if (order.status === 'Confirmed') {
+                  <button
+                    type="button"
+                    [disabled]="updatingId() === order.id"
+                    (click)="updateOrderStatus(order.id, 'Paid')"
+                    class="rounded bg-blue-600 hover:bg-blue-700 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs disabled:opacity-30 transition-all flex items-center gap-1.5"
+                  >
+                    <span>Mark Paid</span>
+                  </button>
+                }
 
-              <button
-                type="button"
-                [disabled]="order.status === 'Shipped' || order.status === 'Completed' || order.status === 'Cancelled' || updatingId() === order.id"
-                (click)="updateOrderStatus(order.id, 'Shipped')"
-                class="rounded bg-teal-600 hover:bg-teal-700 px-3 py-1 text-[11px] font-bold text-white shadow-xs disabled:opacity-30"
-              >
-                Mark Shipped
-              </button>
+                @if (order.status === 'Paid') {
+                  <button
+                    type="button"
+                    [disabled]="updatingId() === order.id"
+                    (click)="updateOrderStatus(order.id, 'Shipped')"
+                    class="rounded bg-teal-600 hover:bg-teal-700 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs disabled:opacity-30 transition-all flex items-center gap-1.5"
+                  >
+                    <span>Mark Shipped</span>
+                  </button>
+                }
 
-              <button
-                type="button"
-                [disabled]="order.status === 'Completed' || order.status === 'Cancelled' || updatingId() === order.id"
-                (click)="updateOrderStatus(order.id, 'Completed')"
-                class="rounded bg-emerald-600 hover:bg-emerald-700 px-3 py-1 text-[11px] font-bold text-white shadow-xs disabled:opacity-30"
-              >
-                Complete Order
-              </button>
+                @if (order.status === 'Shipped') {
+                  <button
+                    type="button"
+                    [disabled]="updatingId() === order.id"
+                    (click)="updateOrderStatus(order.id, 'Completed')"
+                    class="rounded bg-emerald-600 hover:bg-emerald-700 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs disabled:opacity-30 transition-all flex items-center gap-1.5"
+                  >
+                    <span>Complete Order</span>
+                  </button>
+                }
 
-              <button
-                type="button"
-                [disabled]="order.status === 'Cancelled' || updatingId() === order.id"
-                (click)="updateOrderStatus(order.id, 'Cancelled')"
-                class="rounded bg-rose-600 hover:bg-rose-700 px-3 py-1 text-[11px] font-bold text-white shadow-xs disabled:opacity-30"
-              >
-                Cancel Order
-              </button>
+                @if (order.status === 'Pending' || order.status === 'Confirmed' || order.status === 'Paid') {
+                  <button
+                    type="button"
+                    [disabled]="updatingId() === order.id"
+                    (click)="updateOrderStatus(order.id, 'Cancelled')"
+                    class="rounded bg-rose-600 hover:bg-rose-700 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs disabled:opacity-30 transition-all flex items-center gap-1.5"
+                  >
+                    <span>Cancel Order</span>
+                  </button>
+                }
+              </div>
             </div>
-          </div>
+          }
 
           <!-- Child Seller Order Packages -->
           <div class="divide-y divide-slate-300 dark:divide-slate-800">

@@ -499,46 +499,53 @@
         </div>
 
         <!-- Status Action Buttons for Seller -->
-        <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
-          <span class="text-[11px] text-slate-600 dark:text-slate-400 font-semibold">Update fulfillment status for client:</span>
+        @if (sOrder.status !== 'Completed' && sOrder.status !== 'Cancelled') {
+          <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+            <span class="text-[11px] text-slate-600 dark:text-slate-400 font-semibold">Update fulfillment status for client:</span>
 
-          <div class="flex flex-wrap gap-2">
-            <button type="button"
-              [disabled]="sOrder.status !== 'Pending'"
-              (click)="updateOrderStatus(sOrder.id, 'Confirmed')"
-              class="rounded-xl bg-indigo-500/10 dark:bg-indigo-600/20 hover:bg-indigo-600 text-indigo-700 dark:text-indigo-300 hover:text-white border border-indigo-500/30 px-3 py-1 text-xs font-bold transition-all disabled:opacity-30">
-              Confirm Order
-            </button>
+            <div class="flex flex-wrap gap-2">
+              @if (sOrder.status === 'Pending') {
+                <button type="button"
+                  (click)="updateOrderStatus(sOrder.id, 'Confirmed')"
+                  class="rounded-xl bg-indigo-500/10 dark:bg-indigo-600/20 hover:bg-indigo-600 text-indigo-700 dark:text-indigo-300 hover:text-white border border-indigo-500/30 px-3 py-1 text-xs font-bold transition-all">
+                  Confirm Order
+                </button>
+              }
 
-            <button type="button"
-              [disabled]="sOrder.status !== 'Confirmed'"
-              (click)="updateOrderStatus(sOrder.id, 'Paid')"
-              class="rounded-xl bg-blue-500/10 dark:bg-blue-600/20 hover:bg-blue-600 text-blue-700 dark:text-blue-300 hover:text-white border border-blue-500/30 px-3 py-1 text-xs font-bold transition-all disabled:opacity-30">
-              Mark Paid
-            </button>
+              @if (sOrder.status === 'Confirmed') {
+                <button type="button"
+                  (click)="updateOrderStatus(sOrder.id, 'Paid')"
+                  class="rounded-xl bg-blue-500/10 dark:bg-blue-600/20 hover:bg-blue-600 text-blue-700 dark:text-blue-300 hover:text-white border border-blue-500/30 px-3 py-1 text-xs font-bold transition-all">
+                  Mark Paid
+                </button>
+              }
 
-            <button type="button"
-              [disabled]="sOrder.status !== 'Paid'"
-              (click)="updateOrderStatus(sOrder.id, 'Shipped')"
-              class="rounded-xl bg-teal-500/10 dark:bg-teal-600/20 hover:bg-teal-600 text-teal-700 dark:text-teal-300 hover:text-white border border-teal-500/30 px-3 py-1 text-xs font-bold transition-all disabled:opacity-30">
-              Mark Shipped
-            </button>
+              @if (sOrder.status === 'Paid') {
+                <button type="button"
+                  (click)="updateOrderStatus(sOrder.id, 'Shipped')"
+                  class="rounded-xl bg-teal-500/10 dark:bg-teal-600/20 hover:bg-teal-600 text-teal-700 dark:text-teal-300 hover:text-white border border-teal-500/30 px-3 py-1 text-xs font-bold transition-all">
+                  Mark Shipped
+                </button>
+              }
 
-            <button type="button"
-              [disabled]="sOrder.status !== 'Shipped'"
-              (click)="updateOrderStatus(sOrder.id, 'Completed')"
-              class="rounded-xl bg-emerald-500/10 dark:bg-emerald-600/20 hover:bg-emerald-600 text-emerald-700 dark:text-emerald-300 hover:text-white border border-emerald-500/30 px-3 py-1 text-xs font-bold transition-all disabled:opacity-30">
-              Mark Completed
-            </button>
+              @if (sOrder.status === 'Shipped') {
+                <button type="button"
+                  (click)="updateOrderStatus(sOrder.id, 'Completed')"
+                  class="rounded-xl bg-emerald-500/10 dark:bg-emerald-600/20 hover:bg-emerald-600 text-emerald-700 dark:text-emerald-300 hover:text-white border border-emerald-500/30 px-3 py-1 text-xs font-bold transition-all">
+                  Mark Completed
+                </button>
+              }
 
-            <button type="button"
-              [disabled]="sOrder.status === 'Completed' || sOrder.status === 'Cancelled'"
-              (click)="updateOrderStatus(sOrder.id, 'Cancelled')"
-              class="rounded-xl bg-rose-500/10 dark:bg-rose-600/20 hover:bg-rose-600 text-rose-700 dark:text-rose-300 hover:text-white border border-rose-500/30 px-3 py-1 text-xs font-bold transition-all disabled:opacity-30">
-              Cancel Order
-            </button>
+              @if (sOrder.status === 'Pending' || sOrder.status === 'Confirmed' || sOrder.status === 'Paid') {
+                <button type="button"
+                  (click)="updateOrderStatus(sOrder.id, 'Cancelled')"
+                  class="rounded-xl bg-rose-500/10 dark:bg-rose-600/20 hover:bg-rose-600 text-rose-700 dark:text-rose-300 hover:text-white border border-rose-500/30 px-3 py-1 text-xs font-bold transition-all">
+                  Cancel Order
+                </button>
+              }
+            </div>
           </div>
-        </div>
+        }
 
       </div>
       }

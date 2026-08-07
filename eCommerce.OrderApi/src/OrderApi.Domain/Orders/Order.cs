@@ -328,30 +328,30 @@ public class Order : Entity
         {
             Status = OrderStatus.Cancelled;
         }
-        else if (activeSellerOrders.All(order => order.Status == OrderStatus.Completed))
-        {
-            Status = OrderStatus.Completed;
-        }
-        else if (activeSellerOrders.All(order => order.Status == OrderStatus.Shipped))
-        {
-            Status = OrderStatus.Shipped;
-        }
-        else if (activeSellerOrders.All(order => order.Status == OrderStatus.Paid))
-        {
-            Status = OrderStatus.Paid;
-        }
-        else if (activeSellerOrders.All(order => order.Status == OrderStatus.Confirmed))
-        {
-            Status = OrderStatus.Confirmed;
-        }
-        else
+        else if (activeSellerOrders.Any(order => order.Status == OrderStatus.Pending))
         {
             Status = OrderStatus.Pending;
         }
+        else if (activeSellerOrders.Any(order => order.Status == OrderStatus.Confirmed))
+        {
+            Status = OrderStatus.Confirmed;
+        }
+        else if (activeSellerOrders.Any(order => order.Status == OrderStatus.Paid))
+        {
+            Status = OrderStatus.Paid;
+        }
+        else if (activeSellerOrders.Any(order => order.Status == OrderStatus.Shipped))
+        {
+            Status = OrderStatus.Shipped;
+        }
+        else
+        {
+            Status = OrderStatus.Completed;
+        }
 
-        ConfirmedOnUtc ??= _sellerOrders.Any(order => order.ConfirmedOnUtc is not null) ? utcNow : null;
-        PaidOnUtc ??= _sellerOrders.Any(order => order.PaidOnUtc is not null) ? utcNow : null;
-        ShippedOnUtc ??= _sellerOrders.Any(order => order.ShippedOnUtc is not null) ? utcNow : null;
+        ConfirmedOnUtc ??= _sellerOrders.All(order => order.ConfirmedOnUtc is not null) ? utcNow : null;
+        PaidOnUtc ??= _sellerOrders.All(order => order.PaidOnUtc is not null) ? utcNow : null;
+        ShippedOnUtc ??= _sellerOrders.All(order => order.ShippedOnUtc is not null) ? utcNow : null;
         CompletedOnUtc ??= Status == OrderStatus.Completed ? utcNow : null;
         CancelledOnUtc ??= Status == OrderStatus.Cancelled ? utcNow : null;
     }
