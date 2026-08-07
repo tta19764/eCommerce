@@ -108,6 +108,14 @@ export const routes: Routes = [
         title: 'Category Editor · eCommerce',
       },
       {
+        path: 'orders',
+        loadComponent: () =>
+          import('./features/admin/pages/admin-orders-page/admin-orders-page').then(
+            (m) => m.AdminOrdersPage,
+          ),
+        title: 'Manage orders · eCommerce',
+      },
+      {
         path: 'users',
         loadComponent: () =>
           import('./features/admin/pages/admin-users-page/admin-users-page').then(

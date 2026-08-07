@@ -10,6 +10,15 @@ export interface UpdateOrderStatusRequest {
   status: OrderStatus;
 }
 
+export interface OrderSearchQuery {
+  page?: number;
+  pageSize?: number;
+  minOrderPrice?: number | null;
+  maxOrderPrice?: number | null;
+  sortByOrderPrice?: boolean;
+  sortDescending?: boolean;
+}
+
 export type ReviewState = 'Eligible' | 'Reviewed' | 'NotEligible';
 
 export interface OrderItem {

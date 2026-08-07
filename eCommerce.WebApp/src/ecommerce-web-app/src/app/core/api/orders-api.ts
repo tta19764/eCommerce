@@ -6,6 +6,7 @@ import { ApiResponse, PagedList, PageQuery } from '../models/api-model';
 import {
   Order,
   OrderItemRequest,
+  OrderSearchQuery,
   OrderStatus,
   SellerOrder,
   UpdateOrderStatusRequest,
@@ -16,6 +17,30 @@ import { apiData } from './api-base';
 export class OrdersApiClient {
   private readonly http = inject(HttpClient);
   private readonly url = `${environment.gatewayUrl}/order-api/v1/orders`;
+
+  // Admin workflow: gets paginated orders with price filters and sorting.
+  getPage(query: OrderSearchQuery = {}) {
+    let params = new HttpParams()
+      .set('page', query.page ?? 1)
+      .set('pageSize', query.pageSize ?? 10);
+
+    if (query.minOrderPrice !== null && query.minOrderPrice !== undefined) {
+      params = params.set('minOrderPrice', query.minOrderPrice);
+    }
+    if (query.maxOrderPrice !== null && query.maxOrderPrice !== undefined) {
+      params = params.set('maxOrderPrice', query.maxOrderPrice);
+    }
+    if (query.sortByOrderPrice !== undefined) {
+      params = params.set('sortByOrderPrice', query.sortByOrderPrice);
+    }
+    if (query.sortDescending !== undefined) {
+      params = params.set('sortDescending', query.sortDescending);
+    }
+
+    return this.http
+      .get<ApiResponse<PagedList<Order>>>(this.url, { params })
+      .pipe(map(apiData));
+  }
 
   // The backend resolves the owner from the access-token claims.
   getOwn(query: PageQuery = {}) {

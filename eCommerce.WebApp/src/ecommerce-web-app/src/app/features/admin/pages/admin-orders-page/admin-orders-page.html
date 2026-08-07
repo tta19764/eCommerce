@@ -1,0 +1,318 @@
+<div class="space-y-6">
+  
+  <!-- Header Bar -->
+  <div class="app-card rounded-xl p-6 border border-slate-300 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white">Global Platform Orders</h2>
+      <p class="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+        Inspect all customer orders across marketplace sellers, filter by total value, and execute global state transitions.
+      </p>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="rounded-lg bg-indigo-500/10 border border-indigo-500/30 px-3 py-1.5 text-xs font-bold text-indigo-700 dark:text-indigo-300">
+        Total Orders: {{ totalCount() }}
+      </span>
+      <button
+        type="button"
+        (click)="loadOrders()"
+        class="rounded-lg bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 px-3 py-1.5 text-xs font-bold text-slate-800 dark:text-slate-200 transition-colors"
+      >
+        Refresh List
+      </button>
+    </div>
+  </div>
+
+  <!-- Error / Success Feedback Banners -->
+  @if (error()) {
+    <div class="rounded-lg border border-rose-500/30 bg-rose-500/10 p-4 text-xs font-semibold text-rose-700 dark:text-rose-300">
+      {{ error() }}
+    </div>
+  }
+
+  @if (success()) {
+    <div class="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+      {{ success() }}
+    </div>
+  }
+
+  <!-- Search, Filter & Sorting Bar -->
+  <div class="app-card rounded-xl p-5 border border-slate-300 dark:border-slate-800 space-y-4 shadow-sm">
+    <h3 class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Filters & Sorting</h3>
+    
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 items-end">
+      <!-- Min Price -->
+      <div>
+        <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Min Order Price ($)</label>
+        <input
+          type="number"
+          min="0"
+          step="1"
+          [ngModel]="minPriceInput()"
+          (ngModelChange)="minPriceInput.set($event)"
+          placeholder="0.00"
+          class="w-full app-input rounded px-3 py-2 text-xs"
+        />
+      </div>
+
+      <!-- Max Price -->
+      <div>
+        <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Max Order Price ($)</label>
+        <input
+          type="number"
+          min="0"
+          step="1"
+          [ngModel]="maxPriceInput()"
+          (ngModelChange)="maxPriceInput.set($event)"
+          placeholder="1000.00"
+          class="w-full app-input rounded px-3 py-2 text-xs"
+        />
+      </div>
+
+      <!-- Sort Criterion -->
+      <div>
+        <label class="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">Sort Strategy</label>
+        <select
+          [ngModel]="sortByOrderPrice()"
+          (ngModelChange)="sortByOrderPrice.set($event)"
+          class="w-full app-input rounded px-3 py-2 text-xs"
+        >
+          <option [ngValue]="false">Sort by Creation Date</option>
+          <option [ngValue]="true">Sort by Total Order Price</option>
+        </select>
+      </div>
+
+      <!-- Sort Direction & Apply -->
+      <div class="flex items-center gap-2">
+        <select
+          [ngModel]="sortDescending()"
+          (ngModelChange)="sortDescending.set($event)"
+          class="flex-1 app-input rounded px-3 py-2 text-xs"
+        >
+          <option [ngValue]="true">Descending</option>
+          <option [ngValue]="false">Ascending</option>
+        </select>
+
+        <button
+          type="button"
+          (click)="applyFilters()"
+          class="rounded bg-indigo-600 hover:bg-indigo-700 px-4 py-2 text-xs font-bold text-white shadow-sm transition-colors"
+        >
+          Filter
+        </button>
+
+        <button
+          type="button"
+          (click)="resetFilters()"
+          class="rounded bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 px-3 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 transition-colors"
+        >
+          Reset
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Orders Grid / Loading States -->
+  @if (loading()) {
+    <div class="space-y-4">
+      @for (item of [1, 2, 3]; track item) {
+        <div class="h-48 animate-pulse rounded-xl bg-slate-200 dark:bg-slate-800/50"></div>
+      }
+    </div>
+  } @else if (!orders().length) {
+    <div class="app-card rounded-xl p-12 text-center text-slate-500 dark:text-slate-400 space-y-2">
+      <h3 class="text-base font-bold text-slate-900 dark:text-white">No Orders Found</h3>
+      <p class="text-xs">No customer orders match your current filter parameters.</p>
+    </div>
+  } @else {
+    <div class="space-y-6">
+      @for (order of orders(); track order.id) {
+        <article class="app-card rounded-xl border border-slate-300 dark:border-slate-800 overflow-hidden shadow-sm">
+          
+          <!-- Order Card Header -->
+          <header class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-300 dark:border-slate-800 bg-slate-100 dark:bg-slate-950/60 px-6 py-4 text-xs">
+            <div class="flex flex-wrap items-center gap-6">
+              <div>
+                <span class="block text-[10px] uppercase tracking-wider text-slate-600 dark:text-slate-400 font-semibold">Order Ref</span>
+                <strong class="font-mono text-sm text-indigo-600 dark:text-indigo-400">#{{ order.id.slice(0, 8) }}</strong>
+              </div>
+              <div>
+                <span class="block text-[10px] uppercase tracking-wider text-slate-600 dark:text-slate-400 font-semibold">Client ID</span>
+                <span class="font-mono text-xs text-slate-800 dark:text-slate-300">{{ order.clientId.slice(0, 8) }}...</span>
+              </div>
+              <div>
+                <span class="block text-[10px] uppercase tracking-wider text-slate-600 dark:text-slate-400 font-semibold">Date Placed</span>
+                <strong class="text-slate-900 dark:text-slate-200 font-bold">{{ order.createdAtUtc | date: 'medium' }}</strong>
+              </div>
+            </div>
+
+            <!-- Global Status Pill & Global Change Actions -->
+            <div class="flex items-center gap-3">
+              <span
+                class="rounded border px-3 py-1 text-[10px] font-bold uppercase tracking-wider"
+                [class.bg-emerald-500\/10]="order.status === 'Completed'"
+                [class.text-emerald-700]="order.status === 'Completed'"
+                [class.dark:text-emerald-400]="order.status === 'Completed'"
+                [class.border-emerald-500\/30]="order.status === 'Completed'"
+                [class.bg-rose-500\/10]="order.status === 'Cancelled'"
+                [class.text-rose-700]="order.status === 'Cancelled'"
+                [class.dark:text-rose-400]="order.status === 'Cancelled'"
+                [class.border-rose-500\/30]="order.status === 'Cancelled'"
+                [class.bg-indigo-500\/10]="order.status !== 'Completed' && order.status !== 'Cancelled'"
+                [class.text-indigo-700]="order.status !== 'Completed' && order.status !== 'Cancelled'"
+                [class.dark:text-indigo-400]="order.status !== 'Completed' && order.status !== 'Cancelled'"
+              >
+                Global: {{ order.status }}
+              </span>
+            </div>
+          </header>
+
+          <!-- Admin Global State Trigger Bar -->
+          <div class="bg-indigo-500/5 dark:bg-indigo-950/20 px-6 py-3 border-b border-slate-300 dark:border-slate-800/80 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <span class="font-bold text-slate-800 dark:text-slate-200">Global State Transition:</span>
+            
+            <div class="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                [disabled]="order.status === 'Confirmed' || order.status === 'Completed' || order.status === 'Cancelled' || updatingId() === order.id"
+                (click)="updateOrderStatus(order.id, 'Confirmed')"
+                class="rounded bg-indigo-600 hover:bg-indigo-700 px-3 py-1 text-[11px] font-bold text-white shadow-xs disabled:opacity-30"
+              >
+                Confirm Order
+              </button>
+
+              <button
+                type="button"
+                [disabled]="order.status === 'Paid' || order.status === 'Completed' || order.status === 'Cancelled' || updatingId() === order.id"
+                (click)="updateOrderStatus(order.id, 'Paid')"
+                class="rounded bg-blue-600 hover:bg-blue-700 px-3 py-1 text-[11px] font-bold text-white shadow-xs disabled:opacity-30"
+              >
+                Mark Paid
+              </button>
+
+              <button
+                type="button"
+                [disabled]="order.status === 'Shipped' || order.status === 'Completed' || order.status === 'Cancelled' || updatingId() === order.id"
+                (click)="updateOrderStatus(order.id, 'Shipped')"
+                class="rounded bg-teal-600 hover:bg-teal-700 px-3 py-1 text-[11px] font-bold text-white shadow-xs disabled:opacity-30"
+              >
+                Mark Shipped
+              </button>
+
+              <button
+                type="button"
+                [disabled]="order.status === 'Completed' || order.status === 'Cancelled' || updatingId() === order.id"
+                (click)="updateOrderStatus(order.id, 'Completed')"
+                class="rounded bg-emerald-600 hover:bg-emerald-700 px-3 py-1 text-[11px] font-bold text-white shadow-xs disabled:opacity-30"
+              >
+                Complete Order
+              </button>
+
+              <button
+                type="button"
+                [disabled]="order.status === 'Cancelled' || updatingId() === order.id"
+                (click)="updateOrderStatus(order.id, 'Cancelled')"
+                class="rounded bg-rose-600 hover:bg-rose-700 px-3 py-1 text-[11px] font-bold text-white shadow-xs disabled:opacity-30"
+              >
+                Cancel Order
+              </button>
+            </div>
+          </div>
+
+          <!-- Child Seller Order Packages -->
+          <div class="divide-y divide-slate-300 dark:divide-slate-800">
+            @for (sellerOrder of order.sellerOrders; track sellerOrder.id) {
+              <div>
+                <div class="flex flex-wrap items-center justify-between bg-slate-50 dark:bg-slate-900/50 px-6 py-2.5 text-xs font-medium border-b border-slate-300 dark:border-slate-800/60">
+                  <div class="flex items-center gap-3">
+                    <span class="text-slate-900 dark:text-slate-300 font-semibold">Seller Package #{{ sellerOrder.id.slice(0, 8) }} (Seller: {{ sellerOrder.sellerId.slice(0, 8) }})</span>
+                    <span
+                      class="rounded px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider border"
+                      [class.bg-rose-500\/10]="sellerOrder.status === 'Cancelled'"
+                      [class.text-rose-600]="sellerOrder.status === 'Cancelled'"
+                      [class.border-rose-500\/30]="sellerOrder.status === 'Cancelled'"
+                      [class.bg-emerald-500\/10]="sellerOrder.status === 'Completed'"
+                      [class.text-emerald-600]="sellerOrder.status === 'Completed'"
+                      [class.border-emerald-500\/30]="sellerOrder.status === 'Completed'"
+                      [class.bg-indigo-500\/10]="sellerOrder.status !== 'Cancelled' && sellerOrder.status !== 'Completed'"
+                      [class.text-indigo-600]="sellerOrder.status !== 'Cancelled' && sellerOrder.status !== 'Completed'"
+                      [class.border-indigo-500\/30]="sellerOrder.status !== 'Cancelled' && sellerOrder.status !== 'Completed'"
+                    >
+                      {{ sellerOrder.status }}
+                    </span>
+                  </div>
+
+                  <strong class="font-bold text-xs text-indigo-600 dark:text-indigo-300">
+                    {{ sellerOrder.totalPrice | currency: sellerOrder.currency }}
+                  </strong>
+                </div>
+
+                <!-- Items in Seller Package -->
+                <div class="divide-y divide-slate-200 dark:divide-slate-800/40">
+                  @for (item of sellerOrder.items; track item.id) {
+                    <div class="flex items-center justify-between px-6 py-3 text-xs">
+                      <div>
+                        <span class="font-bold text-slate-900 dark:text-slate-200 block">{{ item.productName }}</span>
+                        <span class="text-slate-500 dark:text-slate-400">Qty: {{ item.quantity }} · {{ item.unitPrice | currency: item.currency }} each</span>
+                      </div>
+                      <div>
+                        @if (sellerOrder.status === 'Cancelled') {
+                          <span class="line-through text-slate-400 font-semibold">{{ item.totalPrice | currency: item.currency }}</span>
+                        } @else {
+                          <strong class="font-bold text-slate-900 dark:text-white">{{ item.totalPrice | currency: item.currency }}</strong>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Order Footer Total -->
+          <footer class="flex items-center justify-between border-t border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950/80 px-6 py-4 text-xs">
+            <span class="text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Total Order Amount</span>
+            <div class="flex items-center gap-3">
+              @if (order.originalTotalPrice && order.originalTotalPrice > order.totalPrice) {
+                <span class="text-xs text-slate-400 dark:text-slate-500 line-through font-semibold">
+                  {{ order.originalTotalPrice | currency: order.currency }}
+                </span>
+                <span class="rounded bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-300">
+                  Adjusted Net Total
+                </span>
+              }
+              <strong class="text-lg font-black text-indigo-600 dark:text-indigo-400">
+                {{ order.totalPrice | currency: order.currency }}
+              </strong>
+            </div>
+          </footer>
+
+        </article>
+      }
+
+      <!-- Pagination Controls -->
+      <div class="flex items-center justify-between border-t border-slate-300 dark:border-slate-800 pt-4 text-xs font-semibold text-slate-600 dark:text-slate-400">
+        <span>Showing Page {{ page() }} of {{ totalPages() }} ({{ totalCount() }} Total Orders)</span>
+        
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            [disabled]="page() === 1"
+            (click)="setPage(page() - 1)"
+            class="rounded bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 px-3 py-1.5 text-xs font-bold text-slate-800 dark:text-slate-200 disabled:opacity-30 transition-colors"
+          >
+            Previous Page
+          </button>
+          
+          <button
+            type="button"
+            [disabled]="page() >= totalPages()"
+            (click)="setPage(page() + 1)"
+            class="rounded bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 px-3 py-1.5 text-xs font-bold text-slate-800 dark:text-slate-200 disabled:opacity-30 transition-colors"
+          >
+            Next Page
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>
