@@ -4,15 +4,16 @@ using Microsoft.Extensions.Options;
 namespace GatewayApi.Api.Extensions;
 
 /// <summary>
-/// Defines the SwaggerExtensions class used by this slice.
+/// Provides extension methods for aggregating backend microservice OpenAPI/Swagger documentation at the API Gateway.
 /// </summary>
 public static class SwaggerExtensions
 {
     /// <summary>
-    /// Executes the AddGatewaySwagger operation.
+    /// Registers dependencies required to aggregate downstream microservice OpenAPI specs.
     /// </summary>
-    /// <param name="services">The services value.</param>
-    /// <param name="configuration">The configuration value.</param>
+    /// <param name="services">The service collection.</param>
+    /// <param name="configuration">The application configuration.</param>
+    /// <returns>The service collection for call chaining.</returns>
     public static IServiceCollection AddGatewaySwagger(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<SwaggerServiceOptions>(configuration.GetSection("Swagger"));
@@ -24,9 +25,10 @@ public static class SwaggerExtensions
     }
 
     /// <summary>
-    /// Executes the MapGatewaySwaggerDocuments operation.
+    /// Maps the gateway endpoints that proxy individual downstream service OpenAPI JSON documents.
     /// </summary>
-    /// <param name="builder">The builder value.</param>
+    /// <param name="builder">The endpoint route builder.</param>
+    /// <returns>The endpoint route builder for call chaining.</returns>
     public static IEndpointRouteBuilder MapGatewaySwaggerDocuments(this IEndpointRouteBuilder builder)
     {
         builder.MapGet(
@@ -42,9 +44,10 @@ public static class SwaggerExtensions
     }
 
     /// <summary>
-    /// Executes the UseGatewaySwaggerUi operation.
+    /// Configures the aggregated Swagger UI displaying OpenAPI specifications for all registered backend microservices.
     /// </summary>
-    /// <param name="app">The app value.</param>
+    /// <param name="app">The web application builder.</param>
+    /// <returns>The application builder for call chaining.</returns>
     public static IApplicationBuilder UseGatewaySwaggerUi(this WebApplication app)
     {
         var swaggerOptions = app.Services.GetRequiredService<IOptions<SwaggerServiceOptions>>().Value;
@@ -64,3 +67,4 @@ public static class SwaggerExtensions
         return app;
     }
 }
+

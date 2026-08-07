@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 namespace GatewayApi.Api.OpenApi;
 
 /// <summary>
-/// Defines the SwaggerDocumentProxy class used by this slice.
+/// Fetches, rewrites, and proxies downstream microservice OpenAPI specifications for unified Gateway Swagger rendering.
 /// </summary>
 public sealed class SwaggerDocumentProxy(
     IHttpClientFactory httpClientFactory,
@@ -15,15 +15,17 @@ public sealed class SwaggerDocumentProxy(
     private const string BearerSecuritySchemeName = "Bearer";
 
     /// <summary>
-    /// Executes the GetSwaggerDocumentAsync operation.
+    /// Fetches and transforms the OpenAPI specification for a configured downstream service.
     /// </summary>
-    /// <param name="serviceName">The serviceName value.</param>
-    /// <param name="context">The context value.</param>
-    /// <param name="cancellationToken">The cancellationToken value.</param>
+    /// <param name="serviceName">The unique service name.</param>
+    /// <param name="context">The HTTP context.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The transformed OpenAPI JSON document or error problem details.</returns>
     public async Task<IResult> GetSwaggerDocumentAsync(
         string serviceName,
         HttpContext context,
         CancellationToken cancellationToken)
+
     {
         var service = options.Value.Services.FirstOrDefault(
             configuredService => string.Equals(configuredService.Name, serviceName, StringComparison.OrdinalIgnoreCase));

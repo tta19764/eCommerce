@@ -1,7 +1,8 @@
 namespace ProductApi.Messages.Products;
 
 /// <summary>
-/// Defines the AdjustProductQuantitiesRequest record used by this slice.
+/// Requests stock quantity adjustments for multiple products (e.g. upon order placement or cancellation).
 /// </summary>
-/// <param name="Adjustments">The Adjustments value.</param>
+/// <param name="Adjustments">The collection of product quantity adjustments to perform.</param>
 public sealed record AdjustProductQuantitiesRequest(IReadOnlyCollection<ProductQuantityAdjustment> Adjustments);
+

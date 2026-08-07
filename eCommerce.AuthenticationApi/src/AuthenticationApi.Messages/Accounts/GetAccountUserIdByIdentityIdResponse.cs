@@ -1,12 +1,13 @@
 namespace AuthenticationApi.Messages.Accounts;
 
 /// <summary>
-/// Defines the GetAccountUserIdByIdentityIdResponse record used by this slice.
+/// Response payload containing the resolved user profile identifier for an identity provider subject identifier.
 /// </summary>
-/// <param name="IdentityId">The IdentityId value.</param>
-/// <param name="UserId">The UserId value.</param>
-/// <param name="Found">The Found value.</param>
+/// <param name="IdentityId">The queried identity provider subject identifier.</param>
+/// <param name="UserId">The resolved user profile identifier, or null if no matching account was found.</param>
+/// <param name="Found">Indicates whether a matching account was found.</param>
 public sealed record GetAccountUserIdByIdentityIdResponse(
     string IdentityId,
     Guid? UserId,
     bool Found);
+
