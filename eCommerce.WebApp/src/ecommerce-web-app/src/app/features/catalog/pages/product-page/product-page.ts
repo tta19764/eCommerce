@@ -142,32 +142,28 @@ export class ProductPage {
     this.reviewError.set('');
     this.reviewSuccess.set('');
 
-    const newReview: ProductReview = {
-      id: `rev-${Date.now()}`,
-      productId: p.id,
-      userId: this.auth.user()?.id ?? 'current-user',
-      rating,
-      comment,
-      createdAtUtc: new Date().toISOString(),
-    };
+    const userId = this.auth.user()?.id ?? '';
 
-    // Try API submission with optimistic fallback
-    this.api.createReview(p.id, { rating, comment }).subscribe({
-      next: (created) => {
-        const added = created || newReview;
-        this.reviews.update((prev) => [added, ...prev]);
-        this.newComment.set('');
-        this.newRating.set(5);
-        this.submittingReview.set(false);
-        this.reviewSuccess.set('Thank you! Your review has been published.');
-      },
-      error: () => {
-        // Fallback for visual demonstration when API endpoint is pending backend contract
+    this.api.createReview(p.id, { rating, comment, userId }).subscribe({
+      next: (createdId) => {
+        const newReview: ProductReview = {
+          id: createdId || `rev-${Date.now()}`,
+          productId: p.id,
+          userId: userId || 'current-user',
+          rating,
+          comment,
+          createdAtUtc: new Date().toISOString(),
+        };
         this.reviews.update((prev) => [newReview, ...prev]);
         this.newComment.set('');
         this.newRating.set(5);
         this.submittingReview.set(false);
-        this.reviewSuccess.set('Thank you! Your review has been added to the product page.');
+        this.reviewSuccess.set('Thank you! Your review has been published successfully.');
+      },
+      error: (err) => {
+        this.submittingReview.set(false);
+        const detail = err?.error?.detail || err?.error?.title || 'Failed to publish review. Please try again.';
+        this.reviewError.set(detail);
       },
     });
   }
@@ -176,11 +172,12 @@ export class ProductPage {
     const p = this.product();
     if (!p) return;
 
-    this.reviews.update((prev) => prev.filter((r) => r.id !== reviewId));
-
     this.api.deleteReview(p.id, reviewId).subscribe({
+      next: () => {
+        this.reviews.update((prev) => prev.filter((r) => r.id !== reviewId));
+      },
       error: () => {
-        // Silent fallback for local removal
+        this.reviews.update((prev) => prev.filter((r) => r.id !== reviewId));
       },
     });
   }

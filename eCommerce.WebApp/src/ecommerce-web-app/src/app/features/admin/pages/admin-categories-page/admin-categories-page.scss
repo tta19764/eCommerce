@@ -1,3 +1,22 @@
 :host {
   display: block;
 }
+
+/* Admin Categories Page Dedicated SCSS */
+.admin-card {
+  background-color: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow-card);
+}
+
+.category-item {
+  background-color: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.5rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    border-color: var(--border-strong);
+  }
+}

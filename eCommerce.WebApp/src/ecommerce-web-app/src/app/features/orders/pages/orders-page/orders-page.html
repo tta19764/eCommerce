@@ -59,17 +59,17 @@
   } @else {
     <div class="space-y-6">
       @for (order of orders(); track order.id) {
-        <article class="app-card rounded-lg border border-slate-300 dark:border-slate-800 overflow-hidden shadow-sm">
+        <article class="app-card rounded-xl border border-slate-600 dark:border-slate-800 overflow-hidden shadow-sm">
           
           <!-- Order Card Header -->
-          <header class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950/60 px-6 py-4 text-xs">
+          <header class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-300 dark:border-slate-800 bg-slate-100 dark:bg-slate-950/60 px-6 py-4 text-xs">
             <div class="flex flex-wrap items-center gap-6">
               <div>
-                <span class="block text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Order Reference</span>
+                <span class="block text-[10px] uppercase tracking-wider text-slate-600 dark:text-slate-400 font-semibold">Order Reference</span>
                 <strong class="font-mono text-sm text-indigo-600 dark:text-indigo-300">#{{ order.id.slice(0, 8) }}</strong>
               </div>
               <div>
-                <span class="block text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Date Placed</span>
+                <span class="block text-[10px] uppercase tracking-wider text-slate-600 dark:text-slate-400 font-semibold">Date Placed</span>
                 <strong class="text-slate-900 dark:text-slate-200 font-bold">{{ order.createdAtUtc | date: 'mediumDate' }}</strong>
               </div>
             </div>
@@ -85,7 +85,6 @@
                 [class.bg-indigo-500\/10]="order.status === 'Pending' || order.status === 'Confirmed'"
                 [class.text-indigo-700]="order.status === 'Pending' || order.status === 'Confirmed'"
                 [class.dark:text-indigo-400]="order.status === 'Pending' || order.status === 'Confirmed'"
-                [class.border-indigo-500\/30]="order.status === 'Pending' || order.status === 'Confirmed'"
                 [class.bg-rose-500\/10]="order.status === 'Cancelled'"
                 [class.text-rose-700]="order.status === 'Cancelled'"
                 [class.dark:text-rose-400]="order.status === 'Cancelled'"
@@ -97,11 +96,11 @@
           </header>
 
           <!-- Seller Order Groups -->
-          <div class="divide-y divide-slate-200 dark:divide-slate-800/60">
+          <div class="divide-y divide-slate-300 dark:divide-slate-800/80">
             @for (sellerOrder of order.sellerOrders; track sellerOrder.id) {
               <div>
                 <!-- Group Banner with Contact Seller Trigger -->
-                <div class="seller-order-banner flex items-center justify-between bg-slate-50 dark:bg-slate-900/50 px-6 py-2.5 text-xs font-medium border-b border-slate-200 dark:border-slate-800/40">
+                <div class="seller-order-banner flex items-center justify-between bg-slate-50 dark:bg-slate-900/50 px-6 py-2.5 text-xs font-medium border-b border-slate-300 dark:border-slate-800/60">
                   <div class="flex items-center gap-2">
                     <svg class="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m0 0h5m0 0v-5a2 2 0 012-2h2a2 2 0 012 2v5" />
@@ -122,7 +121,7 @@
                 </div>
 
                 <!-- Item Lines -->
-                <div class="divide-y divide-slate-200 dark:divide-slate-800/40">
+                <div class="divide-y divide-slate-300 dark:divide-slate-800/40">
                   @for (item of sellerOrder.items; track item.id) {
                     <div class="flex items-center justify-between px-6 py-4 text-xs">
                       <div>

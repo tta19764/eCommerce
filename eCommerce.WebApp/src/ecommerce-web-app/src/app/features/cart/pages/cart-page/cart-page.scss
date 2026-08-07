@@ -1,3 +1,24 @@
 :host {
   display: block;
 }
+
+/* Cart Page Dedicated SCSS */
+.cart-card {
+  background-color: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow-card);
+}
+
+.quantity-stepper {
+  background-color: var(--surface-secondary);
+  border: 1px solid var(--border-strong);
+  border-radius: 0.375rem;
+
+  button {
+    color: var(--text-primary);
+    &:hover {
+      background-color: var(--surface-hover);
+    }
+  }
+}

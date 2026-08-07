@@ -60,9 +60,9 @@ export class ProductsApiClient {
       .pipe(map(apiData));
   }
 
-  createReview(productId: string, request: { rating: number; comment: string }) {
+  createReview(productId: string, request: { rating: number; comment: string; userId?: string }) {
     return this.http
-      .post<ApiResponse<ProductReview>>(`${this.url}/${productId}/reviews`, request)
+      .post<ApiResponse<string>>(`${this.url}/${productId}/reviews`, request)
       .pipe(map(apiData));
   }
 

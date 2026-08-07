@@ -94,50 +94,50 @@
   <div class="space-y-6">
     <!-- Store Overview Cards -->
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      <div class="glass-panel rounded-2xl p-5 border border-slate-800 space-y-1">
-        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Product Listings</span>
-        <p class="text-2xl font-extrabold text-white">{{ products().length }}</p>
+      <div class="glass-panel rounded-2xl p-5 border border-slate-300 dark:border-slate-800 space-y-1">
+        <span class="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Total Product Listings</span>
+        <p class="text-2xl font-extrabold text-slate-900 dark:text-white">{{ products().length }}</p>
       </div>
 
-      <div class="glass-panel rounded-2xl p-5 border border-slate-800 space-y-1">
-        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Client Orders</span>
-        <p class="text-2xl font-extrabold text-emerald-400">{{ sellerOrders().length }}</p>
+      <div class="glass-panel rounded-2xl p-5 border border-slate-300 dark:border-slate-800 space-y-1">
+        <span class="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Client Orders</span>
+        <p class="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">{{ sellerOrders().length }}</p>
       </div>
 
-      <div class="glass-panel rounded-2xl p-5 border border-slate-800 space-y-1">
-        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Seller Account Status</span>
-        <p class="text-sm font-bold text-emerald-400 flex items-center gap-1.5 mt-1">
-          <span class="h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+      <div class="glass-panel rounded-2xl p-5 border border-slate-300 dark:border-slate-800 space-y-1">
+        <span class="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Seller Account Status</span>
+        <p class="text-sm font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 mt-1">
+          <span class="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
           Active Verified Seller
         </p>
       </div>
 
-      <div class="glass-panel rounded-2xl p-5 border border-slate-800 space-y-1">
-        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Catalog Taxonomy</span>
-        <p class="text-sm font-bold text-indigo-300 mt-1">{{ flatCategories().length }} Categories Available</p>
+      <div class="glass-panel rounded-2xl p-5 border border-slate-300 dark:border-slate-800 space-y-1">
+        <span class="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Catalog Taxonomy</span>
+        <p class="text-sm font-bold text-indigo-600 dark:text-indigo-300 mt-1">{{ flatCategories().length }} Categories Available</p>
       </div>
     </div>
 
     <!-- Seller Profile Details Card -->
-    <div class="glass-panel rounded-2xl p-6 sm:p-8 border border-slate-800 space-y-6">
-      <h2 class="text-lg font-bold text-white flex items-center gap-2">
+    <div class="glass-panel rounded-2xl p-6 sm:p-8 border border-slate-300 dark:border-slate-800 space-y-6">
+      <h2 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
         <span>🏪</span>
         <span>Seller Profile Overview</span>
       </h2>
 
       @if (profile()) {
       <div
-        class="flex flex-col sm:flex-row items-start sm:items-center gap-6 p-4 rounded-xl bg-slate-900/60 border border-slate-800">
+        class="flex flex-col sm:flex-row items-start sm:items-center gap-6 p-4 rounded-xl bg-slate-100 dark:bg-slate-900/60 border border-slate-300 dark:border-slate-800">
         <div
           class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white font-extrabold text-xl shadow-lg">
           {{ profile()!.firstName[0] }}{{ profile()!.lastName[0] }}
         </div>
 
         <div class="space-y-1 flex-1">
-          <h3 class="text-base font-bold text-white">{{ profile()!.fullName }}</h3>
-          <p class="text-xs text-slate-400">{{ profile()!.email }}</p>
+          <h3 class="text-base font-bold text-slate-900 dark:text-white">{{ profile()!.fullName }}</h3>
+          <p class="text-xs text-slate-600 dark:text-slate-400">{{ profile()!.email }}</p>
           <div class="flex flex-wrap gap-2 pt-1">
-            <span class="rounded-md bg-slate-800 px-2.5 py-1 text-[10px] font-mono text-emerald-400">
+            <span class="rounded-md bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700/80 px-2.5 py-1 text-[10px] font-mono text-emerald-700 dark:text-emerald-400">
               Seller Account ID: {{ profile()!.id }}
             </span>
           </div>
@@ -149,7 +149,7 @@
             Manage Products
           </button>
           <button type="button" (click)="setTab('orders')"
-            class="rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold px-4 py-2 border border-slate-700 transition-all">
+            class="rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold px-4 py-2 border border-slate-300 dark:border-slate-700 transition-all">
             View Client Orders
           </button>
         </div>
@@ -165,7 +165,7 @@
 
     <!-- Products Action Bar -->
     <div
-      class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 glass-panel p-4 rounded-2xl border border-slate-800">
+      class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 glass-panel p-4 rounded-2xl border border-slate-300 dark:border-slate-800">
       <div class="flex items-center gap-3 flex-1 max-w-md">
         <input type="text" [ngModel]="productSearchQuery()" (ngModelChange)="productSearchQuery.set($event)"
           placeholder="Search seller products..." class="w-full glass-input rounded-xl px-3.5 py-2 text-xs" />
@@ -173,7 +173,7 @@
 
       <div class="flex items-center gap-3">
         <button type="button" (click)="openCategoryModal()"
-          class="rounded-xl bg-slate-800 border border-slate-700 px-3.5 py-2 text-xs font-bold text-slate-300 hover:text-white transition-all flex items-center gap-1.5">
+          class="rounded-xl bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-3.5 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:text-white transition-all flex items-center gap-1.5">
           <span>🏷️</span>
           <span>Add Category</span>
         </button>
@@ -189,85 +189,85 @@
     <!-- Expandable Product Add/Edit Form -->
     @if (showProductForm()) {
     <form [formGroup]="form" (ngSubmit)="saveProduct()"
-      class="glass-panel rounded-2xl p-6 sm:p-8 border border-emerald-500/40 space-y-6 shadow-2xl bg-emerald-950/10">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+      class="glass-panel rounded-2xl p-6 sm:p-8 border border-emerald-500/40 space-y-6 shadow-2xl bg-emerald-500/5 dark:bg-emerald-950/10">
+      <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
         <div>
-          <h3 class="text-lg font-bold text-white">
+          <h3 class="text-lg font-bold text-slate-900 dark:text-white">
             {{ editingProduct() ? 'Edit Product Listing' : 'Publish Marketplace Listing' }}
           </h3>
-          <p class="text-xs text-slate-400 mt-0.5">
+          <p class="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
             Configure details, set stock levels, select category, and upload photos.
           </p>
         </div>
-        <button type="button" (click)="closeProductForm()" class="text-slate-400 hover:text-white">✕</button>
+        <button type="button" (click)="closeProductForm()" class="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">✕</button>
       </div>
 
       <div class="grid gap-4 md:grid-cols-2">
         <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1">Product Title *</label>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Product Title *</label>
           <input formControlName="name" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs"
             placeholder="e.g. Wireless Noise-Canceling Headphones" />
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1">Currency Code (3 Chars)</label>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Currency Code (3 Chars)</label>
           <input formControlName="currencyCode" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs uppercase"
             placeholder="USD" />
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1">Price ($) *</label>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Price ($) *</label>
           <input type="number" min="0.01" step="0.01" formControlName="price"
             class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs" />
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1">Inventory Stock Quantity *</label>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Inventory Stock Quantity *</label>
           <input type="number" min="0" formControlName="quantity"
             class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs" />
         </div>
 
         <div>
           <div class="flex items-center justify-between mb-1">
-            <label class="block text-xs font-bold text-slate-300">Category (Displays Subcategories) *</label>
-            <button type="button" (click)="openCategoryModal()" class="text-[10px] text-emerald-400 hover:underline">+
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Category (Displays Subcategories) *</label>
+            <button type="button" (click)="openCategoryModal()" class="text-[10px] text-emerald-600 dark:text-emerald-400 hover:underline font-bold">+
               New Category</button>
           </div>
-          <select formControlName="categoryId" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs">
+          <select formControlName="categoryId" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
             @for (cat of flatCategories(); track cat.id) {
-            <option [value]="cat.id" class="bg-slate-900 text-slate-200">{{ cat.fullPath }}</option>
+            <option [value]="cat.id" class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-200">{{ cat.fullPath }}</option>
             }
           </select>
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1">Product Type *</label>
-          <select formControlName="productType" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs">
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Product Type *</label>
+          <select formControlName="productType" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
             @for (type of productTypes(); track type.value) {
-            <option [value]="type.value" class="bg-slate-900 text-slate-200">{{ type.label }}</option>
+            <option [value]="type.value" class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-200">{{ type.label }}</option>
             }
           </select>
         </div>
       </div>
 
       <div>
-        <label class="block text-xs font-bold text-slate-300 mb-1">Detailed Description *</label>
+        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Detailed Description *</label>
         <textarea formControlName="description" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs min-h-24"
           placeholder="Describe specifications and features..."></textarea>
       </div>
 
       <!-- Image Uploader -->
-      <div class="space-y-3 pt-4 border-t border-slate-800">
+      <div class="space-y-3 pt-4 border-t border-slate-200 dark:border-slate-800">
         <div class="flex items-center justify-between">
-          <h4 class="text-xs font-bold text-slate-200">Product Image Gallery</h4>
-          <span class="text-[10px] text-emerald-400 font-bold">{{ imageIds().length }} / {{ maxProductImages }}
+          <h4 class="text-xs font-bold text-slate-900 dark:text-slate-200">Product Image Gallery</h4>
+          <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">{{ imageIds().length }} / {{ maxProductImages }}
             uploaded</span>
         </div>
 
         <div class="flex flex-wrap gap-3">
           @for (imageId of imageIds(); track imageId; let index = $index) {
-          <div class="relative h-20 w-20 cursor-grab overflow-hidden rounded-xl border-2 bg-slate-950 shadow-md group"
-            [class.border-emerald-500]="index === 0" [class.border-slate-800]="index !== 0" draggable="true"
+          <div class="relative h-20 w-20 cursor-grab overflow-hidden rounded-xl border-2 bg-slate-100 dark:bg-slate-950 shadow-md group"
+            [class.border-emerald-500]="index === 0" [class.border-slate-300]="index !== 0" [class.dark:border-slate-800]="index !== 0" draggable="true"
             (dragstart)="startDragging(index)" (dragover)="$event.preventDefault()" (drop)="dropImage(index)">
             <img class="h-full w-full object-cover" [src]="imageUrl(imageId)" [alt]="'Product image '" />
             @if (index === 0) {
@@ -285,7 +285,7 @@
           < maxProductImages) { <input #imageInput type="file" multiple
             accept="image/jpeg,image/png,image/webp,image/gif" (change)="uploadImages($event)" class="hidden" />
           <button type="button" [disabled]="uploadingImages()" (click)="imageInput.click()"
-            class="flex h-20 w-20 flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-700/80 bg-slate-900/40 text-xs font-semibold text-slate-400 hover:border-emerald-500 hover:text-emerald-400 transition-all">
+            class="flex h-20 w-20 flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-700/80 bg-slate-100 dark:bg-slate-900/40 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:border-emerald-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all">
             <span class="text-lg">+</span>
             <span class="text-[10px]">{{ uploadingImages() ? 'Uploading...' : 'Add Photo' }}</span>
           </button>
@@ -293,9 +293,9 @@
         </div>
       </div>
 
-      <div class="flex justify-end gap-3 pt-4 border-t border-slate-800">
+      <div class="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
         <button type="button" (click)="closeProductForm()"
-          class="rounded-xl bg-slate-800 px-4 py-2.5 text-xs font-bold text-slate-300">
+          class="rounded-xl bg-slate-200 dark:bg-slate-800 px-4 py-2.5 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700">
           Cancel
         </button>
         <button type="submit" [disabled]="saving() || uploadingImages() || !sellerId()"
@@ -310,15 +310,15 @@
     @if (loadingProducts()) {
     <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
       @for (item of [1, 2, 3, 4]; track item) {
-      <div class="h-64 animate-pulse rounded-2xl bg-slate-800/50"></div>
+      <div class="h-64 animate-pulse rounded-2xl bg-slate-200 dark:bg-slate-800/50"></div>
       }
     </div>
     } @else if (!filteredProducts().length) {
-    <div class="glass-panel rounded-2xl p-12 text-center text-slate-400 space-y-3">
-      <h3 class="text-base font-bold text-white">No Products Found</h3>
-      <p class="text-xs text-slate-400">You have no published marketplace products matching your criteria.</p>
+    <div class="glass-panel rounded-2xl p-12 text-center text-slate-600 dark:text-slate-400 space-y-3">
+      <h3 class="text-base font-bold text-slate-900 dark:text-white">No Products Found</h3>
+      <p class="text-xs text-slate-600 dark:text-slate-400">You have no published marketplace products matching your criteria.</p>
       <button type="button" (click)="openCreateForm()"
-        class="rounded-xl bg-emerald-600 text-white px-4 py-2 text-xs font-bold">
+        class="rounded-xl bg-emerald-600 text-white px-4 py-2 text-xs font-bold shadow-md hover:bg-emerald-700">
         Publish First Product
       </button>
     </div>
@@ -326,23 +326,23 @@
     <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
       @for (product of filteredProducts(); track product.id) {
       <div
-        class="glass-panel rounded-2xl border border-slate-800 overflow-hidden flex flex-col justify-between shadow-xl hover:border-slate-700 transition-all group">
+        class="glass-panel rounded-2xl border border-slate-300 dark:border-slate-800 overflow-hidden flex flex-col justify-between shadow-xl hover:border-slate-400 dark:hover:border-slate-700 transition-all group">
         <!-- Card Header / Image -->
-        <div class="relative h-48 bg-slate-950/60 overflow-hidden flex items-center justify-center">
+        <div class="relative h-48 bg-slate-100 dark:bg-slate-950/60 overflow-hidden flex items-center justify-center">
           @if (productMainImageUrl(product)) {
           <img [src]="productMainImageUrl(product)!" [alt]="product.name"
             class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
           } @else {
-          <div class="text-center text-slate-600">
+          <div class="text-center text-slate-500 dark:text-slate-600">
             <span class="text-3xl">📦</span>
-            <p class="text-[10px] text-slate-500 font-semibold mt-1">No Image Uploaded</p>
+            <p class="text-[10px] text-slate-600 dark:text-slate-500 font-semibold mt-1">No Image Uploaded</p>
           </div>
           }
 
           <!-- Stock Status Badge (User requirement: In Stock / Out of Stock) -->
           <div class="absolute top-3 right-3 z-10">
             <span
-              [class]="product.quantity > 0 ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border-rose-500/30'"
+              [class]="product.quantity > 0 ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border-emerald-500/30' : 'bg-rose-500/20 text-rose-700 dark:text-rose-400 border-rose-500/30'"
               class="rounded-full border px-2.5 py-0.5 text-[10px] font-bold backdrop-blur-md">
               {{ product.quantity > 0 ? 'In Stock' : 'Out of stock' }}
             </span>
@@ -351,7 +351,7 @@
           <!-- Product Type Badge -->
           <div class="absolute top-3 left-3 z-10">
             <span
-              class="rounded-full bg-slate-900/80 border border-slate-700/80 px-2.5 py-0.5 text-[10px] font-semibold text-slate-300 backdrop-blur-md">
+              class="rounded-full bg-slate-200/90 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700/80 px-2.5 py-0.5 text-[10px] font-semibold text-slate-800 dark:text-slate-300 backdrop-blur-md">
               {{ product.productType }}
             </span>
           </div>
@@ -361,16 +361,16 @@
         <div class="p-5 space-y-3 flex-1 flex flex-col justify-between">
           <div>
             <div class="flex items-start justify-between gap-2">
-              <h3 class="font-bold text-sm text-white group-hover:text-emerald-400 transition-colors line-clamp-1">
+              <h3 class="font-bold text-sm text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors line-clamp-1">
                 {{ product.name }}
               </h3>
-              <span class="text-base font-extrabold text-emerald-400">
+              <span class="text-base font-extrabold text-emerald-600 dark:text-emerald-400">
                 {{ product.price | currency: product.currency }}
               </span>
             </div>
 
             <span class="text-[11px] text-indigo-600 dark:text-indigo-400 font-semibold flex items-center gap-1 mt-1">
-              <svg class="h-3.5 w-3.5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
               </svg>
@@ -429,14 +429,14 @@
   <!-- TAB 3: CLIENT ORDERS -->
   @if (activeTab() === 'orders') {
   <div class="space-y-6">
-    <div class="glass-panel rounded-2xl p-6 border border-slate-800 flex items-center justify-between">
+    <div class="glass-panel rounded-2xl p-6 border border-slate-300 dark:border-slate-800 flex items-center justify-between">
       <div>
-        <h2 class="text-lg font-bold text-white">Client Orders Management</h2>
-        <p class="text-xs text-slate-400 mt-0.5">Fulfill marketplace orders, view ordered line items, and update order
+        <h2 class="text-lg font-bold text-slate-900 dark:text-white">Client Orders Management</h2>
+        <p class="text-xs text-slate-600 dark:text-slate-400 mt-0.5">Fulfill marketplace orders, view ordered line items, and update order
           statuses.</p>
       </div>
       <button type="button" (click)="setTab('orders')"
-        class="rounded-xl bg-slate-800 px-3.5 py-1.5 text-xs text-slate-300 font-semibold">
+        class="rounded-xl bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-3.5 py-1.5 text-xs text-slate-700 dark:text-slate-300 font-semibold hover:bg-slate-300 dark:hover:bg-slate-700">
         Refresh Orders
       </button>
     </div>
@@ -444,54 +444,54 @@
     @if (loadingOrders()) {
     <div class="space-y-4">
       @for (item of [1, 2]; track item) {
-      <div class="h-44 animate-pulse rounded-2xl bg-slate-800/50"></div>
+      <div class="h-44 animate-pulse rounded-2xl bg-slate-200 dark:bg-slate-800/50"></div>
       }
     </div>
     } @else if (!sellerOrders().length) {
-    <div class="glass-panel rounded-2xl p-12 text-center text-slate-400 space-y-3">
-      <h3 class="text-base font-bold text-white">No Client Orders Yet</h3>
-      <p class="text-xs text-slate-400">When clients order your products, their order details will appear here.</p>
+    <div class="glass-panel rounded-2xl p-12 text-center text-slate-600 dark:text-slate-400 space-y-3">
+      <h3 class="text-base font-bold text-slate-900 dark:text-white">No Client Orders Yet</h3>
+      <p class="text-xs text-slate-600 dark:text-slate-400">When clients order your products, their order details will appear here.</p>
     </div>
     } @else {
     <div class="space-y-4">
       @for (sOrder of sellerOrders(); track sOrder.id) {
-      <div class="glass-panel rounded-2xl border border-slate-800 p-6 space-y-4 shadow-lg">
+      <div class="glass-panel rounded-2xl border border-slate-300 dark:border-slate-800 p-6 space-y-4 shadow-lg">
 
         <!-- Order Group Header -->
-        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-300 dark:border-slate-800 pb-3">
           <div>
             <div class="flex items-center gap-2">
-              <span class="font-bold text-sm text-white font-mono">Order #{{ sOrder.id.slice(0, 8) }}</span>
+              <span class="font-bold text-sm text-slate-900 dark:text-white font-mono">Order #{{ sOrder.id.slice(0, 8) }}</span>
               <span
-                [class]="sOrder.status === 'Completed' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : (sOrder.status === 'Cancelled' ? 'bg-rose-500/20 text-rose-400 border-rose-500/30' : 'bg-amber-500/20 text-amber-400 border-amber-500/30')"
+                [class]="sOrder.status === 'Completed' ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border-emerald-500/30' : (sOrder.status === 'Cancelled' ? 'bg-rose-500/20 text-rose-700 dark:text-rose-400 border-rose-500/30' : 'bg-amber-500/20 text-amber-700 dark:text-amber-400 border-amber-500/30')"
                 class="rounded-full border px-2.5 py-0.5 text-[10px] font-bold">
                 {{ sOrder.status }}
               </span>
             </div>
-            <span class="text-[11px] text-slate-400 block mt-0.5">Parent Order ID: {{ sOrder.orderId }}</span>
+            <span class="text-[11px] text-slate-600 dark:text-slate-400 block mt-0.5">Parent Order ID: {{ sOrder.orderId }}</span>
           </div>
 
           <div class="text-right">
-            <span class="text-lg font-extrabold text-emerald-400">
+            <span class="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">
               {{ sOrder.totalPrice | currency: sOrder.currency }}
             </span>
-            <span class="block text-[10px] text-slate-500">Seller Group Total</span>
+            <span class="block text-[10px] text-slate-600 dark:text-slate-400 font-semibold">Seller Group Total</span>
           </div>
         </div>
 
         <!-- Ordered Items List -->
         <div class="space-y-2">
-          <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Ordered Items</h4>
-          <div class="divide-y divide-slate-800/80 rounded-xl bg-slate-950/60 border border-slate-800 overflow-hidden">
+          <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Ordered Items</h4>
+          <div class="divide-y divide-slate-200 dark:divide-slate-800/80 rounded-xl bg-slate-100 dark:bg-slate-950/60 border border-slate-300 dark:border-slate-800 overflow-hidden">
             @for (item of sOrder.items; track item.id) {
             <div class="p-3 text-xs flex items-center justify-between">
               <div>
-                <span class="font-bold text-slate-200 block">{{ item.productName }}</span>
-                <span class="text-[10px] text-slate-500 font-mono">Product ID: {{ item.productId }}</span>
+                <span class="font-bold text-slate-900 dark:text-slate-200 block">{{ item.productName }}</span>
+                <span class="text-[10px] text-slate-600 dark:text-slate-400 font-mono">Product ID: {{ item.productId }}</span>
               </div>
               <div class="text-right space-x-3">
-                <span class="text-slate-400">{{ item.quantity }} × {{ item.unitPrice | currency: item.currency }}</span>
-                <span class="font-bold text-white">{{ item.totalPrice | currency: item.currency }}</span>
+                <span class="text-slate-700 dark:text-slate-400">{{ item.quantity }} × {{ item.unitPrice | currency: item.currency }}</span>
+                <span class="font-bold text-slate-900 dark:text-white">{{ item.totalPrice | currency: item.currency }}</span>
               </div>
             </div>
             }
@@ -500,32 +500,32 @@
 
         <!-- Status Action Buttons for Seller -->
         <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
-          <span class="text-[11px] text-slate-400">Update fulfillment status for client:</span>
+          <span class="text-[11px] text-slate-600 dark:text-slate-400 font-semibold">Update fulfillment status for client:</span>
 
           <div class="flex flex-wrap gap-2">
             <button type="button"
               [disabled]="sOrder.status === 'Confirmed' || sOrder.status === 'Completed' || sOrder.status === 'Cancelled'"
               (click)="updateOrderStatus(sOrder.id, 'Confirmed')"
-              class="rounded-xl bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 px-3 py-1 text-xs font-bold transition-all disabled:opacity-30">
+              class="rounded-xl bg-indigo-500/10 dark:bg-indigo-600/20 hover:bg-indigo-600 text-indigo-700 dark:text-indigo-300 hover:text-white border border-indigo-500/30 px-3 py-1 text-xs font-bold transition-all disabled:opacity-30">
               Confirm Order
             </button>
 
             <button type="button"
               [disabled]="sOrder.status === 'Shipped' || sOrder.status === 'Completed' || sOrder.status === 'Cancelled'"
               (click)="updateOrderStatus(sOrder.id, 'Shipped')"
-              class="rounded-xl bg-teal-600/20 hover:bg-teal-600 text-teal-300 hover:text-white border border-teal-500/30 px-3 py-1 text-xs font-bold transition-all disabled:opacity-30">
+              class="rounded-xl bg-teal-500/10 dark:bg-teal-600/20 hover:bg-teal-600 text-teal-700 dark:text-teal-300 hover:text-white border border-teal-500/30 px-3 py-1 text-xs font-bold transition-all disabled:opacity-30">
               Mark Shipped
             </button>
 
             <button type="button" [disabled]="sOrder.status === 'Completed' || sOrder.status === 'Cancelled'"
               (click)="updateOrderStatus(sOrder.id, 'Completed')"
-              class="rounded-xl bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white border border-emerald-500/30 px-3 py-1 text-xs font-bold transition-all disabled:opacity-30">
+              class="rounded-xl bg-emerald-500/10 dark:bg-emerald-600/20 hover:bg-emerald-600 text-emerald-700 dark:text-emerald-300 hover:text-white border border-emerald-500/30 px-3 py-1 text-xs font-bold transition-all disabled:opacity-30">
               Mark Completed
             </button>
 
             <button type="button" [disabled]="sOrder.status === 'Cancelled' || sOrder.status === 'Completed'"
               (click)="updateOrderStatus(sOrder.id, 'Cancelled')"
-              class="rounded-xl bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 px-3 py-1 text-xs font-bold transition-all disabled:opacity-30">
+              class="rounded-xl bg-rose-500/10 dark:bg-rose-600/20 hover:bg-rose-600 text-rose-700 dark:text-rose-300 hover:text-white border border-rose-500/30 px-3 py-1 text-xs font-bold transition-all disabled:opacity-30">
               Cancel Order
             </button>
           </div>
@@ -541,25 +541,25 @@
   <!-- Quick Category Addition Modal -->
   @if (showCategoryModal()) {
   <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
-    <div class="glass-panel rounded-2xl p-6 max-w-md w-full border border-slate-800 space-y-4 shadow-2xl">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <h3 class="font-bold text-sm text-white">Add New Category / Subcategory</h3>
-        <button (click)="closeCategoryModal()" class="text-slate-400 hover:text-white">✕</button>
+    <div class="glass-panel rounded-2xl p-6 max-w-md w-full border border-slate-300 dark:border-slate-800 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+        <h3 class="font-bold text-sm text-slate-900 dark:text-white">Add New Category / Subcategory</h3>
+        <button (click)="closeCategoryModal()" class="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">✕</button>
       </div>
 
       <div class="space-y-3">
         <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1">Category Name *</label>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Category Name *</label>
           <input type="text" [(ngModel)]="newCategoryName" placeholder="e.g. Gaming Headsets"
             class="w-full glass-input rounded-xl px-3.5 py-2 text-xs" />
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1">Parent Category (Optional)</label>
-          <select [(ngModel)]="selectedParentCategoryId" class="w-full glass-input rounded-xl px-3.5 py-2 text-xs">
-            <option [value]="null" class="bg-slate-900 text-slate-400">-- None (Root Category) --</option>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Parent Category (Optional)</label>
+          <select [(ngModel)]="selectedParentCategoryId" class="w-full glass-input rounded-xl px-3.5 py-2 text-xs bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+            <option [value]="null" class="bg-white dark:bg-slate-900 text-slate-500">-- None (Root Category) --</option>
             @for (cat of flatCategories(); track cat.id) {
-            <option [value]="cat.id" class="bg-slate-900 text-slate-200">{{ cat.fullPath }}</option>
+            <option [value]="cat.id" class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-200">{{ cat.fullPath }}</option>
             }
           </select>
         </div>
@@ -567,11 +567,11 @@
 
       <div class="flex justify-end gap-3 pt-2">
         <button (click)="closeCategoryModal()"
-          class="rounded-xl bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-300">
+          class="rounded-xl bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700">
           Cancel
         </button>
         <button (click)="saveCategory()" [disabled]="addingCategory() || !newCategoryName.trim()"
-          class="rounded-xl bg-emerald-600 text-white px-5 py-2 text-xs font-bold shadow-md disabled:opacity-40">
+          class="rounded-xl bg-emerald-600 text-white px-5 py-2 text-xs font-bold shadow-md disabled:opacity-40 hover:bg-emerald-700">
           {{ addingCategory() ? 'Saving...' : 'Add Category' }}
         </button>
       </div>

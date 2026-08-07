@@ -1,3 +1,29 @@
 :host {
   display: block;
 }
+
+/* Chat Window Dedicated SCSS */
+.chat-container {
+  background-color: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.5rem;
+}
+
+.chat-header {
+  background-color: var(--surface-secondary);
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+}
+
+.message-bubble-outgoing {
+  background-color: var(--accent-primary);
+  color: #ffffff;
+  border-radius: 0.75rem 0.75rem 0 0.75rem;
+}
+
+.message-bubble-incoming {
+  background-color: var(--surface-secondary);
+  color: var(--text-primary);
+  border-radius: 0.75rem 0.75rem 0.75rem 0;
+  border: 1px solid var(--border-subtle);
+}

@@ -1,0 +1,26 @@
+:host {
+  display: block;
+}
+
+/* Profile Page Dedicated SCSS */
+.profile-banner {
+  background-color: var(--accent-primary);
+  color: #ffffff;
+  border-radius: 0.5rem;
+
+  h1, p, span, svg {
+    color: #ffffff;
+  }
+}
+
+.profile-card {
+  background-color: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow-card);
+}
+
+.avatar-preview-ring {
+  border: 2px solid var(--accent-primary);
+  box-shadow: 0 0 0 3px var(--accent-subtle);
+}

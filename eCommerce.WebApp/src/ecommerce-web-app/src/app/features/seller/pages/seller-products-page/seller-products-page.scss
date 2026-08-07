@@ -1,0 +1,35 @@
+:host {
+  display: block;
+}
+
+/* Seller Products Page Dedicated SCSS */
+.seller-header-banner {
+  background-color: var(--accent-primary);
+  color: #ffffff;
+
+  h1, p, span, svg {
+    color: #ffffff;
+  }
+}
+
+.seller-table-card,
+.glass-panel {
+  background-color: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-card);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.glass-input {
+  background-color: var(--surface-secondary);
+  border: 1px solid var(--border-strong);
+  color: var(--text-primary);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+  }
+}

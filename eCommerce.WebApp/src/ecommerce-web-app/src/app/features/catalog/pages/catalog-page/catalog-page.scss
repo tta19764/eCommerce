@@ -2,3 +2,34 @@
   display: block;
   min-height: 100vh;
 }
+
+/* Catalog Page Dedicated SCSS */
+.catalog-hero {
+  background-color: var(--accent-primary);
+  color: #ffffff;
+
+  h1, p, span, svg {
+    color: #ffffff;
+  }
+}
+
+.catalog-card {
+  background-color: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-card);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.catalog-input {
+  background-color: var(--surface-secondary);
+  border: 1px solid var(--border-strong);
+  color: var(--text-primary);
+  border-radius: 0.375rem;
+
+  &:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+  }
+}

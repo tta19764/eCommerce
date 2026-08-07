@@ -1,0 +1,31 @@
+:host {
+  display: block;
+}
+
+/* Admin Layout Dedicated SCSS */
+.admin-header-banner {
+  background-color: var(--accent-primary);
+  color: #ffffff;
+
+  h1, p, span, svg {
+    color: #ffffff;
+  }
+}
+
+.admin-nav-tab {
+  color: var(--text-secondary);
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s ease, background-color 0.15s ease;
+
+  &:hover {
+    color: var(--text-primary);
+    background-color: var(--surface-hover);
+  }
+
+  &.active {
+    color: var(--accent-primary);
+    border-bottom-color: var(--accent-primary);
+    background-color: var(--accent-subtle);
+    font-weight: 700;
+  }
+}

@@ -1,0 +1,26 @@
+:host {
+  display: block;
+}
+
+/* Admin Users Page Dedicated SCSS */
+.admin-card {
+  background-color: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow-card);
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th {
+    background-color: var(--surface-secondary);
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  tr:hover {
+    background-color: var(--surface-hover);
+  }
+}

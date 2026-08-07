@@ -1,0 +1,11 @@
+:host {
+  display: block;
+}
+
+/* Register Page Dedicated SCSS */
+.auth-card {
+  background-color: var(--surface-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-card);
+}

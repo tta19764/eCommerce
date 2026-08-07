@@ -1,4 +1,33 @@
 :host {
   display: block;
-  min-height: 100vh;
+}
+
+/* Conversations Page Dedicated SCSS */
+.messaging-header-banner {
+  background-color: var(--accent-primary);
+  color: #ffffff;
+
+  h1, p, span, svg, button, a {
+    color: #ffffff;
+  }
+}
+
+.conversations-sidebar {
+  background-color: var(--surface-secondary);
+  border-right: 1px solid var(--border-subtle);
+}
+
+.conv-item-btn {
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-subtle);
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+
+  &:hover {
+    background-color: var(--surface-hover);
+  }
+
+  &.active {
+    background-color: var(--accent-subtle);
+    border-left: 4px solid var(--accent-primary);
+  }
 }

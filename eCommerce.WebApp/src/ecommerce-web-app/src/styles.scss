@@ -1,5 +1,7 @@
 @import 'tailwindcss';
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-brand-50: #eef2ff;
   --color-brand-100: #e0e7ff;
@@ -11,32 +13,43 @@
   --color-brand-900: #312e81;
 }
 
+/* Base Theme Tokens */
 :root {
-  --app-bg: #020617;
-  --surface-card: #0f172a;
-  --surface-secondary: #1e293b;
-  --surface-elevated: #1e293b;
+  --app-bg: #090d16;
+  --surface-card: #131c2e;
+  --surface-secondary: #1b273e;
+  --surface-hover: #243350;
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
-  --border-subtle: #1e293b;
-  --border-strong: #334155;
+  --border-subtle: #1e2d4a;
+  --border-strong: #334668;
   --accent-primary: #6366f1;
   --accent-hover: #4f46e5;
+  --accent-subtle: rgba(99, 102, 241, 0.15);
+  --badge-bg: #1e293b;
+  --badge-text: #94a3b8;
+  --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.35);
 }
 
-html.light {
-  --app-bg: #edf2f7;
-  --surface-card: #ffffff;
+/* Light Theme Tokens */
+html.light,
+html[data-theme='light'] {
+  --app-bg: #cbd5e1;
+  --surface-card: #f8fafc;
   --surface-secondary: #f1f5f9;
-  --surface-elevated: #ffffff;
+  --surface-hover: #e2e8f0;
   --text-primary: #0f172a;
   --text-secondary: #334155;
-  --text-muted: #64748b;
-  --border-subtle: #cbd5e1;
-  --border-strong: #94a3b8;
+  --text-muted: #475569;
+  --border-subtle: #64748b;
+  --border-strong: #475569;
   --accent-primary: #4f46e5;
   --accent-hover: #4338ca;
+  --accent-subtle: rgba(79, 70, 229, 0.08);
+  --badge-bg: #e2e8f0;
+  --badge-text: #1e293b;
+  --shadow-card: 0 4px 16px -2px rgba(15, 23, 42, 0.08), 0 2px 6px -1px rgba(15, 23, 42, 0.05);
 }
 
 @layer base {
@@ -47,7 +60,15 @@ html.light {
   body {
     background-color: var(--app-bg);
     color: var(--text-primary);
-    @apply min-w-80 antialiased font-sans selection:bg-indigo-600 selection:text-white transition-colors duration-200;
+    min-width: 20rem;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  ::selection {
+    background-color: var(--accent-primary);
+    color: #ffffff;
   }
 
   /* Universal Interactive Pointer Standard */
@@ -55,10 +76,10 @@ html.light {
   a,
   summary,
   select,
-  [role="button"],
-  [type="button"],
-  [type="submit"],
-  [type="reset"],
+  [role='button'],
+  [type='button'],
+  [type='submit'],
+  [type='reset'],
   .category-chip-inactive,
   .category-chip-active,
   .conv-item,
@@ -74,35 +95,36 @@ html.light {
   textarea:disabled,
   a.disabled,
   .disabled {
-    cursor: not-allowed !important;
+    cursor: not-allowed;
+    opacity: 0.65;
   }
 
-  /* Universal Tactile Hover & Press Micro-Interactions for Buttons */
+  /* Tactile Hover & Press Micro-Interactions */
   button:not(:disabled),
-  [role="button"]:not(:disabled),
-  input[type="button"]:not(:disabled),
+  [role='button']:not(:disabled),
+  input[type='button']:not(:disabled),
   input[type="submit"]:not(:disabled),
   .app-btn-primary,
   .gradient-button,
   .user-menu-button {
-    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), filter 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+    transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), filter 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease, color 0.15s ease;
   }
 
   button:not(:disabled):hover,
-  [role="button"]:not(:disabled):hover,
-  input[type="button"]:not(:disabled):hover,
-  input[type="submit"]:not(:disabled):hover,
+  [role='button']:not(:disabled):hover,
+  input[type='button']:not(:disabled):hover,
+  input[type='submit']:not(:disabled):hover,
   .app-btn-primary:hover,
   .gradient-button:hover,
   .user-menu-button:hover {
     transform: translateY(-1px);
-    filter: brightness(1.08);
+    filter: brightness(1.06);
   }
 
   button:not(:disabled):active,
-  [role="button"]:not(:disabled):active,
-  input[type="button"]:not(:disabled):active,
-  input[type="submit"]:not(:disabled):active,
+  [role='button']:not(:disabled):active,
+  input[type='button']:not(:disabled):active,
+  input[type='submit']:not(:disabled):active,
   .app-btn-primary:active,
   .gradient-button:active,
   .user-menu-button:active {
@@ -110,7 +132,7 @@ html.light {
     filter: brightness(0.95);
   }
 
-  /* Custom scrollbar */
+  /* Standard Scrollbar */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -130,17 +152,13 @@ html.light {
   }
 }
 
-/* Reusable UI Component Styles */
+/* Shared UI Components */
 .app-card,
 .glass-panel {
   background-color: var(--surface-card);
   border: 1px solid var(--border-subtle);
   border-radius: 0.5rem;
-}
-
-html.light .app-card,
-html.light .glass-panel {
-  box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.08);
+  box-shadow: var(--shadow-card);
 }
 
 .app-input,
@@ -162,7 +180,7 @@ html.light .glass-panel {
 .gradient-button,
 .app-btn-primary {
   background-color: var(--accent-primary);
-  color: #ffffff !important;
+  color: #ffffff;
   border-radius: 0.375rem;
   font-weight: 500;
   transition: background-color 0.15s ease;
@@ -173,40 +191,7 @@ html.light .glass-panel {
   background-color: var(--accent-hover);
 }
 
-/* High-Contrast Light Mode Text Rules */
-html.light body {
-  background-color: #edf2f7;
-  color: #0f172a;
-}
-
-html.light .text-slate-100,
-html.light .text-slate-200 {
-  color: #0f172a;
-}
-
-html.light .text-slate-300,
-html.light .text-slate-400 {
-  color: #334155;
-}
-
-html.light .text-slate-500 {
-  color: #475569;
-}
-
-html.light .messaging-header-banner,
-html.light .hero-bg,
-html.light .bg-indigo-600,
-html.light button.bg-indigo-600 {
-  background-color: #4f46e5;
-  color: #ffffff;
-}
-
-html.light .messaging-header-banner *,
-html.light .hero-bg *,
-html.light button.bg-indigo-600 * {
-  color: #ffffff;
-}
-
+/* High Contrast Light Mode Global Fallbacks */
 html.light select option {
   background-color: #ffffff;
   color: #0f172a;
