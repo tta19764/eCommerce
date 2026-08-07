@@ -99,13 +99,27 @@
           <div class="divide-y divide-slate-300 dark:divide-slate-800/80">
             @for (sellerOrder of order.sellerOrders; track sellerOrder.id) {
               <div>
-                <!-- Group Banner with Contact Seller Trigger -->
+                <!-- Group Banner with Contact Seller Trigger & Status Badge -->
                 <div class="seller-order-banner flex items-center justify-between bg-slate-50 dark:bg-slate-900/50 px-6 py-2.5 text-xs font-medium border-b border-slate-300 dark:border-slate-800/60">
-                  <div class="flex items-center gap-2">
+                  <div class="flex items-center gap-3">
                     <svg class="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m0 0h5m0 0v-5a2 2 0 012-2h2a2 2 0 012 2v5" />
                     </svg>
                     <span class="text-slate-900 dark:text-slate-300 font-semibold">Seller Package #{{ sellerOrder.id.slice(0, 8) }}</span>
+                    <span
+                      class="rounded px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider border"
+                      [class.bg-rose-500\/10]="sellerOrder.status === 'Cancelled'"
+                      [class.text-rose-600]="sellerOrder.status === 'Cancelled'"
+                      [class.border-rose-500\/30]="sellerOrder.status === 'Cancelled'"
+                      [class.bg-emerald-500\/10]="sellerOrder.status === 'Completed'"
+                      [class.text-emerald-600]="sellerOrder.status === 'Completed'"
+                      [class.border-emerald-500\/30]="sellerOrder.status === 'Completed'"
+                      [class.bg-indigo-500\/10]="sellerOrder.status !== 'Cancelled' && sellerOrder.status !== 'Completed'"
+                      [class.text-indigo-600]="sellerOrder.status !== 'Cancelled' && sellerOrder.status !== 'Completed'"
+                      [class.border-indigo-500\/30]="sellerOrder.status !== 'Cancelled' && sellerOrder.status !== 'Completed'"
+                    >
+                      {{ sellerOrder.status }}
+                    </span>
                   </div>
 
                   <button
@@ -135,9 +149,16 @@
                         </span>
                       </div>
                       <div class="flex items-center gap-4">
-                        <strong class="font-bold text-sm text-indigo-600 dark:text-indigo-300">{{ item.totalPrice | currency: item.currency }}</strong>
+                        @if (sellerOrder.status === 'Cancelled') {
+                          <span class="text-xs line-through text-slate-400 dark:text-slate-500 font-semibold">
+                            {{ item.totalPrice | currency: item.currency }}
+                          </span>
+                          <span class="text-[10px] font-bold text-rose-500 uppercase">Cancelled</span>
+                        } @else {
+                          <strong class="font-bold text-sm text-indigo-600 dark:text-indigo-300">{{ item.totalPrice | currency: item.currency }}</strong>
+                        }
 
-                        @if (order.status === 'Completed') {
+                        @if (sellerOrder.status === 'Completed') {
                           @if (item.reviewState === 'Eligible') {
                             <a
                               [routerLink]="['/products', item.productId, 'review']"
@@ -168,9 +189,19 @@
           <!-- Order Footer Summary -->
           <footer class="flex items-center justify-between border-t border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950/80 px-6 py-4 text-xs">
             <span class="text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">Total Order Amount</span>
-            <strong class="text-lg font-black text-indigo-600 dark:text-indigo-400">
-              {{ order.totalPrice | currency: order.currency }}
-            </strong>
+            <div class="flex items-center gap-3">
+              @if (order.originalTotalPrice && order.originalTotalPrice > order.totalPrice) {
+                <span class="text-xs text-slate-400 dark:text-slate-500 line-through font-semibold">
+                  {{ order.originalTotalPrice | currency: order.currency }}
+                </span>
+                <span class="rounded bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-300">
+                  Adjusted Net Total
+                </span>
+              }
+              <strong class="text-lg font-black text-indigo-600 dark:text-indigo-400">
+                {{ order.totalPrice | currency: order.currency }}
+              </strong>
+            </div>
           </footer>
 
         </article>

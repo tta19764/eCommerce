@@ -322,17 +322,32 @@ public class Order : Entity
             return;
         }
 
-        Status = _sellerOrders.All(order => order.Status == OrderStatus.Cancelled)
-            ? OrderStatus.Cancelled
-            : _sellerOrders.All(order => order.Status == OrderStatus.Completed)
-                ? OrderStatus.Completed
-                : _sellerOrders.All(order => order.Status == OrderStatus.Shipped)
-                    ? OrderStatus.Shipped
-                    : _sellerOrders.All(order => order.Status == OrderStatus.Paid)
-                        ? OrderStatus.Paid
-                        : _sellerOrders.All(order => order.Status == OrderStatus.Confirmed)
-                            ? OrderStatus.Confirmed
-                            : OrderStatus.Pending;
+        var activeSellerOrders = _sellerOrders.Where(order => order.Status != OrderStatus.Cancelled).ToList();
+
+        if (activeSellerOrders.Count == 0)
+        {
+            Status = OrderStatus.Cancelled;
+        }
+        else if (activeSellerOrders.All(order => order.Status == OrderStatus.Completed))
+        {
+            Status = OrderStatus.Completed;
+        }
+        else if (activeSellerOrders.All(order => order.Status == OrderStatus.Shipped))
+        {
+            Status = OrderStatus.Shipped;
+        }
+        else if (activeSellerOrders.All(order => order.Status == OrderStatus.Paid))
+        {
+            Status = OrderStatus.Paid;
+        }
+        else if (activeSellerOrders.All(order => order.Status == OrderStatus.Confirmed))
+        {
+            Status = OrderStatus.Confirmed;
+        }
+        else
+        {
+            Status = OrderStatus.Pending;
+        }
 
         ConfirmedOnUtc ??= _sellerOrders.Any(order => order.ConfirmedOnUtc is not null) ? utcNow : null;
         PaidOnUtc ??= _sellerOrders.Any(order => order.PaidOnUtc is not null) ? utcNow : null;

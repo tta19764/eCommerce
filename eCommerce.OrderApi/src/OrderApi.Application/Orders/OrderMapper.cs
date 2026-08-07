@@ -22,11 +22,17 @@ internal static class OrderMapper
     /// <returns>The order response.</returns>
     internal static OrderResponse ToResponse(Order order, IDictionary<Guid, Guid>? userReviews = null)
     {
+        var sellerOrderStatuses = order.SellerOrders.ToDictionary(so => so.Id, so => so.Status);
+
         var items = order.Items
-            .Select(item => ToItemResponse(item, order.Status, userReviews))
+            .Select(item => ToItemResponse(
+                item,
+                sellerOrderStatuses.TryGetValue(item.SellerOrderId, out var sStatus) ? sStatus : OrderStatus.Pending,
+                userReviews))
             .ToList();
+
         var sellerOrders = order.SellerOrders
-            .Select(sellerOrder => ToSellerOrderResponse(sellerOrder, order.Items, order.Status, userReviews))
+            .Select(sellerOrder => ToSellerOrderResponse(sellerOrder, order.Items, sellerOrder.Status, userReviews))
             .ToList();
 
         return new OrderResponse(
@@ -35,6 +41,7 @@ internal static class OrderMapper
             order.CreatedAtUtc.Value,
             order.Status.ToString(),
             CalculateTotal(order),
+            CalculateOriginalTotal(order),
             GetOrderCurrency(order).Code,
             items,
             sellerOrders,
@@ -53,11 +60,17 @@ internal static class OrderMapper
     /// <returns>The detailed order response.</returns>
     internal static OrderDetailsResponse ToDetailsResponse(Order order, IDictionary<Guid, Guid>? userReviews = null)
     {
+        var sellerOrderStatuses = order.SellerOrders.ToDictionary(so => so.Id, so => so.Status);
+
         var items = order.Items
-            .Select(item => ToDetailsItemResponse(item, order.Status, userReviews))
+            .Select(item => ToDetailsItemResponse(
+                item,
+                sellerOrderStatuses.TryGetValue(item.SellerOrderId, out var sStatus) ? sStatus : OrderStatus.Pending,
+                userReviews))
             .ToList();
+
         var sellerOrders = order.SellerOrders
-            .Select(sellerOrder => ToSellerOrderResponse(sellerOrder, order.Items, order.Status, userReviews))
+            .Select(sellerOrder => ToSellerOrderResponse(sellerOrder, order.Items, sellerOrder.Status, userReviews))
             .ToList();
 
         return new OrderDetailsResponse(
@@ -66,6 +79,7 @@ internal static class OrderMapper
             order.CreatedAtUtc.Value,
             order.Status.ToString(),
             CalculateTotal(order),
+            CalculateOriginalTotal(order),
             GetOrderCurrency(order).Code,
             items,
             sellerOrders,
@@ -100,7 +114,7 @@ internal static class OrderMapper
                 item.UnitPrice.Amount,
                 item.UnitPrice.Currency.Code,
                 item.Quantity.Value,
-            item.TotalPrice.Amount))
+                item.TotalPrice.Amount))
             .ToList();
 
         return new OrderFullInfo(
@@ -123,13 +137,13 @@ internal static class OrderMapper
 
     private static OrderItemResponse ToItemResponse(
         OrderItem item,
-        OrderStatus orderStatus = OrderStatus.Pending,
+        OrderStatus sellerOrderStatus = OrderStatus.Pending,
         IDictionary<Guid, Guid>? userReviews = null)
     {
         string reviewState = "NotEligible";
         Guid? reviewId = null;
 
-        if (orderStatus == OrderStatus.Completed)
+        if (sellerOrderStatus == OrderStatus.Completed)
         {
             if (userReviews is not null && userReviews.TryGetValue(item.ProductId, out var foundReviewId))
             {
@@ -158,13 +172,13 @@ internal static class OrderMapper
 
     private static OrderDetailsItemResponse ToDetailsItemResponse(
         OrderItem item,
-        OrderStatus orderStatus = OrderStatus.Pending,
+        OrderStatus sellerOrderStatus = OrderStatus.Pending,
         IDictionary<Guid, Guid>? userReviews = null)
     {
         string reviewState = "NotEligible";
         Guid? reviewId = null;
 
-        if (orderStatus == OrderStatus.Completed)
+        if (sellerOrderStatus == OrderStatus.Completed)
         {
             if (userReviews is not null && userReviews.TryGetValue(item.ProductId, out var foundReviewId))
             {
@@ -194,12 +208,12 @@ internal static class OrderMapper
     internal static SellerOrderResponse ToSellerOrderResponse(
         SellerOrder sellerOrder,
         IEnumerable<OrderItem> orderItems,
-        OrderStatus parentOrderStatus = OrderStatus.Pending,
+        OrderStatus sellerOrderStatus = OrderStatus.Pending,
         IDictionary<Guid, Guid>? userReviews = null)
     {
         var items = orderItems
             .Where(item => item.SellerOrderId == sellerOrder.Id)
-            .Select(item => ToItemResponse(item, parentOrderStatus, userReviews))
+            .Select(item => ToItemResponse(item, sellerOrderStatus, userReviews))
             .ToList();
 
         return new SellerOrderResponse(
@@ -218,6 +232,18 @@ internal static class OrderMapper
     }
 
     private static decimal CalculateTotal(Order order)
+    {
+        var cancelledSellerOrderIds = order.SellerOrders
+            .Where(so => so.Status == OrderStatus.Cancelled)
+            .Select(so => so.Id)
+            .ToHashSet();
+
+        return order.Items
+            .Where(item => !cancelledSellerOrderIds.Contains(item.SellerOrderId))
+            .Sum(item => item.TotalPrice.Amount);
+    }
+
+    private static decimal CalculateOriginalTotal(Order order)
     {
         return order.Items.Sum(item => item.TotalPrice.Amount);
     }

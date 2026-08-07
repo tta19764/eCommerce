@@ -40,6 +40,7 @@ export interface Order {
   createdAtUtc: string;
   status: OrderStatus;
   totalPrice: number;
+  originalTotalPrice?: number;
   currency: string;
   items: OrderItem[];
   sellerOrders: SellerOrder[];

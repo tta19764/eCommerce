@@ -216,9 +216,18 @@ public class OrderRepository(OrderDbContext dbContext) : Repository<Order, Order
         var matchingOrders = await DbSet
             .AsNoTracking()
             .Where(order => order.ClientId == clientId && order.Items.Any(item => item.ProductId == productId))
-            .Select(order => new { order.Status })
+            .Select(order => new
+            {
+                SellerOrderStatuses = order.SellerOrders
+                    .Where(so => order.Items.Any(item => item.ProductId == productId && item.SellerOrderId == so.Id))
+                    .Select(so => so.Status)
+                    .ToList()
+            })
             .ToListAsync(cancellationToken);
 
-        return (matchingOrders.Count > 0, matchingOrders.Any(order => order.Status == OrderStatus.Completed));
+        var hasPurchased = matchingOrders.Count > 0;
+        var hasCompletedOrder = matchingOrders.Any(o => o.SellerOrderStatuses.Any(s => s == OrderStatus.Completed));
+
+        return (hasPurchased, hasCompletedOrder);
     }
 }

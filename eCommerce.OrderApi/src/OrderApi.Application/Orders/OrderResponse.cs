@@ -22,6 +22,7 @@ public sealed record OrderResponse(
     DateTime CreatedAtUtc,
     string Status,
     decimal TotalPrice,
+    decimal OriginalTotalPrice,
     string Currency,
     IReadOnlyCollection<OrderItemResponse> Items,
     IReadOnlyCollection<SellerOrderResponse> SellerOrders,
