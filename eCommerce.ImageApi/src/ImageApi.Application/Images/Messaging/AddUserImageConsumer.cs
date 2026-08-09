@@ -40,7 +40,6 @@ public sealed class AddUserImageConsumer(
         }
 
         image.Attach();
-        imageRepository.Update(image);
         await unitOfWork.SaveChangesAsync(context.CancellationToken);
 
         logger.LogInformation(

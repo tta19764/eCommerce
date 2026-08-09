@@ -36,7 +36,6 @@ public sealed class AddProductImagesConsumer(
             }
 
             image.Attach();
-            imageRepository.Update(image);
             attachedImageIds.Add(image.Id);
         }
 

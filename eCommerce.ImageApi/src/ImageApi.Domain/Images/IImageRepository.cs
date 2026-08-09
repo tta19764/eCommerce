@@ -7,13 +7,14 @@ namespace ImageApi.Domain.Images;
 /// </summary>
 public interface IImageRepository
 {
+    /// <summary>
+    /// Gets a tracked image aggregate by identifier for reading or mutation through domain methods.
+    /// </summary>
     Task<Image?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
     Task<Image?> GetByAsync(Expression<Func<Image, bool>> predicate, CancellationToken cancellationToken = default);
 
     void Add(Image image);
-
-    void Update(Image image);
 
     void Delete(Image image);
 }
