@@ -5,6 +5,9 @@ namespace AuthenticationApi.Domain.Accounts;
 /// </summary>
 public interface IAccountRepository
 {
+    /// <summary>
+    /// Gets a tracked account aggregate by identifier for reading or mutation through domain methods.
+    /// </summary>
     Task<Account?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
     Task<Account?> GetByEmailAsync(string email, CancellationToken cancellationToken = default);
@@ -27,8 +30,6 @@ public interface IAccountRepository
     Task<int> CountAsync(CancellationToken cancellationToken = default);
 
     void Add(Account account);
-
-    void Update(Account account);
 
     void Delete(Account account);
 }

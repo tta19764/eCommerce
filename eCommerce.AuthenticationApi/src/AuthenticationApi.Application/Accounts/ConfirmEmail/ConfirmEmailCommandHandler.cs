@@ -53,7 +53,6 @@ public sealed class ConfirmEmailCommandHandler(
             return confirmationResult;
         }
 
-        accountRepository.Update(account);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Success();

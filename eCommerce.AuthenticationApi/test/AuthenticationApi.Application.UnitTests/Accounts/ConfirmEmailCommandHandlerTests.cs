@@ -47,7 +47,6 @@ public class ConfirmEmailCommandHandlerTests
         account.IsEmailConfirmed.Should().BeTrue();
 
         await _identityProviderMock.Received(1).ConfirmEmailAsync("keycloak-user-id", cancellationToken);
-        _accountRepositoryMock.Received(1).Update(account);
         await _unitOfWorkMock.Received(1).SaveChangesAsync(cancellationToken);
     }
 
