@@ -19,3 +19,7 @@ dist/
 **/.angular/
 out-tsc/
 **/out-tsc/
+
+# Local coding-agent instructions and workflows
+**/AGENTS.md
+**/.agents/
