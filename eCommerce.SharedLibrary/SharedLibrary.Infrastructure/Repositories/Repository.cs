@@ -104,18 +104,6 @@ public abstract class Repository<T, TContext>(TContext dbContext)
     }
 
     /// <summary>
-    /// Marks an entity as modified in the underlying context.
-    /// </summary>
-    /// <param name="entity">The entity to update.</param>
-    public virtual void Update(T entity)
-    {
-        if (DbContext.Entry(entity).State == EntityState.Detached)
-        {
-            DbContext.Update(entity);
-        }
-    }
-
-    /// <summary>
     /// Removes an entity from the underlying context.
     /// </summary>
     /// <param name="entity">The entity to delete.</param>
