@@ -55,7 +55,6 @@ public sealed class UpdateOrderStatusCommandHandler(
             return adjustmentResult;
         }
 
-        orderRepository.Update(order);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         await OrderCacheKeys.InvalidateCacheAsync(cacheService, cancellationToken);

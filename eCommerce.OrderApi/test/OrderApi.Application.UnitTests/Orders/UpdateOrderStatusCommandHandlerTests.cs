@@ -49,7 +49,6 @@ public class UpdateOrderStatusCommandHandlerTests
                 request.Adjustments.Single().QuantityDelta == -2),
             cancellationToken);
 
-        _orderRepositoryMock.Received(1).Update(order);
         await _unitOfWorkMock.Received(1).SaveChangesAsync(cancellationToken);
     }
 
@@ -82,7 +81,6 @@ public class UpdateOrderStatusCommandHandlerTests
                 request.Adjustments.Single().QuantityDelta == 3),
             cancellationToken);
 
-        _orderRepositoryMock.Received(1).Update(order);
         await _unitOfWorkMock.Received(1).SaveChangesAsync(cancellationToken);
     }
 

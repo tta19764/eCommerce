@@ -65,7 +65,6 @@ public sealed class UpdateOrderCommandHandler(
             return updateResult;
         }
 
-        orderRepository.Update(order);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         await OrderCacheKeys.InvalidateCacheAsync(cacheService, cancellationToken);

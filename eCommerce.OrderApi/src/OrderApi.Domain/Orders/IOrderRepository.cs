@@ -16,7 +16,7 @@ public interface IOrderRepository
     public Task<Order?> GetByAsync(Expression<Func<Order, bool>> predicate, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Gets an order by identifier.
+    /// Gets a tracked order aggregate by identifier for reading or mutation through domain methods.
     /// </summary>
     /// <param name="id">The order identifier.</param>
     /// <param name="cancellationToken">The request cancellation token.</param>
@@ -85,7 +85,7 @@ public interface IOrderRepository
     public Task<int> CountByClientIdAsync(Guid clientId, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Gets an order that contains the supplied seller-order group.
+    /// Gets a tracked order aggregate that contains the supplied seller-order group.
     /// </summary>
     public Task<Order?> GetBySellerOrderIdAsync(Guid sellerOrderId, CancellationToken cancellationToken = default);
 
@@ -108,12 +108,6 @@ public interface IOrderRepository
     /// </summary>
     /// <param name="order">The order to delete.</param>
     public void Delete(Order order);
-
-    /// <summary>
-    /// Marks an order for update.
-    /// </summary>
-    /// <param name="order">The order to update.</param>
-    public void Update(Order order);
 
     /// <summary>
     /// Marks an order for insertion.
