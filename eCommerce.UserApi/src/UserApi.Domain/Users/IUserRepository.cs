@@ -15,7 +15,7 @@ public interface IUserRepository
     public Task<User?> GetByAsync(Expression<Func<User, bool>> predicate, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Executes the GetByIdAsync operation.
+    /// Gets a tracked user aggregate by identifier for reading or mutation through domain methods.
     /// </summary>
     /// <param name="id">The id value.</param>
     /// <param name="cancellationToken">The cancellationToken value.</param>
@@ -40,12 +40,6 @@ public interface IUserRepository
     /// </summary>
     /// <param name="user">The user value.</param>
     public void Add(User user);
-
-    /// <summary>
-    /// Executes the Update operation.
-    /// </summary>
-    /// <param name="user">The user value.</param>
-    public void Update(User user);
 
     /// <summary>
     /// Executes the Delete operation.

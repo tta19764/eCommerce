@@ -52,7 +52,6 @@ public class UpdateUserCommandHandlerTests
         user.Email.Value.Should().Be("john.smith@example.com");
         user.ImageId.Should().Be(imageId);
 
-        _userRepositoryMock.Received(1).Update(user);
         await _unitOfWorkMock.Received(1).SaveChangesAsync(cancellationToken);
     }
 
@@ -82,7 +81,6 @@ public class UpdateUserCommandHandlerTests
         result.IsFailure.Should().BeTrue();
         result.Error.Should().Be(UserErrors.NotFound);
 
-        _userRepositoryMock.DidNotReceive().Update(Arg.Any<User>());
         await _unitOfWorkMock.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 

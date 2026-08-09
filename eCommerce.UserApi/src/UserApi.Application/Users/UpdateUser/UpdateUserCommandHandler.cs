@@ -58,7 +58,6 @@ public sealed class UpdateUserCommandHandler(
             return updateResult;
         }
 
-        userRepository.Update(user);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         logger.LogInformation("Updated user {UserId}", request.UserId);
