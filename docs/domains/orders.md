@@ -15,7 +15,7 @@ OrderApi owns checkout records, immutable item snapshots, multi-seller grouping,
 - Main and seller-group states follow Pending -> Confirmed -> Paid -> Shipped -> Completed; cancellation is allowed before shipment. Invalid transitions return domain errors.
 - Confirming decrements ProductApi stock. Cancelling a Confirmed/Paid order restores stock. Failure prevents the order transition from being committed.
 - Customers may read/cancel only their own orders. Sellers may act only on their groups unless a caller has administrative permissions.
-- Status domain events publish notification/integration events and invalidate relevant caches.
+- Status domain events publish notification/integration events and invalidate relevant caches. Seller-order status events add system messages to existing customer-seller conversations in MessagingApi.
 - `Paid` is only a lifecycle state; no payment processor validates it.
 
 ## Application services and repositories
