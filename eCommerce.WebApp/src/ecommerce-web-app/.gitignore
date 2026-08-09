@@ -38,6 +38,10 @@ testem.log
 /typings
 __screenshots__/
 
+# Local coding-agent metadata
+/.agents/
+/AGENTS.md
+
 # System files
 .DS_Store
 Thumbs.db
