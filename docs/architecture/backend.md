@@ -37,12 +37,13 @@ Domain interfaces (`IProductRepository`, `IOrderRepository`, and peers) are impl
 
 ## Tests
 
-The strongest coverage is in ProductApi, OrderApi, UserApi, AuthenticationApi, ImageApi, and MessagingApi:
+The strongest coverage is in ProductApi, OrderApi, UserApi, AuthenticationApi, ImageApi, MessagingApi, and NotificationApi:
 
-- domain unit tests exercise aggregate rules, notably product, order, and user behavior;
+- domain unit tests exercise aggregate rules, including product, order, user, account, conversation, and notification-job behavior;
 - application unit tests mock repositories/message clients and test handlers and consumers;
 - application integration tests for Product, Order, and User run APIs/handlers against test infrastructure and databases;
-- Messaging has realtime notifier unit tests;
+- Messaging has domain, application-handler, integration-event consumer, and realtime notifier unit tests;
+- Notification has domain lifecycle and background processor success/retry unit tests;
 - the Angular app has a small number of component/store specs, so frontend workflow coverage is materially lighter.
 
-Notification, Gateway, and AppHost behavior appears to rely primarily on composition/runtime testing rather than substantial dedicated test suites.
+Gateway and AppHost behavior appears to rely primarily on composition/runtime testing rather than substantial dedicated test suites.
