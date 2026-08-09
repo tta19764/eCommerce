@@ -3,6 +3,7 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
+using OrderApi.Messages.Orders;
 using ProductApi.Domain.Categories;
 using ProductApi.Application.IntegrationTests.Products;
 using ProductApi.Domain.Products;
@@ -44,6 +45,22 @@ public sealed class IntegrationTestWebAppFactory : IAsyncLifetime
             });
 
         var cacheService = Substitute.For<ICacheService>();
+        var purchaseStatusClient = Substitute.For<IRequestClient<GetUserProductPurchaseStatusRequest>>();
+        purchaseStatusClient
+            .GetResponse<GetUserProductPurchaseStatusResponse>(
+                Arg.Any<GetUserProductPurchaseStatusRequest>(),
+                Arg.Any<CancellationToken>())
+            .Returns(callInfo =>
+            {
+                var request = callInfo.Arg<GetUserProductPurchaseStatusRequest>()!;
+                return Task.FromResult<Response<GetUserProductPurchaseStatusResponse>>(
+                    new TestResponse<GetUserProductPurchaseStatusResponse>(
+                        new GetUserProductPurchaseStatusResponse(
+                            request.UserId,
+                            request.ProductId,
+                            true,
+                            true)));
+            });
 
         var services = new ServiceCollection();
 
@@ -56,6 +73,7 @@ public sealed class IntegrationTestWebAppFactory : IAsyncLifetime
         services.AddScoped<IProductReviewRepository, ProductReviewRepository>();
         services.AddScoped<IUnitOfWork>(serviceProvider => serviceProvider.GetRequiredService<ProductDbContext>());
         services.AddSingleton(imageClient);
+        services.AddSingleton(purchaseStatusClient);
         services.AddSingleton(cacheService);
 
         _serviceProvider = services.BuildServiceProvider();

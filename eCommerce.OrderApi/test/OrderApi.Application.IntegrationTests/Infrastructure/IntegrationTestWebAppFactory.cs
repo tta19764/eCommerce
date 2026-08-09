@@ -62,6 +62,14 @@ public sealed class IntegrationTestWebAppFactory : IAsyncLifetime
 
         var services = new ServiceCollection();
         var cacheService = Substitute.For<ICacheService>();
+        var userReviewsClient = Substitute.For<IRequestClient<GetUserProductReviewsRequest>>();
+        userReviewsClient
+            .GetResponse<GetUserProductReviewsResponse>(
+                Arg.Any<GetUserProductReviewsRequest>(),
+                Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult<Response<GetUserProductReviewsResponse>>(
+                new TestResponse<GetUserProductReviewsResponse>(
+                    new GetUserProductReviewsResponse([]))));
 
         services.AddLogging();
         services.AddApplication();
@@ -71,6 +79,7 @@ public sealed class IntegrationTestWebAppFactory : IAsyncLifetime
         services.AddScoped<IUnitOfWork>(serviceProvider => serviceProvider.GetRequiredService<OrderDbContext>());
         services.AddTransient<GetOrderFullInfoConsumer>();
         services.AddSingleton(productClient);
+        services.AddSingleton(userReviewsClient);
         services.AddSingleton(userClient);
         services.AddSingleton(cacheService);
 

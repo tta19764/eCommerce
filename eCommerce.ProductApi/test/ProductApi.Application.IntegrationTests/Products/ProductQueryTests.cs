@@ -78,14 +78,16 @@ public class ProductQueryTests(IntegrationTestWebAppFactory factory) : BaseInteg
             cancellationToken)).Value;
         DbContext.ChangeTracker.Clear();
 
-        await Sender.Send(
+        Result<Guid> firstReviewResult = await Sender.Send(
             new CreateProductReviewCommand(productId, Guid.NewGuid(), 5, "Great keyboard"),
             cancellationToken);
+        firstReviewResult.IsSuccess.Should().BeTrue();
         DbContext.ChangeTracker.Clear();
 
-        await Sender.Send(
+        Result<Guid> secondReviewResult = await Sender.Send(
             new CreateProductReviewCommand(productId, Guid.NewGuid(), 4, "Good keyboard"),
             cancellationToken);
+        secondReviewResult.IsSuccess.Should().BeTrue();
         DbContext.ChangeTracker.Clear();
 
         // Act
