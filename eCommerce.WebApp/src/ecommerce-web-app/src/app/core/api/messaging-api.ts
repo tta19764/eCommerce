@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { map } from 'rxjs';
+import { map, of, switchMap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ApiResponse, PagedList, PageQuery } from '../models/api-model';
 import {
@@ -27,10 +27,6 @@ export class MessagingApiClient {
       .pipe(map(apiData));
   }
 
-  getConversation(id: string) {
-    return this.http.get<ApiResponse<Conversation>>(`${this.url}/${id}`).pipe(map(apiData));
-  }
-
   getMessages(conversationId: string, query: PageQuery = {}) {
     const params = new HttpParams()
       .set('page', query.page ?? 1)
@@ -55,13 +51,31 @@ export class MessagingApiClient {
 
   startProductInquiry(request: StartProductInquiryRequest) {
     return this.http
-      .post<ApiResponse<string>>(`${this.url}/product-inquiry`, request)
-      .pipe(map(apiData));
+      .post<ApiResponse<string>>(`${this.url}/product-inquiries/${request.productId}`, {})
+      .pipe(
+        map(apiData),
+        switchMap((conversationId) =>
+          this.sendInitialMessage(conversationId, request.initialMessage),
+        ),
+      );
   }
 
   startSellerOrderConversation(request: StartSellerOrderConversationRequest) {
     return this.http
-      .post<ApiResponse<string>>(`${this.url}/seller-order-conversation`, request)
-      .pipe(map(apiData));
+      .post<ApiResponse<string>>(`${this.url}/seller-orders/${request.sellerOrderId}`, {})
+      .pipe(
+        map(apiData),
+        switchMap((conversationId) =>
+          this.sendInitialMessage(conversationId, request.initialMessage),
+        ),
+      );
+  }
+
+  private sendInitialMessage(conversationId: string, initialMessage: string) {
+    const body = initialMessage.trim();
+
+    return body
+      ? this.sendMessage(conversationId, { body }).pipe(map(() => conversationId))
+      : of(conversationId);
   }
 }

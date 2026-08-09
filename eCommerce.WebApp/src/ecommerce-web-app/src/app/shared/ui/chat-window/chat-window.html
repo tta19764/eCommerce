@@ -51,22 +51,33 @@
       </div>
     } @else {
       @for (msg of messages(); track msg.id) {
-        <div class="flex flex-col" [class]="isSentByCurrentUser(msg) ? 'items-end' : 'items-start'">
-          <div
-            class="max-w-[85%] rounded-md px-3.5 py-2 text-xs shadow-xs space-y-1"
-            [class]="isSentByCurrentUser(msg)
-              ? 'bg-indigo-600 text-white rounded-br-none'
-              : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700/80 rounded-bl-none'"
-          >
-            <p class="leading-relaxed whitespace-pre-wrap">{{ msg.body }}</p>
-            <span
-              class="block text-[9px] text-right font-medium"
-              [class]="isSentByCurrentUser(msg) ? 'text-indigo-100' : 'text-slate-500 dark:text-slate-400'"
-            >
-              {{ msg.createdAtUtc | date: 'shortTime' }}
-            </span>
+        @if (msg.senderUserId === null) {
+          <div class="flex justify-center px-2 py-1">
+            <div class="max-w-[95%] rounded-full border border-indigo-300/70 bg-indigo-50 px-3.5 py-2 text-center text-[10px] text-indigo-800 shadow-xs dark:border-indigo-700/60 dark:bg-indigo-950/50 dark:text-indigo-200">
+              <p class="font-semibold leading-relaxed whitespace-pre-wrap">{{ msg.body }}</p>
+              <span class="mt-0.5 block text-[9px] font-medium text-indigo-500 dark:text-indigo-400">
+                {{ msg.createdAtUtc | date: 'shortTime' }}
+              </span>
+            </div>
           </div>
-        </div>
+        } @else {
+          <div class="flex flex-col" [class]="isSentByCurrentUser(msg) ? 'items-end' : 'items-start'">
+            <div
+              class="max-w-[85%] rounded-md px-3.5 py-2 text-xs shadow-xs space-y-1"
+              [class]="isSentByCurrentUser(msg)
+                ? 'bg-indigo-600 text-white rounded-br-none'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700/80 rounded-bl-none'"
+            >
+              <p class="leading-relaxed whitespace-pre-wrap">{{ msg.body }}</p>
+              <span
+                class="block text-[9px] text-right font-medium"
+                [class]="isSentByCurrentUser(msg) ? 'text-indigo-100' : 'text-slate-500 dark:text-slate-400'"
+              >
+                {{ msg.createdAtUtc | date: 'shortTime' }}
+              </span>
+            </div>
+          </div>
+        }
       }
     }
   </div>
