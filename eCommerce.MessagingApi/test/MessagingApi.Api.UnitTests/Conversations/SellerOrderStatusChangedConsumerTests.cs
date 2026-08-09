@@ -48,7 +48,7 @@ public sealed class SellerOrderStatusChangedConsumerTests
         var message = conversation.Messages.Should().ContainSingle().Which;
         message.SenderUserId.Should().BeNull();
         message.Type.Should().Be(ConversationMessageType.System);
-        message.Body.Should().Be("The state of the order #**9451ca76 has been changed to: Confirmed**");
+        message.Body.Should().Be("The state of the order #9451ca76 has been changed to: Confirmed");
         message.CreatedAtUtc.Should().Be(changedAtUtc);
         await _unitOfWork.Received(1).SaveChangesAsync(context.CancellationToken);
         await _realtimeNotifier.Received(1).NotifyMessageSentAsync(
@@ -66,7 +66,7 @@ public sealed class SellerOrderStatusChangedConsumerTests
         var conversation = Conversation.CreateSellerOrderConversation(
             Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), sellerOrderId, DateTime.UtcNow);
         conversation.AddSystemMessage(
-            "The state of the order #**9451ca76 has been changed to: Confirmed**",
+            "The state of the order #9451ca76 has been changed to: Confirmed",
             DateTime.UtcNow);
         var context = CreateContext(new SellerOrderStatusChangedIntegrationEvent(
             conversation.OrderId!.Value,
