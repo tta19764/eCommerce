@@ -16,7 +16,7 @@ public interface IProductRepository
     public Task<Product?> GetByAsync(Expression<Func<Product, bool>> predicate, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Gets a product by identifier.
+    /// Gets a tracked product aggregate by identifier for reading or mutation through domain methods.
     /// </summary>
     /// <param name="id">The product identifier.</param>
     /// <param name="cancellationToken">The request cancellation token.</param>
@@ -61,12 +61,6 @@ public interface IProductRepository
     /// </summary>
     /// <param name="product">The product to delete.</param>
     public void Delete(Product product);
-
-    /// <summary>
-    /// Marks a product for update.
-    /// </summary>
-    /// <param name="product">The product to update.</param>
-    public void Update(Product product);
 
     /// <summary>
     /// Marks a product for insertion.

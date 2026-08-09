@@ -52,7 +52,6 @@ public sealed class DeleteProductReviewCommandHandler(
 
         product.RemoveReview(review.Rating);
         productReviewRepository.Remove(review);
-        productRepository.Update(product);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
         await ProductCacheKeys.InvalidatePagesAsync(cacheService, cancellationToken);

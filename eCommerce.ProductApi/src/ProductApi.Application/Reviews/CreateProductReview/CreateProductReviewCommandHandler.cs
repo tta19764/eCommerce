@@ -80,7 +80,6 @@ public sealed class CreateProductReviewCommandHandler(
         }
 
         productReviewRepository.Add(reviewResult.Value);
-        productRepository.Update(product);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
         await ProductCacheKeys.InvalidatePagesAsync(cacheService, cancellationToken);

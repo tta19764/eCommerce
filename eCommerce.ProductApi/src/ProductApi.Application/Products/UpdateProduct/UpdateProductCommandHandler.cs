@@ -87,8 +87,6 @@ public sealed class UpdateProductCommandHandler(
             return updateResult;
         }
 
-        productRepository.Update(product);
-
         await unitOfWork.SaveChangesAsync(cancellationToken);
         await ProductCacheKeys.InvalidatePagesAsync(cacheService, cancellationToken);
 

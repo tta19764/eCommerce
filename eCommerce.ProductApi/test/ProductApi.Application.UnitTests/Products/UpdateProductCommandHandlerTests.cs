@@ -71,7 +71,6 @@ public class UpdateProductCommandHandlerTests
         product.CategoryId.Should().Be(category.Id);
         product.ProductType.Should().Be(ProductType.DigitalDownload);
 
-        _productRepositoryMock.Received(1).Update(product);
         await _unitOfWorkMock.Received(1).SaveChangesAsync(cancellationToken);
         await _cacheServiceMock.Received(1).RemoveAsync("products:page:1:size:10", cancellationToken);
         await _cacheServiceMock.Received(1).RemoveAsync("products:page-keys", cancellationToken);
@@ -101,7 +100,6 @@ public class UpdateProductCommandHandlerTests
         result.IsFailure.Should().BeTrue();
         result.Error.Should().Be(ProductErrors.NotFound);
 
-        _productRepositoryMock.DidNotReceive().Update(Arg.Any<Product>());
         await _unitOfWorkMock.DidNotReceive().SaveChangesAsync(Arg.Any<CancellationToken>());
         await _cacheServiceMock.DidNotReceive().RemoveAsync(Arg.Any<string>(), Arg.Any<CancellationToken>());
     }

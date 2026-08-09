@@ -76,8 +76,6 @@ public sealed class AdjustProductQuantitiesConsumer(
                 insufficientProductIds.Add(adjustment.ProductId);
                 continue;
             }
-
-            productRepository.Update(product);
         }
 
         if (insufficientProductIds.Count > 0)

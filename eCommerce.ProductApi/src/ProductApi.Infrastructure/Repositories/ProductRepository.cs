@@ -9,6 +9,14 @@ namespace ProductApi.Infrastructure.Repositories;
 /// </summary>
 public class ProductRepository(ProductDbContext dbContext) : Repository<Product, ProductDbContext>(dbContext), IProductRepository
 {
+    /// <summary>
+    /// Gets a tracked product aggregate so entity mutations are persisted by the unit of work.
+    /// </summary>
+    public new async Task<Product?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        return await DbSet.FirstOrDefaultAsync(product => product.Id == id, cancellationToken);
+    }
+
     /// <inheritdoc />
     public async Task<IEnumerable<Product>> GetPageAsync(
         ProductSearchFilter filter,
