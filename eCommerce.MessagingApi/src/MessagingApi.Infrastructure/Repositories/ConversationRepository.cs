@@ -56,6 +56,7 @@ public sealed class ConversationRepository(MessagingDbContext dbContext) : IConv
         CancellationToken cancellationToken = default)
     {
         return await dbContext.Conversations
+            .AsNoTracking()
             .Where(conversation => conversation.CustomerUserId == userId || conversation.SellerUserId == userId)
             .OrderByDescending(conversation => conversation.LastMessageAtUtc)
             .Skip((page - 1) * pageSize)
@@ -76,15 +77,6 @@ public sealed class ConversationRepository(MessagingDbContext dbContext) : IConv
     public void Add(Conversation conversation)
     {
         dbContext.Conversations.Add(conversation);
-    }
-
-    /// <inheritdoc />
-    public void Update(Conversation conversation)
-    {
-        if (dbContext.Entry(conversation).State == EntityState.Detached)
-        {
-            dbContext.Conversations.Update(conversation);
-        }
     }
 }
 
