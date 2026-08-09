@@ -33,7 +33,6 @@ public sealed class NotificationJobProcessor(
     private async Task ProcessJobAsync(NotificationJob job, CancellationToken cancellationToken)
     {
         job.StartProcessing();
-        notificationJobRepository.Update(job);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         try
@@ -41,7 +40,6 @@ public sealed class NotificationJobProcessor(
             await emailSender.SendAsync(job.Recipient, job.Subject, job.Body, cancellationToken);
 
             job.MarkSucceeded(DateTime.UtcNow);
-            notificationJobRepository.Update(job);
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
             logger.LogInformation("Processed notification job {NotificationJobId}", job.Id);
@@ -51,7 +49,6 @@ public sealed class NotificationJobProcessor(
             var retryDelay = TimeSpan.FromSeconds(Math.Min(300, Math.Pow(2, job.Attempts) * 15));
 
             job.MarkFailed(exception.Message, retryDelay, DateTime.UtcNow);
-            notificationJobRepository.Update(job);
             await unitOfWork.SaveChangesAsync(cancellationToken);
 
             logger.LogWarning(

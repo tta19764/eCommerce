@@ -12,13 +12,7 @@ public interface INotificationJobRepository
     void Add(NotificationJob job);
 
     /// <summary>
-    /// Marks an existing notification job as changed.
-    /// </summary>
-    /// <param name="job">The job to update.</param>
-    void Update(NotificationJob job);
-
-    /// <summary>
-    /// Gets pending jobs that are ready to be processed.
+    /// Gets tracked pending jobs that are ready for mutation through domain methods and processing.
     /// </summary>
     /// <param name="batchSize">The maximum number of jobs to load.</param>
     /// <param name="utcNow">The current UTC clock value.</param>
