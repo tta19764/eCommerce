@@ -25,6 +25,7 @@ public sealed class Role
         "Seller",
         Permission.ProductRead,
         Permission.ProductCreate,
+        Permission.OrderCreate,
         Permission.ProductCreateOwn,
         Permission.ProductUpdateOwn,
         Permission.ProductDeleteOwn,
