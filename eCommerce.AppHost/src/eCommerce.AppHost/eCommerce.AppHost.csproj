@@ -19,6 +19,7 @@
     <ProjectReference Include="..\..\..\eCommerce.GatewayApi\src\GatewayApi.Api\GatewayApi.Api.csproj" />
     <ProjectReference Include="..\..\..\eCommerce.NotificationApi\src\NotificationApi.Api\NotificationApi.Api.csproj" />
     <ProjectReference Include="..\..\..\eCommerce.OrderApi\src\OrderApi.Api\OrderApi.Api.csproj" />
+    <ProjectReference Include="..\..\..\eCommerce.PaymentApi\src\PaymentApi.Api\PaymentApi.Api.csproj" />
     <ProjectReference Include="..\..\..\eCommerce.ProductApi\src\ProductApi.Api\ProductApi.Api.csproj" />
     <ProjectReference Include="..\..\..\eCommerce.UserApi\src\UserApi.Api\UserApi.Api.csproj" />
     <ProjectReference Include="..\..\..\eCommerce.ImageApi\src\ImageApi.Api\ImageApi.Api.csproj" />

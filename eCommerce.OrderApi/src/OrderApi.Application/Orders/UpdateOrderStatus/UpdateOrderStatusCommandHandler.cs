@@ -25,6 +25,11 @@ public sealed class UpdateOrderStatusCommandHandler(
     /// <param name="cancellationToken">The cancellationToken value.</param>
     public async Task<Result> Handle(UpdateOrderStatusCommand request, CancellationToken cancellationToken)
     {
+        if (request.Status == OrderStatus.Paid)
+        {
+            return Result.Failure(OrderErrors.PaymentProviderRequired);
+        }
+
         var order = await orderRepository.GetByIdAsync(request.OrderId, cancellationToken);
 
         if (order is null)
@@ -70,7 +75,7 @@ public sealed class UpdateOrderStatusCommandHandler(
         {
             OrderStatus.Pending when order.Status == OrderStatus.Pending => Result.Success(),
             OrderStatus.Confirmed => order.Confirm(DateTime.UtcNow),
-            OrderStatus.Paid => order.MarkAsPaid(DateTime.UtcNow),
+            OrderStatus.Paid => Result.Failure(OrderErrors.PaymentProviderRequired),
             OrderStatus.Shipped => order.MarkAsShipped(DateTime.UtcNow),
             OrderStatus.Completed => order.Complete(DateTime.UtcNow),
             OrderStatus.Cancelled => order.Cancel(DateTime.UtcNow),

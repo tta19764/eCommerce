@@ -5,7 +5,8 @@ using OrderApi.Domain.Orders;
 namespace OrderApi.Infrastructure.Configurations;
 
 /// <summary>
-/// EF Core mapping for order persistence.
+/// EF Core mapping for the order aggregate, including checkout-currency money, FX provenance,
+/// provider payment projection, and owned creation-date value object.
 /// </summary>
 public class OrderConfiguration : IEntityTypeConfiguration<Order>
 {
@@ -37,9 +38,25 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
             .HasMaxLength(50)
             .IsRequired();
 
+        builder.Property(order => order.CheckoutCurrency)
+            .HasConversion(currency => currency.Code, code => SharedLibrary.Domain.Money.Currency.FromCode(code))
+            .HasMaxLength(3)
+            .HasDefaultValue(SharedLibrary.Domain.Money.Currency.Usd)
+            .IsRequired();
+
+        builder.Property(order => order.GrandTotalMinor).IsRequired();
+        builder.Property(order => order.FxQuoteId);
+        builder.Property(order => order.FxRateProvider).HasMaxLength(100);
+        builder.Property(order => order.FxQuotedOnUtc);
+        builder.Property(order => order.FxRateEffectiveOnUtc);
+        builder.Property(order => order.FxQuoteExpiresOnUtc);
+        builder.Property(order => order.PaymentExpiresOnUtc);
+
         builder.Property(order => order.ConfirmedOnUtc);
 
         builder.Property(order => order.PaidOnUtc);
+        builder.Property(order => order.PaymentId);
+        builder.HasIndex(order => order.PaymentId).IsUnique();
 
         builder.Property(order => order.ShippedOnUtc);
 

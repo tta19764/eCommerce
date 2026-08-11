@@ -21,6 +21,11 @@ public sealed class UpdateSellerOrderStatusCommandHandler(
     /// <inheritdoc />
     public async Task<Result> Handle(UpdateSellerOrderStatusCommand request, CancellationToken cancellationToken)
     {
+        if (request.Status == OrderStatus.Paid)
+        {
+            return Result.Failure(OrderErrors.PaymentProviderRequired);
+        }
+
         var order = await orderRepository.GetBySellerOrderIdAsync(request.SellerOrderId, cancellationToken);
         var sellerOrder = order?.SellerOrders.FirstOrDefault(sellerOrder => sellerOrder.Id == request.SellerOrderId);
 

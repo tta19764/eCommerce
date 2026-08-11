@@ -12,6 +12,9 @@ var pgAdminPassword = builder.AddParameter("pgadmin-password", secret: true);
 var rabbitMqUser = builder.AddParameter("rabbitmq-user");
 var rabbitMqPassword = builder.AddParameter("rabbitmq-password", secret: true);
 var gatewaySignature = builder.AddParameter("gateway-signature", secret: true);
+var stripeSecretKey = builder.AddParameter("stripe-secret-key", secret: true);
+var stripePublishableKey = builder.AddParameter("stripe-publishable-key");
+var stripeWebhookSecret = builder.AddParameter("stripe-webhook-secret", secret: true);
 var minioRootUser = builder.AddParameter("minio-root-user");
 var minioRootPassword = builder.AddParameter("minio-root-password", secret: true);
 var keycloakAdminUser = builder.AddParameter("keycloak-admin-user");
@@ -45,6 +48,7 @@ var pgAdminMasterPasswordRequired = GetRequired("AppHost:PgAdmin:MasterPasswordR
 // WithReference(..., "Database").
 var productDbName = GetRequired("AppHost:Postgres:Databases:Product");
 var orderDbName = GetRequired("AppHost:Postgres:Databases:Order");
+var paymentDbName = GetRequired("AppHost:Postgres:Databases:Payment");
 var userDbName = GetRequired("AppHost:Postgres:Databases:User");
 var imageDbName = GetRequired("AppHost:Postgres:Databases:Image");
 var authenticationDbName = GetRequired("AppHost:Postgres:Databases:Authentication");
@@ -107,6 +111,13 @@ var webAppCommand = GetRequired("AppHost:WebApp:Command");
 var webAppSourcePath = Path.GetFullPath(GetRequired("AppHost:WebApp:SourcePath"), builder.AppHostDirectory);
 var webAppPort = GetRequiredInt("AppHost:WebApp:Port");
 
+// Stripe CLI is a development process supervised by AppHost. It uses the developer's authenticated
+// Stripe CLI profile and forwards only the PaymentIntent events understood by PaymentApi. The matching
+// whsec value remains an AppHost user secret and is injected into PaymentApi above.
+var stripeCliCommand = GetRequired("AppHost:StripeCli:Command");
+var stripeCliForwardTo = GetRequired("AppHost:StripeCli:ForwardTo");
+var stripeCliEvents = GetRequired("AppHost:StripeCli:Events");
+
 // Authentication settings are injected into AuthenticationApi so local Keycloak URLs, issuer,
 // audience, and HTTPS metadata behavior are controlled from AppHost configuration.
 var authenticationAudience = GetRequired("AppHost:Authentication:Audience");
@@ -142,6 +153,8 @@ var productApiPort = GetRequiredInt("AppHost:Projects:ProductApi:HttpPort");
 var productApiHttpsPort = GetRequiredInt("AppHost:Projects:ProductApi:HttpsPort");
 var orderApiPort = GetRequiredInt("AppHost:Projects:OrderApi:HttpPort");
 var orderApiHttpsPort = GetRequiredInt("AppHost:Projects:OrderApi:HttpsPort");
+var paymentApiPort = GetRequiredInt("AppHost:Projects:PaymentApi:HttpPort");
+var paymentApiHttpsPort = GetRequiredInt("AppHost:Projects:PaymentApi:HttpsPort");
 var userApiPort = GetRequiredInt("AppHost:Projects:UserApi:HttpPort");
 var userApiHttpsPort = GetRequiredInt("AppHost:Projects:UserApi:HttpsPort");
 var imageApiPort = GetRequiredInt("AppHost:Projects:ImageApi:HttpPort");
@@ -162,6 +175,7 @@ var postgres = builder.AddPostgres("postgres", postgresUser, postgresPassword, p
 
 var productDb = postgres.AddDatabase("product-db", productDbName);
 var orderDb = postgres.AddDatabase("order-db", orderDbName);
+var paymentDb = postgres.AddDatabase("payment-db", paymentDbName);
 var userDb = postgres.AddDatabase("user-db", userDbName);
 var imageDb = postgres.AddDatabase("image-db", imageDbName);
 var authenticationDb = postgres.AddDatabase("authentication-db", authenticationDbName);
@@ -304,6 +318,30 @@ var orderApi = builder.AddProject<Projects.OrderApi_Api>("order-api")
     .WaitFor(redis)
     .WaitFor(seq);
 
+// PaymentApi owns Stripe payment state, verified webhook receipts, and payment integration events.
+var paymentApi = builder.AddProject<Projects.PaymentApi_Api>("payment-api")
+    .WithHttpEndpoint(port: paymentApiPort)
+    .WithHttpsEndpoint(port: paymentApiHttpsPort)
+    .WithEnvironment("ASPNETCORE_ENVIRONMENT", projectEnvironment)
+    .WithEnvironment("DOTNET_ENVIRONMENT", projectEnvironment)
+    .WithEnvironment("Gateway__HeaderName", gatewayHeaderName)
+    .WithEnvironment("Gateway__Signature", gatewaySignature)
+    .WithEnvironment("Stripe__SecretKey", stripeSecretKey)
+    .WithEnvironment("Stripe__PublishableKey", stripePublishableKey)
+    .WithEnvironment("Stripe__WebhookSecret", stripeWebhookSecret)
+    .WithEnvironment("Authentication__Audience", authenticationAudience)
+    .WithEnvironment("Authentication__MetadataUrl", authenticationMetadataUrl)
+    .WithEnvironment("Authentication__RequireHttpsMetadata", authenticationRequireHttpsMetadata)
+    .WithEnvironment("Authentication__Issuer", authenticationIssuer)
+    .WithEnvironment("Serilog__WriteTo__1__Name", seqSinkName)
+    .WithEnvironment("Serilog__WriteTo__1__Args__serverUrl", seqServerUrl)
+    .WithReference(paymentDb, "Database")
+    .WithReference(rabbitMq)
+    .WaitFor(postgres)
+    .WaitFor(rabbitMq)
+    .WaitFor(orderApi)
+    .WaitFor(seq);
+
 // UserApi owns profile data linked from AuthenticationApi accounts. AuthenticationApi creates and
 // deletes profiles through MassTransit, so UserApi must wait for RabbitMQ and PostgreSQL before it
 // can reliably process profile messages.
@@ -416,6 +454,7 @@ var gatewayApi = builder.AddProject<Projects.GatewayApi_Api>("gateway-api")
     .WithReference(authenticationApi)
     .WithReference(productApi)
     .WithReference(orderApi)
+    .WithReference(paymentApi)
     .WithReference(userApi)
     .WithReference(imageApi)
     .WithReference(notificationApi)
@@ -423,11 +462,26 @@ var gatewayApi = builder.AddProject<Projects.GatewayApi_Api>("gateway-api")
     .WaitFor(authenticationApi)
     .WaitFor(productApi)
     .WaitFor(orderApi)
+    .WaitFor(paymentApi)
     .WaitFor(userApi)
     .WaitFor(imageApi)
     .WaitFor(notificationApi)
     .WaitFor(messagingApi)
     .WithExternalHttpEndpoints();
+
+// Wait for the Gateway because webhooks must traverse its signature boundary. --skip-verify applies
+// only to the local development certificate used by the HTTPS forwarding target.
+builder.AddExecutable(
+        "stripe-listener",
+        stripeCliCommand,
+        builder.AppHostDirectory,
+        "listen",
+        "--forward-to",
+        stripeCliForwardTo,
+        "--events",
+        stripeCliEvents,
+        "--skip-verify")
+    .WaitFor(gatewayApi);
 
 // WebApp runs Angular's development server as a normal local process. Install packages once in the
 // Angular project with npm install/npm ci, then AppHost can start and supervise the dev server.

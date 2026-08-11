@@ -30,6 +30,13 @@ namespace OrderApi.Infrastructure.Migrations
                     b.Property<DateTime?>("CancelledOnUtc")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("CheckoutCurrency")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)")
+                        .HasDefaultValue("USD");
+
                     b.Property<Guid>("ClientId")
                         .HasColumnType("uuid");
 
@@ -39,8 +46,33 @@ namespace OrderApi.Infrastructure.Migrations
                     b.Property<DateTime?>("ConfirmedOnUtc")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<DateTime?>("FxQuoteExpiresOnUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("FxQuoteId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("FxQuotedOnUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("FxRateEffectiveOnUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FxRateProvider")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<long>("GrandTotalMinor")
+                        .HasColumnType("bigint");
+
                     b.Property<DateTime?>("PaidOnUtc")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("PaymentExpiresOnUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("PaymentId")
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime?>("ShippedOnUtc")
                         .HasColumnType("timestamp with time zone");
@@ -54,6 +86,9 @@ namespace OrderApi.Infrastructure.Migrations
 
                     b.HasIndex("ClientId");
 
+                    b.HasIndex("PaymentId")
+                        .IsUnique();
+
                     b.HasIndex("Status");
 
                     b.ToTable("Orders");
@@ -63,6 +98,10 @@ namespace OrderApi.Infrastructure.Migrations
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
+
+                    b.Property<decimal>("ExchangeRate")
+                        .HasPrecision(28, 12)
+                        .HasColumnType("numeric(28,12)");
 
                     b.Property<Guid>("OrderId")
                         .HasColumnType("uuid");
@@ -194,6 +233,54 @@ namespace OrderApi.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.OwnsOne("SharedLibrary.Domain.Money.Money", "OriginalUnitPrice", b1 =>
+                        {
+                            b1.Property<Guid>("OrderItemId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<decimal>("Amount")
+                                .HasPrecision(18, 6)
+                                .HasColumnType("numeric(18,6)")
+                                .HasColumnName("OriginalUnitPrice");
+
+                            b1.Property<string>("Currency")
+                                .IsRequired()
+                                .HasMaxLength(3)
+                                .HasColumnType("character varying(3)")
+                                .HasColumnName("OriginalCurrency");
+
+                            b1.HasKey("OrderItemId");
+
+                            b1.ToTable("OrderItems");
+
+                            b1.WithOwner()
+                                .HasForeignKey("OrderItemId");
+                        });
+
+                    b.OwnsOne("SharedLibrary.Domain.Money.Money", "UnitPrice", b1 =>
+                        {
+                            b1.Property<Guid>("OrderItemId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<decimal>("Amount")
+                                .HasPrecision(18, 2)
+                                .HasColumnType("numeric(18,2)")
+                                .HasColumnName("UnitPrice");
+
+                            b1.Property<string>("Currency")
+                                .IsRequired()
+                                .HasMaxLength(3)
+                                .HasColumnType("character varying(3)")
+                                .HasColumnName("Currency");
+
+                            b1.HasKey("OrderItemId");
+
+                            b1.ToTable("OrderItems");
+
+                            b1.WithOwner()
+                                .HasForeignKey("OrderItemId");
+                        });
+
                     b.OwnsOne("OrderApi.Domain.Orders.OrderItemQuantity", "Quantity", b1 =>
                         {
                             b1.Property<Guid>("OrderItemId")
@@ -230,29 +317,8 @@ namespace OrderApi.Infrastructure.Migrations
                                 .HasForeignKey("OrderItemId");
                         });
 
-                    b.OwnsOne("SharedLibrary.Domain.Money.Money", "UnitPrice", b1 =>
-                        {
-                            b1.Property<Guid>("OrderItemId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<decimal>("Amount")
-                                .HasPrecision(18, 2)
-                                .HasColumnType("numeric(18,2)")
-                                .HasColumnName("UnitPrice");
-
-                            b1.Property<string>("Currency")
-                                .IsRequired()
-                                .HasMaxLength(3)
-                                .HasColumnType("character varying(3)")
-                                .HasColumnName("Currency");
-
-                            b1.HasKey("OrderItemId");
-
-                            b1.ToTable("OrderItems");
-
-                            b1.WithOwner()
-                                .HasForeignKey("OrderItemId");
-                        });
+                    b.Navigation("OriginalUnitPrice")
+                        .IsRequired();
 
                     b.Navigation("ProductName")
                         .IsRequired();

@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\eCommerce.OrderApi\src\OrderApi.Messages\OrderApi.Messages.csproj" />
+    <ProjectReference Include="..\..\..\eCommerce.SharedLibrary\SharedLibrary.Application\SharedLibrary.Application.csproj" />
+    <ProjectReference Include="..\PaymentApi.Domain\PaymentApi.Domain.csproj" />
+    <ProjectReference Include="..\PaymentApi.Messages\PaymentApi.Messages.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MassTransit" Version="8.4.1" />
+  </ItemGroup>
+</Project>

@@ -120,4 +120,34 @@ public class OrderTests
         order.Status.Should().Be(OrderStatus.Confirmed);
         order.ConfirmedOnUtc.Should().Be(confirmedAtUtc);
     }
+
+    [Fact]
+    public void IsEligibleForPayment_ShouldUsePaymentDeadlineInsteadOfFxQuoteExpiry()
+    {
+        var quotedOnUtc = new DateTime(2026, 8, 11, 12, 0, 0, DateTimeKind.Utc);
+        var order = Order.CreatePriced(
+            Guid.NewGuid(),
+            new OrderDate(quotedOnUtc),
+            Currency.Usd,
+            Guid.NewGuid(),
+            "Test",
+            quotedOnUtc,
+            quotedOnUtc.Date,
+            quotedOnUtc.AddMinutes(15),
+            quotedOnUtc.AddHours(24));
+        order.AddPricedItem(
+            SellerId,
+            Guid.NewGuid(),
+            new ProductName("Keyboard"),
+            new Money(100m, Currency.Eur),
+            new Money(110m, Currency.Usd),
+            1.1m,
+            new OrderItemQuantity(1));
+        order.Confirm(quotedOnUtc.AddMinutes(5));
+
+        order.IsEligibleForPayment(quotedOnUtc.AddHours(1)).Should().BeTrue(
+            "the frozen order remains payable after its short FX quote has expired");
+        order.IsEligibleForPayment(quotedOnUtc.AddHours(24)).Should().BeFalse(
+            "the independent payment deadline has elapsed");
+    }
 }

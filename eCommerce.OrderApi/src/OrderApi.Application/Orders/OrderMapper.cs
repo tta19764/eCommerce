@@ -40,9 +40,9 @@ internal static class OrderMapper
             order.ClientId,
             order.CreatedAtUtc.Value,
             order.Status.ToString(),
-            CalculateTotal(order),
-            CalculateOriginalTotal(order),
-            GetOrderCurrency(order).Code,
+            Money.FromMinorUnits(order.GrandTotalMinor, order.CheckoutCurrency).Amount,
+            Money.FromMinorUnits(order.GrandTotalMinor, order.CheckoutCurrency).Amount,
+            order.CheckoutCurrency.Code,
             items,
             sellerOrders,
             order.ConfirmedOnUtc,
@@ -78,9 +78,9 @@ internal static class OrderMapper
             order.ClientId,
             order.CreatedAtUtc.Value,
             order.Status.ToString(),
-            CalculateTotal(order),
-            CalculateOriginalTotal(order),
-            GetOrderCurrency(order).Code,
+            Money.FromMinorUnits(order.GrandTotalMinor, order.CheckoutCurrency).Amount,
+            Money.FromMinorUnits(order.GrandTotalMinor, order.CheckoutCurrency).Amount,
+            order.CheckoutCurrency.Code,
             items,
             sellerOrders,
             order.ConfirmedOnUtc,
@@ -125,8 +125,8 @@ internal static class OrderMapper
             clientFound,
             order.CreatedAtUtc.Value,
             order.Status.ToString(),
-            CalculateTotal(order),
-            GetOrderCurrency(order).Code,
+            Money.FromMinorUnits(order.GrandTotalMinor, order.CheckoutCurrency).Amount,
+            order.CheckoutCurrency.Code,
             items,
             order.ConfirmedOnUtc,
             order.PaidOnUtc,
@@ -231,25 +231,4 @@ internal static class OrderMapper
             sellerOrder.CancelledOnUtc);
     }
 
-    private static decimal CalculateTotal(Order order)
-    {
-        var cancelledSellerOrderIds = order.SellerOrders
-            .Where(so => so.Status == OrderStatus.Cancelled)
-            .Select(so => so.Id)
-            .ToHashSet();
-
-        return order.Items
-            .Where(item => !cancelledSellerOrderIds.Contains(item.SellerOrderId))
-            .Sum(item => item.TotalPrice.Amount);
-    }
-
-    private static decimal CalculateOriginalTotal(Order order)
-    {
-        return order.Items.Sum(item => item.TotalPrice.Amount);
-    }
-
-    private static Currency GetOrderCurrency(Order order)
-    {
-        return order.Items.FirstOrDefault()?.UnitPrice.Currency ?? Currency.Usd;
-    }
 }

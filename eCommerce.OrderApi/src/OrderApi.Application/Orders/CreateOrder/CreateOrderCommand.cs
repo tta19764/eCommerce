@@ -7,6 +7,8 @@ namespace OrderApi.Application.Orders.CreateOrder;
 /// </summary>
 /// <param name="ClientId">The client placing the order.</param>
 /// <param name="Items">The products and quantities requested by the client.</param>
+/// <param name="CheckoutCurrency">The ISO currency in which the order will be paid.</param>
 public sealed record CreateOrderCommand(
     Guid ClientId,
-    IReadOnlyCollection<OrderItemRequest> Items) : ICommand<Guid>;
+    IReadOnlyCollection<OrderItemRequest> Items,
+    string CheckoutCurrency = "USD") : ICommand<Guid>;

@@ -80,7 +80,8 @@ public class OrderCommandTests(IntegrationTestWebAppFactory factory) : BaseInteg
         order.Items.Should().ContainSingle();
         order.Items.Single().ProductId.Should().Be(secondProductId);
         order.Items.Single().ProductName.Value.Should().Be("Mouse");
-        order.Items.Single().UnitPrice.Currency.Code.Should().Be("EUR");
+        order.Items.Single().OriginalUnitPrice.Currency.Code.Should().Be("EUR");
+        order.Items.Single().UnitPrice.Currency.Code.Should().Be("USD");
         order.Items.Single().Quantity.Value.Should().Be(3);
     }
 

@@ -1,11 +1,9 @@
-using MassTransit;
 using Microsoft.Extensions.Logging;
 using OrderApi.Domain.Orders;
-using ProductApi.Messages.Products;
+using OrderApi.Application.Orders.Pricing;
 using SharedLibrary.Application.Abstractions.Caching;
 using SharedLibrary.Application.Abstractions.Messaging;
 using SharedLibrary.Domain.Abstractions;
-using SharedLibrary.Domain.Money;
 
 namespace OrderApi.Application.Orders.CreateOrder;
 
@@ -15,7 +13,7 @@ namespace OrderApi.Application.Orders.CreateOrder;
 public sealed class CreateOrderCommandHandler(
     IOrderRepository orderRepository,
     IUnitOfWork unitOfWork,
-    IRequestClient<GetProductDetailsRequest> productClient,
+    IOrderPricingService pricingService,
     ICacheService cacheService,
     ILogger<CreateOrderCommandHandler> logger) : ICommandHandler<CreateOrderCommand, Guid>
 {
@@ -29,37 +27,40 @@ public sealed class CreateOrderCommandHandler(
     {
         logger.LogInformation("Creating order for client {ClientId}", request.ClientId);
 
-        var order = Order.Create(request.ClientId, new OrderDate(DateTime.UtcNow));
-
-        foreach (var item in request.Items.GroupBy(item => item.ProductId).Select(group => new OrderItemRequest(group.Key, group.Sum(item => item.Quantity))))
+        var pricingResult = await pricingService.PriceAsync(
+            request.Items, request.CheckoutCurrency, cancellationToken);
+        if (pricingResult.IsFailure)
         {
-            // Product data is copied into the order so later product changes do not rewrite order history.
-            var product = await productClient.GetResponse<GetProductDetailsResponse>(
-                new GetProductDetailsRequest(item.ProductId),
-                cancellationToken);
+            return Result.Failure<Guid>(pricingResult.Error);
+        }
 
-            if (!product.Message.Found)
-            {
-                logger.LogWarning("Product {ProductId} was not found while creating an order", item.ProductId);
-                return Result.Failure<Guid>(OrderErrors.ProductNotFound);
-            }
+        var pricing = pricingResult.Value;
+        var order = Order.CreatePriced(
+            request.ClientId,
+            new OrderDate(DateTime.UtcNow),
+            pricing.CheckoutCurrency,
+            pricing.QuoteId,
+            pricing.Provider,
+            pricing.QuotedOnUtc,
+            pricing.RateEffectiveOnUtc,
+            pricing.QuoteExpiresOnUtc,
+            pricing.QuotedOnUtc.Add(OrderPaymentPolicy.DefaultPaymentWindow));
 
-            var addItemResult = order.AddItem(
-                product.Message.SellerId,
-                product.Message.ProductId,
-                new ProductName(product.Message.Name),
-                new Money(product.Message.Price, Currency.FromCode(product.Message.Currency)),
+        foreach (var item in pricing.Items)
+        {
+            var addItemResult = order.AddPricedItem(
+                item.SellerId,
+                item.ProductId,
+                new ProductName(item.Name),
+                item.OriginalUnitPrice,
+                item.CheckoutUnitPrice,
+                item.ExchangeRate,
                 new OrderItemQuantity(item.Quantity));
 
             if (addItemResult.IsFailure)
             {
                 return Result.Failure<Guid>(addItemResult.Error);
             }
-        }
-
-        if (order.Items.Count == 0)
-        {
-            return Result.Failure<Guid>(OrderErrors.EmptyOrder);
         }
 
         orderRepository.Add(order);

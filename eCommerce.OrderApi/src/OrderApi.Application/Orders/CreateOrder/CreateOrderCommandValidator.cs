@@ -18,6 +18,11 @@ public sealed class CreateOrderCommandValidator : AbstractValidator<CreateOrderC
         RuleFor(command => command.Items)
             .NotEmpty();
 
+        RuleFor(command => command.CheckoutCurrency)
+            .Must(code => SharedLibrary.Domain.Money.Currency.All.Any(currency =>
+                string.Equals(currency.Code, code, StringComparison.OrdinalIgnoreCase)))
+            .WithMessage("Checkout currency is not supported.");
+
         RuleForEach(command => command.Items)
             .ChildRules(item =>
             {

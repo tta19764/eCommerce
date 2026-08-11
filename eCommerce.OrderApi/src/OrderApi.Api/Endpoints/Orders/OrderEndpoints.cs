@@ -10,6 +10,7 @@ using OrderApi.Application.Orders.CreateOrder;
 using OrderApi.Application.Orders.DeleteOrder;
 using OrderApi.Application.Orders.GetOrder;
 using OrderApi.Application.Orders.GetOrderPage;
+using OrderApi.Application.Orders.GetOrderPricingQuote;
 using OrderApi.Application.Orders.GetOrdersByClient;
 using OrderApi.Application.Orders.GetSellerOrder;
 using OrderApi.Application.Orders.GetSellerOrders;
@@ -18,7 +19,6 @@ using OrderApi.Application.Orders.UpdateOrderStatus;
 using OrderApi.Application.Orders.UpdateSellerOrderStatus;
 using OrderApi.Domain.Orders;
 using SharedLibrary.Api.Contracts;
-using SharedLibrary.Api.Extensions;
 using SharedLibrary.Application.Authorization;
 using SharedLibrary.Application.Pagination;
 
@@ -53,6 +53,14 @@ public static class OrderEndpoints
             .Produces(StatusCodes.Status401Unauthorized)
             .Produces(StatusCodes.Status403Forbidden)
             .RequireAuthorization(ApplicationPermissions.OrderCreate);
+
+        group.MapPost("quote", GetOrderPricingQuote)
+            .WithName(nameof(GetOrderPricingQuote))
+            .Produces<ApiResponse<OrderPricingQuoteResponse>>()
+            .Produces<ApiResponse<OrderPricingQuoteResponse>>(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status429TooManyRequests)
+            .AllowAnonymous()
+            .RequireRateLimiting("order-pricing");
 
         group.MapGet(string.Empty, GetOrders)
             .WithName(nameof(GetOrders))
@@ -162,6 +170,23 @@ public static class OrderEndpoints
     }
 
     /// <summary>
+    /// Produces a non-binding, server-authoritative cart pricing preview.
+    /// </summary>
+    public static async Task<IResult> GetOrderPricingQuote(
+        GetOrderPricingQuoteRequest request,
+        ISender sender,
+        CancellationToken cancellationToken)
+    {
+        var result = await sender.Send(
+            new GetOrderPricingQuoteQuery(request.Items, request.CheckoutCurrency),
+            cancellationToken);
+
+        return result.IsSuccess
+            ? Results.Ok(result.MapToApiResponse())
+            : Results.BadRequest(result.MapToApiResponse());
+    }
+
+    /// <summary>
     /// Executes the CreateOwnOrder operation.
     /// </summary>
     /// <param name="request">The request value.</param>
@@ -183,7 +208,7 @@ public static class OrderEndpoints
             return Results.Forbid();
         }
 
-        var result = await sender.Send(new CreateOrderCommand(currentUserId.Value, request.Items), cancellationToken);
+        var result = await sender.Send(new CreateOrderCommand(currentUserId.Value, request.Items, request.CheckoutCurrency), cancellationToken);
 
         return result.IsSuccess
             ? Results.CreatedAtRoute(

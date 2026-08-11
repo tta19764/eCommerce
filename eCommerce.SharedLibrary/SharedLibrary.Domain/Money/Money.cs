@@ -39,4 +39,34 @@ public record Money(decimal Amount, Currency Currency)
     /// </summary>
     /// <returns><c>true</c> when the amount is zero for the same currency; otherwise, <c>false</c>.</returns>
     public bool IsZero() => this == Zero(Currency);
+
+    /// <summary>
+    /// Converts the amount to integer minor units using midpoint rounding away from zero.
+    /// </summary>
+    /// <remarks>Checked conversion fails instead of wrapping values outside <see cref="long"/>.</remarks>
+    public long ToMinorUnits()
+    {
+        var scale = DecimalScale(Currency.MinorUnitDigits);
+        return checked((long)decimal.Round(Amount * scale, 0, MidpointRounding.AwayFromZero));
+    }
+
+    /// <summary>
+    /// Creates a money value from integer minor units.
+    /// </summary>
+    /// <remarks>The currency exponent controls scaling; callers must not assume two decimal digits.</remarks>
+    public static Money FromMinorUnits(long amount, Currency currency)
+    {
+        return new Money(amount / DecimalScale(currency.MinorUnitDigits), currency);
+    }
+
+    private static decimal DecimalScale(int digits)
+    {
+        decimal scale = 1;
+        for (var index = 0; index < digits; index++)
+        {
+            scale *= 10;
+        }
+
+        return scale;
+    }
 }

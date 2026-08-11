@@ -6,7 +6,7 @@ using SharedLibrary.Domain.Money;
 namespace OrderApi.Infrastructure.Configurations;
 
 /// <summary>
-/// EF Core mapping for order item persistence.
+/// EF Core mapping for immutable original/checkout money snapshots and their frozen exchange rate.
 /// </summary>
 public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
 {
@@ -57,6 +57,24 @@ public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
                 .IsRequired();
         });
 
+        builder.OwnsOne(item => item.OriginalUnitPrice, priceBuilder =>
+        {
+            priceBuilder.Property(price => price.Amount)
+                .HasColumnName("OriginalUnitPrice")
+                .HasPrecision(18, 6)
+                .IsRequired();
+
+            priceBuilder.Property(price => price.Currency)
+                .HasColumnName("OriginalCurrency")
+                .HasConversion(currency => currency.Code, code => Currency.FromCode(code))
+                .HasMaxLength(3)
+                .IsRequired();
+        });
+
+        builder.Property(item => item.ExchangeRate)
+            .HasPrecision(28, 12)
+            .IsRequired();
+
         builder.OwnsOne(item => item.Quantity, quantityBuilder =>
         {
             quantityBuilder.Property(quantity => quantity.Value)
@@ -65,6 +83,7 @@ public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
         });
 
         builder.Ignore(item => item.TotalPrice);
+        builder.Ignore(item => item.OriginalTotalPrice);
 
         builder.HasIndex(item => item.OrderId);
         builder.HasIndex(item => item.SellerOrderId);

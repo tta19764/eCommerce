@@ -2,6 +2,7 @@ using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
+using OrderApi.Application.ExchangeRates;
 using OrderApi.Application.IntegrationTests.Orders;
 using OrderApi.Application.Orders.Messaging;
 using OrderApi.Domain.Orders;
@@ -10,6 +11,7 @@ using OrderApi.Infrastructure.Repositories;
 using ProductApi.Messages.Products;
 using SharedLibrary.Application.Abstractions.Caching;
 using SharedLibrary.Domain.Abstractions;
+using SharedLibrary.Domain.Money;
 using Testcontainers.PostgreSql;
 using UserApi.Messages.Users;
 using Xunit;
@@ -79,6 +81,7 @@ public sealed class IntegrationTestWebAppFactory : IAsyncLifetime
         services.AddScoped<IUnitOfWork>(serviceProvider => serviceProvider.GetRequiredService<OrderDbContext>());
         services.AddTransient<GetOrderFullInfoConsumer>();
         services.AddSingleton(productClient);
+        services.AddSingleton<IExchangeRateProvider, DeterministicExchangeRateProvider>();
         services.AddSingleton(userReviewsClient);
         services.AddSingleton(userClient);
         services.AddSingleton(cacheService);
@@ -114,5 +117,30 @@ public sealed class IntegrationTestWebAppFactory : IAsyncLifetime
         await _serviceProvider.DisposeAsync();
         await _dbContainer.StopAsync();
         await _dbContainer.DisposeAsync();
+    }
+
+    /// <summary>
+    /// Keeps integration tests independent of the external FX API while exercising the complete
+    /// pricing and persistence path with a stable one-to-one conversion.
+    /// </summary>
+    private sealed class DeterministicExchangeRateProvider : IExchangeRateProvider
+    {
+        public Task<Result<ExchangeRateQuote>> GetQuoteAsync(
+            IReadOnlyCollection<Currency> sourceCurrencies,
+            Currency targetCurrency,
+            CancellationToken cancellationToken = default)
+        {
+            var quotedOnUtc = new DateTime(2026, 8, 11, 12, 0, 0, DateTimeKind.Utc);
+            var rates = sourceCurrencies.ToDictionary(currency => currency.Code, _ => 1m);
+
+            return Task.FromResult(Result.Success(new ExchangeRateQuote(
+                Guid.Parse("87c39583-a22a-41bc-a67f-5f1635f5f691"),
+                "IntegrationTest",
+                targetCurrency,
+                rates,
+                quotedOnUtc,
+                quotedOnUtc,
+                quotedOnUtc.AddMinutes(15))));
+        }
     }
 }

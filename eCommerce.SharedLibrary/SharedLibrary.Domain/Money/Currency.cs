@@ -25,12 +25,21 @@ public record Currency
     /// </summary>
     public static readonly Currency Uah = new("UAH");
 
-    private Currency(string code) => Code = code;
+    private Currency(string code, int minorUnitDigits = 2)
+    {
+        Code = code;
+        MinorUnitDigits = minorUnitDigits;
+    }
 
     /// <summary>
     /// Gets the ISO currency code.
     /// </summary>
     public string Code { get; init; }
+
+    /// <summary>
+    /// Gets the number of decimal digits used by the currency's minor unit.
+    /// </summary>
+    public int MinorUnitDigits { get; init; }
 
     /// <summary>
     /// Gets a supported currency by its code.
@@ -40,7 +49,7 @@ public record Currency
     /// <exception cref="ApplicationException">Thrown when the currency code is not supported.</exception>
     public static Currency FromCode(string code)
     {
-        return All.FirstOrDefault(c => c.Code == code) ??
+        return All.FirstOrDefault(c => string.Equals(c.Code, code, StringComparison.OrdinalIgnoreCase)) ??
                throw new ApplicationException("The currency code is invalid");
     }
 

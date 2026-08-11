@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using OrderApi.Application.Orders.Messaging;
 using OrderApi.Application.Orders.Notifications;
+using OrderApi.Application.Orders.Pricing;
 using SharedLibrary.Application;
 
 namespace OrderApi.Application;
@@ -19,6 +20,7 @@ public static class DependencyInjection
         services.AddSharedApplication(typeof(DependencyInjection).Assembly);
         services.AddScoped<OrderStatusChangedNotificationDispatcher>();
         services.AddScoped<SellerOrderStatusChangedIntegrationEventPublisher>();
+        services.AddScoped<IOrderPricingService, OrderPricingService>();
 
         return services;
     }

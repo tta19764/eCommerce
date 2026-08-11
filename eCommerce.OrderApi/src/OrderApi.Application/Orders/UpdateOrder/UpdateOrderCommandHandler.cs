@@ -6,6 +6,7 @@ using SharedLibrary.Application.Abstractions.Caching;
 using SharedLibrary.Application.Abstractions.Messaging;
 using SharedLibrary.Domain.Abstractions;
 using SharedLibrary.Domain.Money;
+using OrderApi.Application.ExchangeRates;
 
 namespace OrderApi.Application.Orders.UpdateOrder;
 
@@ -16,6 +17,7 @@ public sealed class UpdateOrderCommandHandler(
     IOrderRepository orderRepository,
     IUnitOfWork unitOfWork,
     IRequestClient<GetProductDetailsRequest> productClient,
+    IExchangeRateProvider exchangeRateProvider,
     ICacheService cacheService,
     ILogger<UpdateOrderCommandHandler> logger) : ICommandHandler<UpdateOrderCommand>
 {
@@ -35,7 +37,7 @@ public sealed class UpdateOrderCommandHandler(
             return Result.Failure(OrderErrors.NotFound);
         }
 
-        var replacementItems = new List<(Guid SellerId, Guid ProductId, ProductName ProductName, Money UnitPrice, OrderItemQuantity Quantity)>();
+        var snapshots = new List<(GetProductDetailsResponse Product, int Quantity)>();
 
         foreach (var item in request.Items.GroupBy(item => item.ProductId).Select(group => new OrderItemRequest(group.Key, group.Sum(item => item.Quantity))))
         {
@@ -50,15 +52,42 @@ public sealed class UpdateOrderCommandHandler(
                 return Result.Failure(OrderErrors.ProductNotFound);
             }
 
-            replacementItems.Add((
-                product.Message.SellerId,
-                product.Message.ProductId,
-                new ProductName(product.Message.Name),
-                new Money(product.Message.Price, Currency.FromCode(product.Message.Currency)),
-                new OrderItemQuantity(item.Quantity)));
+            snapshots.Add((product.Message, item.Quantity));
         }
 
-        var updateResult = order.ReplaceItems(replacementItems);
+        var quoteResult = await exchangeRateProvider.GetQuoteAsync(
+            snapshots.Select(snapshot => Currency.FromCode(snapshot.Product.Currency)).Distinct().ToArray(),
+            order.CheckoutCurrency,
+            cancellationToken);
+        if (quoteResult.IsFailure) return Result.Failure(quoteResult.Error);
+
+        var quote = quoteResult.Value;
+        var replacementItems = snapshots.Select(snapshot =>
+        {
+            var originalCurrency = Currency.FromCode(snapshot.Product.Currency);
+            var originalPrice = new Money(snapshot.Product.Price, originalCurrency);
+            var rate = quote.GetRate(originalCurrency);
+            var checkoutPrice = new Money(
+                decimal.Round(originalPrice.Amount * rate, order.CheckoutCurrency.MinorUnitDigits, MidpointRounding.AwayFromZero),
+                order.CheckoutCurrency);
+            return (
+                snapshot.Product.SellerId,
+                snapshot.Product.ProductId,
+                new ProductName(snapshot.Product.Name),
+                originalPrice,
+                checkoutPrice,
+                rate,
+                new OrderItemQuantity(snapshot.Quantity));
+        });
+
+        var updateResult = order.ReplacePricedItems(
+            quote.Id,
+            quote.Provider,
+            quote.QuotedOnUtc,
+            quote.RateEffectiveOnUtc,
+            quote.QuoteExpiresOnUtc,
+            quote.QuotedOnUtc.Add(OrderPaymentPolicy.DefaultPaymentWindow),
+            replacementItems);
 
         if (updateResult.IsFailure)
         {
