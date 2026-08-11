@@ -18,7 +18,6 @@ This knowledge base maps the implemented eCommerce microservices system for deve
 - [[Payment API Contracts]] — implemented customer/webhook contracts and planned settlement contracts
 - [[Stripe Integration Plan]] — staged implementation and rollout plan
 - [[Sales, Discounts, and Seller Stores Plan]] — planned promotion pricing, storefronts, and seller payment onboarding
-- [[Legacy Data Reset and Admin Bootstrap Plan]] — development data reset, idempotent admin bootstrap, and removal of compatibility nullability
 
 ## System at a glance
 

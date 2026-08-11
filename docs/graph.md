@@ -33,7 +33,6 @@ This is the hub for the repository documentation graph. Open `docs/` as the Obsi
 - [[plans/index|Implementation Plans]]
   - [[plans/stripe-integration|Stripe Integration Plan]]
   - [[plans/sales-discounts-seller-stores|Sales, Discounts, and Seller Stores Plan]]
-  - [[plans/legacy-data-reset-admin-bootstrap|Legacy Data Reset and Admin Bootstrap Plan]]
 
 ## Legacy and supplemental documentation
 

@@ -23,10 +23,13 @@ public class GetOrderFullInfoConsumerTests
         // Arrange
         CancellationToken cancellationToken = TestContext.Current.CancellationToken;
         var clientId = Guid.NewGuid();
-        var order = Order.Create(clientId, new OrderDate(new DateTime(2026, 7, 28, 12, 0, 0, DateTimeKind.Utc)));
+        var order = OrderTestFactory.CreatePending(
+            clientId,
+            new DateTime(2026, 7, 28, 12, 0, 0, DateTimeKind.Utc));
         var productId = Guid.NewGuid();
 
-        order.AddItem(
+        OrderTestFactory.AddItem(
+            order,
             Guid.NewGuid(),
             productId,
             new ProductName("Keyboard"),

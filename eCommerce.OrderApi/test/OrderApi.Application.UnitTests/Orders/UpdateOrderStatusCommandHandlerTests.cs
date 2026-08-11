@@ -107,9 +107,10 @@ public class UpdateOrderStatusCommandHandlerTests
 
     private static Order CreatePendingOrder(Guid productId, int quantity)
     {
-        var order = Order.Create(Guid.NewGuid(), new OrderDate(DateTime.UtcNow));
+        var order = OrderTestFactory.CreatePending();
 
-        order.AddItem(
+        OrderTestFactory.AddItem(
+            order,
             Guid.NewGuid(),
             productId,
             new ProductName("Keyboard"),

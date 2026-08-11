@@ -20,7 +20,7 @@ public class HasOrdersForClientConsumerTests
         // Arrange
         CancellationToken cancellationToken = TestContext.Current.CancellationToken;
         var clientId = Guid.NewGuid();
-        var order = Order.Create(clientId, new OrderDate(DateTime.UtcNow));
+        var order = OrderTestFactory.CreatePending(clientId);
 
         _orderRepositoryMock
             .GetByAsync(Arg.Any<Expression<Func<Order, bool>>>(), cancellationToken)

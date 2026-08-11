@@ -19,6 +19,7 @@ public class Order : Entity
     {
         CreatedAtUtc = null!;
         CheckoutCurrency = Currency.Usd;
+        FxRateProvider = string.Empty;
     }
 
     private Order(Guid id, Guid clientId, OrderDate createdAtUtc)
@@ -28,6 +29,7 @@ public class Order : Entity
         CreatedAtUtc = createdAtUtc;
         Status = OrderStatus.Pending;
         CheckoutCurrency = Currency.Usd;
+        FxRateProvider = string.Empty;
     }
 
     /// <summary>Gets the customer who owns and may pay this order.</summary>
@@ -46,22 +48,22 @@ public class Order : Entity
     public long GrandTotalMinor { get; private set; }
 
     /// <summary>Gets the internal identifier of the FX quote used to freeze converted prices.</summary>
-    public Guid? FxQuoteId { get; private set; }
+    public Guid FxQuoteId { get; private set; }
 
     /// <summary>Gets the exchange-rate provider retained as price provenance.</summary>
-    public string? FxRateProvider { get; private set; }
+    public string FxRateProvider { get; private set; }
 
     /// <summary>Gets when OrderApi requested and assembled the internal FX quote.</summary>
-    public DateTime? FxQuotedOnUtc { get; private set; }
+    public DateTime FxQuotedOnUtc { get; private set; }
 
     /// <summary>Gets when the provider's underlying reference rates became effective.</summary>
-    public DateTime? FxRateEffectiveOnUtc { get; private set; }
+    public DateTime FxRateEffectiveOnUtc { get; private set; }
 
     /// <summary>Gets when the FX quote ceased being valid for creating this commercial snapshot.</summary>
-    public DateTime? FxQuoteExpiresOnUtc { get; private set; }
+    public DateTime FxQuoteExpiresOnUtc { get; private set; }
 
     /// <summary>Gets the independent deadline for initiating payment of the frozen order total.</summary>
-    public DateTime? PaymentExpiresOnUtc { get; private set; }
+    public DateTime PaymentExpiresOnUtc { get; private set; }
 
     /// <summary>Gets when every applicable seller group first reached confirmation.</summary>
     public DateTime? ConfirmedOnUtc { get; private set; }
@@ -86,17 +88,6 @@ public class Order : Entity
 
     /// <summary>Gets the per-seller fulfillment groups that determine the aggregate status.</summary>
     public IReadOnlyCollection<SellerOrder> SellerOrders => _sellerOrders;
-
-    /// <summary>
-    /// Creates a new order for the supplied client.
-    /// </summary>
-    /// <param name="clientId">The client placing the order.</param>
-    /// <param name="createdAtUtc">The UTC order creation date.</param>
-    /// <returns>The created order.</returns>
-    public static Order Create(Guid clientId, OrderDate createdAtUtc)
-    {
-        return new Order(Guid.NewGuid(), clientId, createdAtUtc);
-    }
 
     /// <summary>
     /// Creates an order whose payable prices are frozen in the supplied checkout currency.
@@ -128,19 +119,6 @@ public class Order : Entity
         };
 
         return order;
-    }
-
-    /// <summary>
-    /// Adds a product snapshot to the order.
-    /// </summary>
-    /// <param name="sellerId">The seller identifier.</param>
-    /// <param name="productId">The product identifier.</param>
-    /// <param name="productName">The product name at purchase time.</param>
-    /// <param name="unitPrice">The unit price at purchase time.</param>
-    /// <param name="quantity">The ordered quantity.</param>
-    public Result AddItem(Guid sellerId, Guid productId, ProductName productName, Money unitPrice, OrderItemQuantity quantity)
-    {
-        return AddPricedItem(sellerId, productId, productName, unitPrice, unitPrice, 1m, quantity);
     }
 
     /// <summary>
@@ -227,41 +205,6 @@ public class Order : Entity
         }
 
         RecalculateStatus(utcNow);
-
-        return Result.Success();
-    }
-
-    /// <summary>
-    /// Executes the ReplaceItems operation.
-    /// </summary>
-    /// <param name="items">The items value.</param>
-    public Result ReplaceItems(
-        IEnumerable<(Guid SellerId, Guid ProductId, ProductName ProductName, Money UnitPrice, OrderItemQuantity Quantity)> items)
-    {
-        if (Status != OrderStatus.Pending)
-        {
-            return Result.Failure(OrderErrors.NotPending);
-        }
-
-        var itemSnapshots = items.ToList();
-
-        if (itemSnapshots.Count == 0)
-        {
-            return Result.Failure(OrderErrors.EmptyOrder);
-        }
-
-        _items.Clear();
-        _sellerOrders.Clear();
-
-        foreach (var item in itemSnapshots)
-        {
-            var result = AddItem(item.SellerId, item.ProductId, item.ProductName, item.UnitPrice, item.Quantity);
-
-            if (result.IsFailure)
-            {
-                return result;
-            }
-        }
 
         return Result.Success();
     }
@@ -405,7 +348,7 @@ public class Order : Entity
     public bool IsEligibleForPayment(DateTime utcNow) =>
         Status == OrderStatus.Confirmed &&
         GrandTotalMinor > 0 &&
-        (!PaymentExpiresOnUtc.HasValue || PaymentExpiresOnUtc > utcNow);
+        PaymentExpiresOnUtc > utcNow;
 
     /// <summary>
     /// Marks a paid order as shipped.

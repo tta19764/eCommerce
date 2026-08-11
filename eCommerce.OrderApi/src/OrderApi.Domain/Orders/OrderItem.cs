@@ -84,28 +84,6 @@ public class OrderItem : Entity
         Quantity = Quantity.Increase(quantity);
     }
 
-    /// <summary>
-    /// Creates a same-currency legacy/product snapshot with an identity exchange rate.
-    /// </summary>
-    /// <param name="orderId">The orderId value.</param>
-    /// <param name="sellerOrderId">The sellerOrderId value.</param>
-    /// <param name="sellerId">The sellerId value.</param>
-    /// <param name="productId">The productId value.</param>
-    /// <param name="productName">The productName value.</param>
-    /// <param name="unitPrice">The unitPrice value.</param>
-    /// <param name="quantity">The quantity value.</param>
-    public static OrderItem Create(
-        Guid orderId,
-        Guid sellerOrderId,
-        Guid sellerId,
-        Guid productId,
-        ProductName productName,
-        Money unitPrice,
-        OrderItemQuantity quantity)
-    {
-        return new OrderItem(Guid.NewGuid(), orderId, sellerOrderId, sellerId, productId, productName, unitPrice, unitPrice, 1m, quantity);
-    }
-
     internal static OrderItem CreateConverted(
         Guid orderId,
         Guid sellerOrderId,

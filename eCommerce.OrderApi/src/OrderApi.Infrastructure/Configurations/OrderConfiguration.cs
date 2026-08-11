@@ -45,12 +45,12 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
             .IsRequired();
 
         builder.Property(order => order.GrandTotalMinor).IsRequired();
-        builder.Property(order => order.FxQuoteId);
-        builder.Property(order => order.FxRateProvider).HasMaxLength(100);
-        builder.Property(order => order.FxQuotedOnUtc);
-        builder.Property(order => order.FxRateEffectiveOnUtc);
-        builder.Property(order => order.FxQuoteExpiresOnUtc);
-        builder.Property(order => order.PaymentExpiresOnUtc);
+        builder.Property(order => order.FxQuoteId).IsRequired();
+        builder.Property(order => order.FxRateProvider).HasMaxLength(100).IsRequired();
+        builder.Property(order => order.FxQuotedOnUtc).IsRequired();
+        builder.Property(order => order.FxRateEffectiveOnUtc).IsRequired();
+        builder.Property(order => order.FxQuoteExpiresOnUtc).IsRequired();
+        builder.Property(order => order.PaymentExpiresOnUtc).IsRequired();
 
         builder.Property(order => order.ConfirmedOnUtc);
 

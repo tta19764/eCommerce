@@ -6,12 +6,13 @@ OrderApi owns checkout records, immutable item snapshots, multi-seller grouping,
 
 ## Entities and relationships
 
-`Order` is the aggregate root with client User ID, date, status, total, `SellerOrder` groups, and `OrderItem`s. Each seller group belongs to one seller and contains related items. Items snapshot product ID, seller ID, name, unit `Money`, and quantity. These IDs cross service boundaries without database foreign keys.
+`Order` is the aggregate root with client User ID, date, status, total, `SellerOrder` groups, and `OrderItem`s. Each seller group belongs to one seller and contains related items. Items snapshot product ID, seller ID, name, original unit `Money`, converted checkout unit `Money`, exchange rate, and quantity. These IDs cross service boundaries without database foreign keys.
 
 ## Business rules
 
 - Creation requires at least one valid item; handlers fetch current product details and use server-side price, seller, currency, and availability rather than cart values.
 - `IOrderPricingService` is shared by cart previews and order creation so product validation, duplicate merging, FX conversion, rounding, stock checks, and minor-unit totals cannot drift.
+- Every persisted order requires `FxQuoteId`, `FxRateProvider`, `FxQuotedOnUtc`, `FxRateEffectiveOnUtc`, `FxQuoteExpiresOnUtc`, and the independent `PaymentExpiresOnUtc`. The aggregate exposes only priced creation and repricing methods, so new code cannot persist a compatibility/unpriced order.
 - Items for the same seller are grouped into a seller order. Duplicate product additions are rejected/combined according to aggregate rules.
 - Main and seller-group states follow Pending -> Confirmed -> Paid -> Shipped -> Completed; cancellation is allowed before shipment. Invalid transitions return domain errors.
 - Confirming decrements ProductApi stock. Cancelling a Confirmed/Paid order restores stock. Failure prevents the order transition from being committed.
@@ -19,7 +20,7 @@ OrderApi owns checkout records, immutable item snapshots, multi-seller grouping,
 - Status domain events publish notification/integration events and invalidate relevant caches. Seller-order status events add system messages to existing customer-seller conversations in MessagingApi.
 - `Paid` is a compatibility lifecycle projection applied only by `PaymentSucceededIntegrationEventConsumer`; admin and seller commands cannot apply it.
 
-[[Stripe Payment Model Decision]] gives an order one immutable checkout currency and preserves original/converted item prices with Frankfurter quote provenance. PaymentApi owns provider state while OrderApi retains the temporary `Paid` fulfillment projection.
+[[Stripe Payment Model Decision]] gives an order one immutable checkout currency and preserves original/converted item prices with Frankfurter quote provenance. FX expiry limits creation of the snapshot; payment eligibility is determined only by the required payment deadline. PaymentApi owns provider state while OrderApi retains the temporary `Paid` fulfillment projection.
 
 ## Application services and repositories
 

@@ -17,7 +17,7 @@ public class OrderTests
         var createdAtUtc = new DateTime(2026, 7, 28, 12, 0, 0, DateTimeKind.Utc);
 
         // Act
-        var order = Order.Create(clientId, new OrderDate(createdAtUtc));
+        var order = CreateTestOrder(clientId, createdAtUtc);
 
         // Assert
         order.Id.Should().NotBeEmpty();
@@ -31,11 +31,12 @@ public class OrderTests
     public void AddItem_Should_AddNewItem_WhenProductIsNotInOrder()
     {
         // Arrange
-        var order = Order.Create(Guid.NewGuid(), new OrderDate(DateTime.UtcNow));
+        var order = CreateTestOrder();
         var productId = Guid.NewGuid();
 
         // Act
-        var result = order.AddItem(
+        var result = AddTestItem(
+            order,
             SellerId,
             productId,
             new ProductName("Keyboard"),
@@ -54,10 +55,11 @@ public class OrderTests
     public void AddItem_Should_IncreaseQuantity_WhenProductAlreadyExists()
     {
         // Arrange
-        var order = Order.Create(Guid.NewGuid(), new OrderDate(DateTime.UtcNow));
+        var order = CreateTestOrder();
         var productId = Guid.NewGuid();
 
-        order.AddItem(
+        AddTestItem(
+            order,
             SellerId,
             productId,
             new ProductName("Keyboard"),
@@ -65,7 +67,8 @@ public class OrderTests
             new OrderItemQuantity(2));
 
         // Act
-        var result = order.AddItem(
+        var result = AddTestItem(
+            order,
             SellerId,
             productId,
             new ProductName("Keyboard"),
@@ -83,10 +86,11 @@ public class OrderTests
     public void AddItem_Should_ReturnFailure_WhenQuantityIsNotPositive()
     {
         // Arrange
-        var order = Order.Create(Guid.NewGuid(), new OrderDate(DateTime.UtcNow));
+        var order = CreateTestOrder();
 
         // Act
-        var result = order.AddItem(
+        var result = AddTestItem(
+            order,
             SellerId,
             Guid.NewGuid(),
             new ProductName("Keyboard"),
@@ -103,9 +107,10 @@ public class OrderTests
     public void Confirm_Should_MovePendingOrderToConfirmed()
     {
         // Arrange
-        var order = Order.Create(Guid.NewGuid(), new OrderDate(DateTime.UtcNow));
+        var order = CreateTestOrder();
         var confirmedAtUtc = new DateTime(2026, 7, 28, 13, 0, 0, DateTimeKind.Utc);
-        order.AddItem(
+        AddTestItem(
+            order,
             SellerId,
             Guid.NewGuid(),
             new ProductName("Keyboard"),
@@ -147,7 +152,41 @@ public class OrderTests
 
         order.IsEligibleForPayment(quotedOnUtc.AddHours(1)).Should().BeTrue(
             "the frozen order remains payable after its short FX quote has expired");
+        order.IsEligibleForPayment(quotedOnUtc.AddHours(24).AddTicks(-1)).Should().BeTrue(
+            "payment remains eligible until the deadline");
         order.IsEligibleForPayment(quotedOnUtc.AddHours(24)).Should().BeFalse(
             "the independent payment deadline has elapsed");
+        order.IsEligibleForPayment(quotedOnUtc.AddHours(25)).Should().BeFalse();
     }
+
+    private static Order CreateTestOrder(Guid? clientId = null, DateTime? createdOnUtc = null)
+    {
+        var quotedOnUtc = createdOnUtc ?? DateTime.UtcNow;
+        return Order.CreatePriced(
+            clientId ?? Guid.NewGuid(),
+            new OrderDate(quotedOnUtc),
+            Currency.Usd,
+            Guid.NewGuid(),
+            "Tests",
+            quotedOnUtc,
+            quotedOnUtc,
+            quotedOnUtc.AddMinutes(15),
+            quotedOnUtc.AddHours(24));
+    }
+
+    private static SharedLibrary.Domain.Abstractions.Result AddTestItem(
+        Order order,
+        Guid sellerId,
+        Guid productId,
+        ProductName productName,
+        Money unitPrice,
+        OrderItemQuantity quantity) =>
+        order.AddPricedItem(
+            sellerId,
+            productId,
+            productName,
+            unitPrice,
+            unitPrice,
+            1m,
+            quantity);
 }
