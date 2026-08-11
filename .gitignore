@@ -22,4 +22,5 @@ out-tsc/
 
 # Local coding-agent instructions and workflows
 **/AGENTS.md
+**/GEMINI.md
 **/.agents/
