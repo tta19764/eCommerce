@@ -8,6 +8,7 @@
 | UserApi | User profile names, email, and profile image reference |
 | ProductApi | [[Products]], [[Categories]], inventory, seller ownership, images, [[Reviews]] |
 | OrderApi | [[Orders]], seller-order groups, line snapshots, status transitions |
+| PaymentApi | [[Payments]], Stripe PaymentIntents, signed webhook inbox, and payment outcome events |
 | ImageApi | Image metadata in PostgreSQL and content in MinIO; temporary-image cleanup |
 | MessagingApi | Authenticated product/order conversations, SignalR events, message history |
 | NotificationApi | Durable email jobs, SMTP delivery, Quartz retries; no public business endpoints |
@@ -37,7 +38,7 @@ Domain interfaces (`IProductRepository`, `IOrderRepository`, and peers) are impl
 
 ## Tests
 
-The strongest coverage is in ProductApi, OrderApi, UserApi, AuthenticationApi, ImageApi, MessagingApi, and NotificationApi:
+The strongest coverage is in ProductApi, OrderApi, PaymentApi, UserApi, AuthenticationApi, ImageApi, MessagingApi, and NotificationApi:
 
 - domain unit tests exercise aggregate rules, including product, order, user, account, conversation, and notification-job behavior;
 - application unit tests mock repositories/message clients and test handlers and consumers;

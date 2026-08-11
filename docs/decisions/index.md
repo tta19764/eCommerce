@@ -13,6 +13,10 @@ The repository contains no formal ADR files. The following decisions are neverth
 | Inventory changes on confirmation, not cart or pending order creation | Pending orders do not reserve stock |
 | Cart is browser-local | No server-side cart recovery or cross-device synchronization |
 | Images are uploaded before attachment | Temporary metadata/content can be cleaned by Quartz if never attached |
-| Payment is represented only as order status | There is no provider-backed payment verification |
+| Stripe webhooks authorize payment success | Manual `Paid` mutations are rejected; PaymentApi verifies and projects success through an outboxed event |
 
 Related pages: [[Architecture]], [[Database Architecture]], [[Authentication Flow]], [[Checkout Flow]], and [[Order Lifecycle]].
+
+## Payment decisions
+
+- [[Stripe Payment Model Decision]] — one checkout currency per order and webhook-authoritative PaymentIntents are implemented. Stripe Connect separate charges/transfers remain gated by business/legal and regional validation.

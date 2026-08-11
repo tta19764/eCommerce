@@ -8,6 +8,7 @@ Each stateful service owns a logical PostgreSQL database and EF Core migrations.
 | `user_db` | UserApi | Users |
 | `product_db` | ProductApi | Products, ProductCategories, ProductReviews and product-owned value data |
 | `order_db` | OrderApi | Orders, SellerOrders, OrderItems |
+| `payment_db` | PaymentApi | Payments, StripeWebhookReceipts, payment outbox messages |
 | `image_db` | ImageApi | Image metadata/status; bytes are in MinIO |
 | `messaging_db` | MessagingApi | Conversations, ConversationMessages |
 | `notification_db` | NotificationApi | Durable NotificationJobs |

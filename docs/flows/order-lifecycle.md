@@ -24,6 +24,6 @@ Authenticated sellers list `/orders/seller`; caller identity resolves to User ID
 
 `OrdersPage` calls `POST /orders/{id}/cancel`. The endpoint resolves the current user, `CancelOwnOrderCommandHandler` verifies `Order.ClientId`, then uses the same transition/inventory rules. Unauthorized ownership returns forbidden/not-found according to endpoint mapping.
 
-## Important limitation
+## Payment authority
 
-`Paid` is set by an authorized status command. There is no Payments service, payment intent, webhook, or provider reconciliation.
+Admin and seller status handlers reject `Paid`. PaymentApi verifies `payment_intent.succeeded`, stores the webhook receipt and payment mutation, and emits an outboxed `PaymentSucceededIntegrationEvent`. OrderApi verifies payment/order/customer/amount/currency before applying the existing `Paid` compatibility projection. Connect transfers, refunds, and scheduled reconciliation remain follow-up slices in [[Stripe Integration Plan]].

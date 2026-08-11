@@ -13,12 +13,20 @@ This knowledge base maps the implemented eCommerce microservices system for deve
 - [[Flows]] — end-to-end workflows across boundaries
 - [[API]] — gateway conventions and endpoint catalog
 - [[Architectural Decisions]] — decisions visible in the implementation
+- [[Implementation Plans]] — staged delivery plans and implementation progress
+- [[Payment Architecture]] — implemented Stripe payment boundary and planned marketplace extensions
+- [[Payment API Contracts]] — implemented customer/webhook contracts and planned settlement contracts
+- [[Stripe Integration Plan]] — staged implementation and rollout plan
+- [[Sales, Discounts, and Seller Stores Plan]] — planned promotion pricing, storefronts, and seller payment onboarding
+- [[Legacy Data Reset and Admin Bootstrap Plan]] — development data reset, idempotent admin bootstrap, and removal of compatibility nullability
 
 ## System at a glance
 
 The Angular SPA calls a YARP gateway. The gateway routes versioned HTTP requests to independently deployed ASP.NET Core services. Services own PostgreSQL databases and coordinate through MassTransit/RabbitMQ request-response and integration events. Keycloak issues tokens; shared middleware translates roles into permission policies. Redis caches selected queries, MinIO stores image binaries, Quartz runs cleanup/notification jobs, and Aspire AppHost orchestrates the local system.
 
-Core commerce concepts are [[Users]], [[Products]], [[Categories]], [[Cart]], [[Orders]], and [[Reviews]]. There is no implemented payment domain; `Paid` is an order status applied by authorized workflows rather than the result of a payment-provider integration.
+Core commerce concepts are [[Users]], [[Products]], [[Categories]], [[Cart]], [[Orders]], [[Reviews]], and [[Payments]]. PaymentApi creates Stripe PaymentIntents from immutable OrderApi snapshots, verifies signed Stripe webhooks through a durable inbox, and projects successful payments to OrderApi through an outboxed integration event. Manual admin/seller `Paid` transitions are rejected.
+
+The implemented MVP and remaining Connect/refund/reconciliation work are documented in [[Payment Architecture]], [[Payment Checkout Flow]], and [[Stripe Integration Plan]].
 
 ## Source map
 

@@ -8,5 +8,6 @@
 - [[Cart]]
 - [[Orders]]
 - [[Reviews]]
+- [[Payments]]
 
-Supporting implemented capabilities—authentication/accounts, images, messaging, and notifications—are described in [[Backend Architecture]] and the relevant [[Flows]]. No Payments document exists because the repository has no payment aggregate, endpoint, provider client, or payment-processing flow.
+Supporting capabilities—authentication/accounts, images, messaging, and notifications—are described in [[Backend Architecture]] and the relevant [[Flows]]. [[Payments]] documents the implemented Stripe MVP and clearly identifies settlement/refund capabilities that remain planned.

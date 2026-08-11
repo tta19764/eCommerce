@@ -39,6 +39,7 @@ This catalog reflects minimal endpoint mappings. Paths include gateway service p
 | --- | --- |
 | `POST /order-api/v1/orders` | `orders:create`; explicit client workflow |
 | `POST /order-api/v1/orders/own` | `orders:create`; claim-resolved client |
+| `POST /order-api/v1/orders/quote` | Public, rate-limited non-binding basket pricing preview |
 | `GET /order-api/v1/orders` | `orders:read` |
 | `GET /order-api/v1/orders/{orderId}` | Authenticated; admin/owner logic |
 | `GET /order-api/v1/orders/clients/{clientId}` | `orders:read` |
@@ -50,6 +51,15 @@ This catalog reflects minimal endpoint mappings. Paths include gateway service p
 | `PATCH /order-api/v1/orders/{orderId}/status` | `orders:update-status` |
 | `POST /order-api/v1/orders/{orderId}/cancel` | Authenticated owner |
 | `DELETE /order-api/v1/orders/{orderId}` | `orders:update-status` |
+
+## PaymentApi
+
+| Method/path | Access |
+| --- | --- |
+| `POST /payment-api/v1/payments` | Authenticated order owner; body contains only `orderId` |
+| `GET /payment-api/v1/payments/{paymentId}` | Authenticated payment owner |
+| `GET /payment-api/v1/payments/config` | Authenticated; returns Stripe publishable key only |
+| `POST /payment-api/v1/webhooks/stripe` | Anonymous HTTP route; requires valid Stripe signature and gateway path |
 
 ## UserApi
 

@@ -36,10 +36,11 @@ The app uses Angular signals rather than NgRx:
 - `AuthStore` keeps tokens in `sessionStorage`, decodes roles for UI state, and exposes login/register/refresh/logout.
 - `UserStore` reacts to authenticated state and loads `/users/own` into a profile signal.
 - `CartStore` stores product snapshots and quantities in `localStorage`; totals are display estimates and backend product data remains authoritative.
+- `CartPage` owns checkout currency and requests debounced, cancellable pricing previews from OrderApi. Converted line/subtotal amounts are rendered from server minor units and original currencies remain informational.
 - page components own loading, errors, filters, pagination, and edit state locally.
 
 ## Important integration constraints
 
-Only the gateway should be called from browser code. Client-side guards and decoded JWT roles do not authorize operations. Cart price/stock snapshots can be stale and are revalidated at checkout. Messaging conversation creation uses backend route identifiers and sends any initial chat text through the separate message endpoint; see [[API Endpoints]].
+Only the gateway should be called from browser code. Client-side guards and decoded JWT roles do not authorize operations. Cart pricing previews are non-binding and final price/stock is revalidated at checkout. Messaging conversation creation uses backend route identifiers and sends any initial chat text through the separate message endpoint; see [[API Endpoints]].
 
 Related documentation: [[Frontend Theme System]], [[Authentication Flow]], [[Cart]], and [[API Endpoints]].
