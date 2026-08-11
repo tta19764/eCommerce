@@ -1,4 +1,5 @@
-import { CurrencyPipe, DatePipe } from '@angular/common';
+import { AppCurrencyPipe } from '../../../../shared/pipes/app-currency.pipe';
+import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { OrdersApiClient } from '../../../../core/api/orders-api';
@@ -8,7 +9,7 @@ import { Order, OrderStatus } from '../../../../core/models/order-model';
 @Component({
   selector: 'app-admin-orders-page',
   standalone: true,
-  imports: [CurrencyPipe, DatePipe, FormsModule],
+  imports: [AppCurrencyPipe, DatePipe, FormsModule],
   templateUrl: './admin-orders-page.html',
   styleUrl: './admin-orders-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

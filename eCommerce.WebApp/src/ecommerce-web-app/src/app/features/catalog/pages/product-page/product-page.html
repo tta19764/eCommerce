@@ -60,7 +60,7 @@
           <div>
             <h1 class="text-2xl font-bold text-slate-900 dark:text-white sm:text-3xl leading-snug">{{ currentProduct.name }}</h1>
             <p class="mt-2 text-2xl font-extrabold text-indigo-600 dark:text-indigo-400">
-              {{ currentProduct.price | currency: currentProduct.currency }}
+              {{ currentProduct.price | appCurrency: currentProduct.currency }}
             </p>
           </div>
 

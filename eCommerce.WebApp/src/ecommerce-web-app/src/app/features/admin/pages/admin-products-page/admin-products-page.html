@@ -48,31 +48,50 @@
 
       <div class="grid gap-4 md:grid-cols-2">
         <div>
-          <label class="block text-xs font-bold text-slate-900 dark:text-slate-300 mb-1">Product Title</label>
+          <label class="block text-xs font-bold text-slate-900 dark:text-slate-300 mb-1">Product Title <span class="required-star">*</span></label>
           <input formControlName="name" class="w-full app-input rounded-md px-3.5 py-2.5 text-xs" placeholder="e.g. Mechanical Gaming Keyboard" />
+          @if (form.controls.name.touched && form.controls.name.invalid) {
+            <p class="field-error-msg">Product title is required.</p>
+          }
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-900 dark:text-slate-300 mb-1">Currency Code (3 Chars)</label>
-          <input formControlName="currencyCode" class="w-full app-input rounded-md px-3.5 py-2.5 text-xs uppercase" placeholder="USD" />
+          <label class="block text-xs font-bold text-slate-900 dark:text-slate-300 mb-1">Currency <span class="required-star">*</span></label>
+          <select
+            formControlName="currencyCode"
+            class="w-full app-input rounded-md px-3.5 py-2.5 text-xs bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700"
+          >
+            <option value="USD">USD ($)</option>
+            <option value="EUR">EUR (€)</option>
+            <option value="UAH">UAH (₴)</option>
+          </select>
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-900 dark:text-slate-300 mb-1">Price ($)</label>
+          <label class="block text-xs font-bold text-slate-900 dark:text-slate-300 mb-1">Price <span class="required-star">*</span></label>
           <input type="number" min="0.01" step="0.01" formControlName="price" class="w-full app-input rounded-md px-3.5 py-2.5 text-xs" />
+          @if (form.controls.price.touched && form.controls.price.invalid) {
+            <p class="field-error-msg">Price must be greater than 0.</p>
+          }
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-900 dark:text-slate-300 mb-1">Stock Quantity</label>
+          <label class="block text-xs font-bold text-slate-900 dark:text-slate-300 mb-1">Stock Quantity <span class="required-star">*</span></label>
           <input type="number" min="0" formControlName="quantity" class="w-full app-input rounded-md px-3.5 py-2.5 text-xs" />
+          @if (form.controls.quantity.touched && form.controls.quantity.invalid) {
+            <p class="field-error-msg">Stock quantity cannot be negative.</p>
+          }
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-900 dark:text-slate-300 mb-1">Seller Account ID</label>
+          <label class="block text-xs font-bold text-slate-900 dark:text-slate-300 mb-1">Seller Account ID <span class="required-star">*</span></label>
           <input
             formControlName="sellerId"
             class="w-full app-input rounded-md px-3.5 py-2.5 text-xs font-mono disabled:opacity-60 disabled:cursor-not-allowed"
           />
+          @if (form.controls.sellerId.touched && form.controls.sellerId.invalid) {
+            <p class="field-error-msg">Seller Account ID is required.</p>
+          }
           @if (editingProduct()) {
             <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium mt-1 block">
               Seller Account ID cannot be changed after creation.
@@ -81,7 +100,7 @@
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-900 dark:text-slate-300 mb-1">Category</label>
+          <label class="block text-xs font-bold text-slate-900 dark:text-slate-300 mb-1">Category <span class="required-star">*</span></label>
           <select formControlName="categoryId" class="w-full app-input rounded-md px-3.5 py-2.5 text-xs bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
             @for (cat of flatCategories(); track cat.id) {
               <option [value]="cat.id" class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">{{ cat.fullPath }}</option>
@@ -90,7 +109,7 @@
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-900 dark:text-slate-300 mb-1">Product Type</label>
+          <label class="block text-xs font-bold text-slate-900 dark:text-slate-300 mb-1">Product Type <span class="required-star">*</span></label>
           <select formControlName="productType" class="w-full app-input rounded-md px-3.5 py-2.5 text-xs bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
             @for (type of productTypes(); track type.value) {
               <option [value]="type.value" class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">{{ type.label }}</option>
@@ -100,8 +119,11 @@
       </div>
 
       <div>
-        <label class="block text-xs font-bold text-slate-900 dark:text-slate-300 mb-1">Description</label>
+        <label class="block text-xs font-bold text-slate-900 dark:text-slate-300 mb-1">Description <span class="required-star">*</span></label>
         <textarea formControlName="description" class="w-full app-input rounded-md px-3.5 py-2.5 text-xs min-h-24" placeholder="Product details..."></textarea>
+        @if (form.controls.description.touched && form.controls.description.invalid) {
+          <p class="field-error-msg">Description is required.</p>
+        }
       </div>
 
       <!-- Image Drag & Drop Uploader -->
@@ -215,7 +237,7 @@
             <div class="flex items-start justify-between gap-2">
               <h3 class="font-bold text-slate-900 dark:text-slate-100 text-sm truncate">{{ product.name }}</h3>
               <strong class="text-indigo-600 dark:text-indigo-400 font-extrabold text-sm whitespace-nowrap">
-                {{ product.price | currency: product.currency }}
+                {{ product.price | appCurrency: product.currency }}
               </strong>
             </div>
 

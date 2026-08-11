@@ -1,4 +1,4 @@
-import { CurrencyPipe } from '@angular/common';
+import { AppCurrencyPipe } from '../../pipes/app-currency.pipe';
 import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ImagesApiClient } from '../../../core/api/images-api';
@@ -7,11 +7,12 @@ import { CartStore } from '../../../features/cart/data-access/cart-store';
 
 @Component({
   selector: 'app-product-card',
-  imports: [CurrencyPipe, RouterLink],
+  imports: [AppCurrencyPipe, RouterLink],
   templateUrl: './product-card.html',
   styleUrl: './product-card.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
+/** Reusable catalog summary that emits cart intent without treating its product snapshot as checkout authority. */
 export class ProductCard {
   readonly product = input.required<Product>();
   private readonly images = inject(ImagesApiClient);

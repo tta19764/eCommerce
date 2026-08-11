@@ -1,0 +1,37 @@
+<section class="mx-auto max-w-2xl px-4 py-10 sm:px-6">
+  <div class="app-card space-y-6 rounded-xl border border-slate-300 p-6 shadow-sm dark:border-slate-800">
+    <div>
+      <p class="text-xs font-bold uppercase tracking-wider text-indigo-600">Secure checkout</p>
+      <h1 class="mt-1 text-2xl font-bold text-slate-950 dark:text-white">Complete payment</h1>
+      @if (amountMinor()) {
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">
+          Total: <strong>{{ amountMinor() / 100 | appCurrency: currency() }}</strong>
+        </p>
+      }
+    </div>
+
+    @if (loading()) {
+      <div class="h-32 animate-pulse rounded-lg bg-slate-200 dark:bg-slate-800"></div>
+    }
+
+    <div #paymentElement [class.hidden]="loading()"></div>
+
+    @if (error()) {
+      <div class="rounded-md border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-700 dark:text-rose-300">
+        {{ error() }}
+      </div>
+    }
+
+    <div class="flex items-center justify-between gap-3">
+      <a routerLink="/orders" class="text-sm font-semibold text-slate-600 hover:text-indigo-600">Back to orders</a>
+      <button
+        type="button"
+        [disabled]="loading() || submitting() || !!error()"
+        (click)="submit()"
+        class="rounded-md bg-indigo-600 px-5 py-3 text-sm font-bold text-white disabled:opacity-40"
+      >
+        {{ submitting() ? 'Confirming…' : 'Pay securely' }}
+      </button>
+    </div>
+  </div>
+</section>

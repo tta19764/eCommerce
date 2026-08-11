@@ -6,6 +6,33 @@ export interface OrderItemRequest {
   quantity: number;
 }
 
+/** One server-priced cart line with original money retained only as display provenance. */
+export interface OrderPricingQuoteItem {
+  productId: string;
+  sellerId: string;
+  name: string;
+  quantity: number;
+  originalUnitPrice: number;
+  originalCurrency: string;
+  checkoutUnitAmountMinor: number;
+  checkoutLineTotalMinor: number;
+  exchangeRate: number;
+}
+
+/** Non-binding cart estimate; checkout amounts are authoritative integer minor units for this quote. */
+export interface OrderPricingQuote {
+  quoteId: string;
+  isEstimate: boolean;
+  provider: string;
+  checkoutCurrency: string;
+  minorUnitDigits: number;
+  items: OrderPricingQuoteItem[];
+  subtotalMinor: number;
+  quotedOnUtc: string;
+  rateEffectiveOnUtc: string;
+  quoteExpiresOnUtc: string;
+}
+
 export interface UpdateOrderStatusRequest {
   status: OrderStatus;
 }

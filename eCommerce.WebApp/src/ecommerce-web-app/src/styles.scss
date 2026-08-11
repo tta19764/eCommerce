@@ -196,3 +196,70 @@ html.light select option {
   background-color: #ffffff;
   color: #0f172a;
 }
+
+/* Dynamic Form Validation Styling */
+.required-star,
+label.required::after {
+  content: ' *';
+  color: #ef4444;
+  font-weight: bold;
+}
+
+/* Base input transition */
+.app-input,
+.glass-input,
+input:not([type='checkbox']):not([type='radio']),
+select,
+textarea {
+  transition: border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s ease;
+}
+
+/* Invalid State (when touched, dirty, or form submitted) */
+input.ng-invalid.ng-touched,
+select.ng-invalid.ng-touched,
+textarea.ng-invalid.ng-touched,
+input.ng-invalid.ng-dirty,
+select.ng-invalid.ng-dirty,
+textarea.ng-invalid.ng-dirty,
+form.ng-submitted input.ng-invalid,
+form.ng-submitted select.ng-invalid,
+form.ng-submitted textarea.ng-invalid {
+  border-color: #ef4444 !important;
+  background-color: rgba(239, 68, 68, 0.04) !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2) !important;
+}
+
+/* Valid State (when touched or dirty and valid) */
+input.ng-valid.ng-touched:not([type='checkbox']):not([type='radio']),
+select.ng-valid.ng-touched,
+textarea.ng-valid.ng-touched,
+input.ng-valid.ng-dirty:not([type='checkbox']):not([type='radio']),
+select.ng-valid.ng-dirty,
+textarea.ng-valid.ng-dirty {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15) !important;
+}
+
+/* Field error message styling */
+.field-error-msg,
+.form-error-msg {
+  color: #f43f5e;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-top: 0.35rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  animation: fieldErrorFade 0.2s ease-in-out;
+}
+
+@keyframes fieldErrorFade {
+  from {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

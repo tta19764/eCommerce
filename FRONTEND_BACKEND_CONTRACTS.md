@@ -31,6 +31,14 @@ POST https://localhost:7059/auth-api/v1/auth/login
 
 Swagger is available through the gateway and supports Bearer token input for protected endpoints.
 
+Order cart pricing preview:
+
+```text
+POST /order-api/v1/orders/quote
+```
+
+This public rate-limited endpoint accepts `{ items: [{ productId, quantity }], checkoutCurrency }` and returns an `ApiResponse<OrderPricingQuoteResponse>`. Converted unit, line, and subtotal values use integer minor units plus `checkoutCurrency` and `minorUnitDigits`. The response is a non-binding estimate; `POST /order-api/v1/orders/own` always reprices the basket and remains authoritative.
+
 ## Standard Response Shapes
 
 Most JSON endpoints return the standard envelope:

@@ -1,4 +1,5 @@
-import { CurrencyPipe, DatePipe } from '@angular/common';
+import { AppCurrencyPipe } from '../../../../shared/pipes/app-currency.pipe';
+import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -18,7 +19,7 @@ export interface RatingDistributionRow {
 
 @Component({
   selector: 'app-product-page',
-  imports: [CurrencyPipe, DatePipe, RouterLink, FormsModule],
+  imports: [AppCurrencyPipe, DatePipe, RouterLink, FormsModule],
   templateUrl: './product-page.html',
   styleUrl: './product-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

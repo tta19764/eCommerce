@@ -3,6 +3,7 @@ import { adminGuard } from './core/auth/admin-guard';
 import { authGuard } from './core/auth/auth-guard';
 import { sellerGuard } from './core/auth/seller-guard';
 
+/** Lazy route table; guards improve navigation UX while backend policies remain authoritative. */
 export const routes: Routes = [
   {
     path: '',
@@ -46,6 +47,13 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/orders/pages/orders-page/orders-page').then((m) => m.OrdersPage),
     title: 'Orders · eCommerce',
+  },
+  {
+    path: 'payments/:orderId',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/payments/pages/payment-page/payment-page').then((m) => m.PaymentPage),
+    title: 'Payment · eCommerce',
   },
   {
     path: 'messages',

@@ -204,32 +204,47 @@
 
       <div class="grid gap-4 md:grid-cols-2">
         <div>
-          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Product Title *</label>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Product Title <span class="required-star">*</span></label>
           <input formControlName="name" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs"
             placeholder="e.g. Wireless Noise-Canceling Headphones" />
+          @if (form.controls.name.touched && form.controls.name.invalid) {
+            <p class="field-error-msg">Product title is required.</p>
+          }
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Currency Code (3 Chars)</label>
-          <input formControlName="currencyCode" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs uppercase"
-            placeholder="USD" />
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Currency <span class="required-star">*</span></label>
+          <select
+            formControlName="currencyCode"
+            class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700"
+          >
+            <option value="USD">USD ($)</option>
+            <option value="EUR">EUR (€)</option>
+            <option value="UAH">UAH (₴)</option>
+          </select>
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Price ($) *</label>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Price <span class="required-star">*</span></label>
           <input type="number" min="0.01" step="0.01" formControlName="price"
             class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs" />
+          @if (form.controls.price.touched && form.controls.price.invalid) {
+            <p class="field-error-msg">Price must be greater than 0.</p>
+          }
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Inventory Stock Quantity *</label>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Inventory Stock Quantity <span class="required-star">*</span></label>
           <input type="number" min="0" formControlName="quantity"
             class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs" />
+          @if (form.controls.quantity.touched && form.controls.quantity.invalid) {
+            <p class="field-error-msg">Stock quantity cannot be negative.</p>
+          }
         </div>
 
         <div>
           <div class="flex items-center justify-between mb-1">
-            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Category (Displays Subcategories) *</label>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Category <span class="required-star">*</span></label>
             <button type="button" (click)="openCategoryModal()" class="text-[10px] text-emerald-600 dark:text-emerald-400 hover:underline font-bold">+
               New Category</button>
           </div>
@@ -241,7 +256,7 @@
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Product Type *</label>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Product Type <span class="required-star">*</span></label>
           <select formControlName="productType" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
             @for (type of productTypes(); track type.value) {
             <option [value]="type.value" class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-200">{{ type.label }}</option>
@@ -251,9 +266,12 @@
       </div>
 
       <div>
-        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Detailed Description *</label>
+        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Detailed Description <span class="required-star">*</span></label>
         <textarea formControlName="description" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs min-h-24"
           placeholder="Describe specifications and features..."></textarea>
+        @if (form.controls.description.touched && form.controls.description.invalid) {
+          <p class="field-error-msg">Description is required.</p>
+        }
       </div>
 
       <!-- Image Uploader -->
@@ -365,7 +383,7 @@
                 {{ product.name }}
               </h3>
               <span class="text-base font-extrabold text-emerald-600 dark:text-emerald-400">
-                {{ product.price | currency: product.currency }}
+                {{ product.price | appCurrency: product.currency }}
               </span>
             </div>
 
@@ -473,7 +491,7 @@
 
           <div class="text-right">
             <span class="text-lg font-extrabold text-emerald-600 dark:text-emerald-400">
-              {{ sOrder.totalPrice | currency: sOrder.currency }}
+              {{ sOrder.totalPrice | appCurrency: sOrder.currency }}
             </span>
             <span class="block text-[10px] text-slate-600 dark:text-slate-400 font-semibold">Seller Group Total</span>
           </div>
@@ -490,8 +508,8 @@
                 <span class="text-[10px] text-slate-600 dark:text-slate-400 font-mono">Product ID: {{ item.productId }}</span>
               </div>
               <div class="text-right space-x-3">
-                <span class="text-slate-700 dark:text-slate-400">{{ item.quantity }} × {{ item.unitPrice | currency: item.currency }}</span>
-                <span class="font-bold text-slate-900 dark:text-white">{{ item.totalPrice | currency: item.currency }}</span>
+                <span class="text-slate-700 dark:text-slate-400">{{ item.quantity }} × {{ item.unitPrice | appCurrency: item.currency }}</span>
+                <span class="font-bold text-slate-900 dark:text-white">{{ item.totalPrice | appCurrency: item.currency }}</span>
               </div>
             </div>
             }
@@ -509,14 +527,6 @@
                   (click)="updateOrderStatus(sOrder.id, 'Confirmed')"
                   class="rounded-xl bg-indigo-500/10 dark:bg-indigo-600/20 hover:bg-indigo-600 text-indigo-700 dark:text-indigo-300 hover:text-white border border-indigo-500/30 px-3 py-1 text-xs font-bold transition-all">
                   Confirm Order
-                </button>
-              }
-
-              @if (sOrder.status === 'Confirmed') {
-                <button type="button"
-                  (click)="updateOrderStatus(sOrder.id, 'Paid')"
-                  class="rounded-xl bg-blue-500/10 dark:bg-blue-600/20 hover:bg-blue-600 text-blue-700 dark:text-blue-300 hover:text-white border border-blue-500/30 px-3 py-1 text-xs font-bold transition-all">
-                  Mark Paid
                 </button>
               }
 

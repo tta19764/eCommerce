@@ -6,6 +6,7 @@ import { ApiResponse, PagedList, PageQuery } from '../models/api-model';
 import {
   Order,
   OrderItemRequest,
+  OrderPricingQuote,
   OrderSearchQuery,
   OrderStatus,
   SellerOrder,
@@ -59,8 +60,20 @@ export class OrdersApiClient {
   }
 
   // Customer checkout must never send a browser-supplied client identifier.
-  createOwn(items: OrderItemRequest[]) {
-    return this.http.post<ApiResponse<string>>(`${this.url}/own`, { items }).pipe(map(apiData));
+  createOwn(items: OrderItemRequest[], checkoutCurrency: string) {
+    return this.http
+      .post<ApiResponse<string>>(`${this.url}/own`, { items, checkoutCurrency })
+      .pipe(map(apiData));
+  }
+
+  /**
+   * Gets a non-binding server pricing preview. Returned minor-unit values are display authority for
+   * this quote only; final order creation repeats the same backend pricing pipeline with fresh data.
+   */
+  getPricingQuote(items: OrderItemRequest[], checkoutCurrency: string) {
+    return this.http
+      .post<ApiResponse<OrderPricingQuote>>(`${this.url}/quote`, { items, checkoutCurrency })
+      .pipe(map(apiData));
   }
 
   // Admin workflow: drives status transitions such as Confirmed, Paid, Shipped, Completed, or Cancelled.

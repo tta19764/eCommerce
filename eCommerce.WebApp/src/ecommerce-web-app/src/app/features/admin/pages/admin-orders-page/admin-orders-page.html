@@ -183,17 +183,6 @@
                   </button>
                 }
 
-                @if (order.status === 'Confirmed') {
-                  <button
-                    type="button"
-                    [disabled]="updatingId() === order.id"
-                    (click)="updateOrderStatus(order.id, 'Paid')"
-                    class="rounded bg-blue-600 hover:bg-blue-700 px-3.5 py-1.5 text-xs font-bold text-white shadow-xs disabled:opacity-30 transition-all flex items-center gap-1.5"
-                  >
-                    <span>Mark Paid</span>
-                  </button>
-                }
-
                 @if (order.status === 'Paid') {
                   <button
                     type="button"
@@ -254,7 +243,7 @@
                   </div>
 
                   <strong class="font-bold text-xs text-indigo-600 dark:text-indigo-300">
-                    {{ sellerOrder.totalPrice | currency: sellerOrder.currency }}
+                    {{ sellerOrder.totalPrice | appCurrency: sellerOrder.currency }}
                   </strong>
                 </div>
 
@@ -264,13 +253,13 @@
                     <div class="flex items-center justify-between px-6 py-3 text-xs">
                       <div>
                         <span class="font-bold text-slate-900 dark:text-slate-200 block">{{ item.productName }}</span>
-                        <span class="text-slate-500 dark:text-slate-400">Qty: {{ item.quantity }} · {{ item.unitPrice | currency: item.currency }} each</span>
+                        <span class="text-slate-500 dark:text-slate-400">Qty: {{ item.quantity }} · {{ item.unitPrice | appCurrency: item.currency }} each</span>
                       </div>
                       <div>
                         @if (sellerOrder.status === 'Cancelled') {
-                          <span class="line-through text-slate-400 font-semibold">{{ item.totalPrice | currency: item.currency }}</span>
+                          <span class="line-through text-slate-400 font-semibold">{{ item.totalPrice | appCurrency: item.currency }}</span>
                         } @else {
-                          <strong class="font-bold text-slate-900 dark:text-white">{{ item.totalPrice | currency: item.currency }}</strong>
+                          <strong class="font-bold text-slate-900 dark:text-white">{{ item.totalPrice | appCurrency: item.currency }}</strong>
                         }
                       </div>
                     </div>
@@ -286,14 +275,14 @@
             <div class="flex items-center gap-3">
               @if (order.originalTotalPrice && order.originalTotalPrice > order.totalPrice) {
                 <span class="text-xs text-slate-400 dark:text-slate-500 line-through font-semibold">
-                  {{ order.originalTotalPrice | currency: order.currency }}
+                  {{ order.originalTotalPrice | appCurrency: order.currency }}
                 </span>
                 <span class="rounded bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-300">
                   Adjusted Net Total
                 </span>
               }
               <strong class="text-lg font-black text-indigo-600 dark:text-indigo-400">
-                {{ order.totalPrice | currency: order.currency }}
+                {{ order.totalPrice | appCurrency: order.currency }}
               </strong>
             </div>
           </footer>

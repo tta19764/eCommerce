@@ -13,7 +13,7 @@
 
     <form class="space-y-4" [formGroup]="form" (ngSubmit)="submit()">
       <div>
-        <label class="block text-xs font-bold text-slate-900 dark:text-slate-300 mb-1" for="login-email">Email Address</label>
+        <label class="block text-xs font-bold text-slate-900 dark:text-slate-300 mb-1" for="login-email">Email Address <span class="required-star">*</span></label>
         <input
           id="login-email"
           type="email"
@@ -23,12 +23,12 @@
           class="w-full app-input rounded-md px-3.5 py-2.5 text-xs"
         />
         @if (form.controls.email.touched && form.controls.email.invalid) {
-          <p class="mt-1 text-[11px] text-rose-600 dark:text-rose-400 font-semibold">Please enter a valid email address.</p>
+          <p class="field-error-msg">Please enter a valid email address.</p>
         }
       </div>
 
       <div>
-        <label class="block text-xs font-bold text-slate-900 dark:text-slate-300 mb-1" for="login-password">Password</label>
+        <label class="block text-xs font-bold text-slate-900 dark:text-slate-300 mb-1" for="login-password">Password <span class="required-star">*</span></label>
         <input
           id="login-password"
           type="password"
@@ -37,6 +37,9 @@
           placeholder="••••••••"
           class="w-full app-input rounded-md px-3.5 py-2.5 text-xs"
         />
+        @if (form.controls.password.touched && form.controls.password.invalid) {
+          <p class="field-error-msg">Password is required.</p>
+        }
       </div>
 
       @if (error()) {

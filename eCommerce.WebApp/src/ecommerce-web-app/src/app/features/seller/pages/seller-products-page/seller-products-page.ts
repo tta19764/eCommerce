@@ -1,4 +1,4 @@
-import { CurrencyPipe } from '@angular/common';
+import { AppCurrencyPipe } from '../../../../shared/pipes/app-currency.pipe';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin, Observable } from 'rxjs';
@@ -22,7 +22,7 @@ import { flattenCategories } from '../../../../shared/utils/category-utils';
 @Component({
   selector: 'app-seller-products-page',
   standalone: true,
-  imports: [CurrencyPipe, FormsModule, ReactiveFormsModule],
+  imports: [AppCurrencyPipe, FormsModule, ReactiveFormsModule],
   templateUrl: './seller-products-page.html',
   styleUrl: './seller-products-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

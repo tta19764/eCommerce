@@ -1,5 +1,4 @@
 import { computed, Injectable, signal } from '@angular/core';
-import { OrdersApiClient } from '../../../core/api/orders-api';
 import { Product } from '../../../core/models/product-model';
 
 export interface CartItem {
@@ -11,16 +10,12 @@ const CART_KEY = 'ecommerce.cart';
 
 @Injectable({ providedIn: 'root' })
 export class CartStore {
-  // Cart state is local browser data and is revalidated by the backend during checkout.
+  // Cart state is a convenience snapshot only. It deliberately contains no exchange-rate quote or
+  // authoritative total; CartPage obtains those from OrderApi whenever this signal changes.
   private readonly state = signal<CartItem[]>(this.restore());
 
   readonly items = this.state.asReadonly();
   readonly count = computed(() => this.state().reduce((sum, item) => sum + item.quantity, 0));
-  readonly total = computed(() =>
-    this.state().reduce((sum, item) => sum + item.product.price * item.quantity, 0),
-  );
-  readonly currency = computed(() => this.state()[0]?.product.currency ?? 'USD');
-
   add(product: Product, quantity = 1): void {
     // Customer-facing controls and the store both reject products known to be unavailable.
     if (product.quantity < 1) {
@@ -63,7 +58,7 @@ export class CartStore {
 
   private save(items: CartItem[]): void {
     this.state.set(items);
-    // Persist only cart contents; pricing and availability remain server-authoritative.
+    // Persist only browsing continuity. ProductApi stock and OrderApi pricing are revalidated remotely.
     localStorage.setItem(CART_KEY, JSON.stringify(items));
   }
 

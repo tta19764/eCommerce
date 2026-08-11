@@ -93,6 +93,20 @@
                 {{ order.status }}
               </span>
             </div>
+            @if (isPayable(order)) {
+              <a
+                [routerLink]="['/payments', order.id]"
+                class="rounded-md bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-700 transition-colors shadow-sm"
+              >Pay now</a>
+            } @else if (isRecentlyPaid(order.id)) {
+              <span class="inline-flex items-center gap-1.5 rounded-md bg-indigo-500/10 border border-indigo-500/30 px-3 py-1.5 text-xs font-bold text-indigo-700 dark:text-indigo-300">
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+                </span>
+                <span>Payment Processing...</span>
+              </span>
+            }
           </header>
 
           <!-- Seller Order Groups -->
@@ -145,17 +159,17 @@
                           </a>
                         </h4>
                         <span class="text-slate-500 dark:text-slate-400">
-                          Qty: <strong class="text-slate-900 dark:text-slate-200 font-bold">{{ item.quantity }}</strong> · {{ item.unitPrice | currency: item.currency }} each
+                          Qty: <strong class="text-slate-900 dark:text-slate-200 font-bold">{{ item.quantity }}</strong> · {{ item.unitPrice | appCurrency: item.currency }} each
                         </span>
                       </div>
                       <div class="flex items-center gap-4">
                         @if (sellerOrder.status === 'Cancelled') {
                           <span class="text-xs line-through text-slate-400 dark:text-slate-500 font-semibold">
-                            {{ item.totalPrice | currency: item.currency }}
+                            {{ item.totalPrice | appCurrency: item.currency }}
                           </span>
                           <span class="text-[10px] font-bold text-rose-500 uppercase">Cancelled</span>
                         } @else {
-                          <strong class="font-bold text-sm text-indigo-600 dark:text-indigo-300">{{ item.totalPrice | currency: item.currency }}</strong>
+                          <strong class="font-bold text-sm text-indigo-600 dark:text-indigo-300">{{ item.totalPrice | appCurrency: item.currency }}</strong>
                         }
 
                         @if (sellerOrder.status === 'Completed') {
@@ -192,14 +206,14 @@
             <div class="flex items-center gap-3">
               @if (order.originalTotalPrice && order.originalTotalPrice > order.totalPrice) {
                 <span class="text-xs text-slate-400 dark:text-slate-500 line-through font-semibold">
-                  {{ order.originalTotalPrice | currency: order.currency }}
+                  {{ order.originalTotalPrice | appCurrency: order.currency }}
                 </span>
                 <span class="rounded bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-300">
                   Adjusted Net Total
                 </span>
               }
               <strong class="text-lg font-black text-indigo-600 dark:text-indigo-400">
-                {{ order.totalPrice | currency: order.currency }}
+                {{ order.totalPrice | appCurrency: order.currency }}
               </strong>
             </div>
           </footer>

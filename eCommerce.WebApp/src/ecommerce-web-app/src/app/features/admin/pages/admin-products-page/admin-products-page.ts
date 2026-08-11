@@ -1,4 +1,4 @@
-import { CurrencyPipe } from '@angular/common';
+import { AppCurrencyPipe } from '../../../../shared/pipes/app-currency.pipe';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
@@ -16,11 +16,12 @@ import { flattenCategories } from '../../../../shared/utils/category-utils';
 
 @Component({
   selector: 'app-admin-products-page',
-  imports: [CurrencyPipe, ReactiveFormsModule],
+  imports: [AppCurrencyPipe, ReactiveFormsModule],
   templateUrl: './admin-products-page.html',
   styleUrl: './admin-products-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
+/** Administrative catalog editor; product money remains validated and persisted by ProductApi. */
 export class AdminProductsPage {
   protected readonly maxProductImages = 8;
 
