@@ -37,7 +37,7 @@ public sealed class AdminBootstrapHostedService(
             return;
         }
 
-        ValidateConfiguration();
+        ValidateEnvironment();
 
         for (var attempt = 1; attempt <= MaximumAttempts; attempt++)
         {
@@ -91,6 +91,7 @@ public sealed class AdminBootstrapHostedService(
                 return;
             }
 
+            ValidateRegistrationConfiguration();
             logger.LogInformation("Bootstrapping the first administrator account");
             var sender = scope.ServiceProvider.GetRequiredService<ISender>();
             var result = await sender.Send(
@@ -147,14 +148,17 @@ public sealed class AdminBootstrapHostedService(
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private void ValidateConfiguration()
+    private void ValidateEnvironment()
     {
         if (!environment.IsDevelopment())
         {
             throw new InvalidOperationException(
                 "Administrator bootstrap is restricted to the Development environment.");
         }
+    }
 
+    private void ValidateRegistrationConfiguration()
+    {
         if (string.IsNullOrWhiteSpace(_options.Email) ||
             string.IsNullOrWhiteSpace(_options.Password) ||
             _options.Password.Length < 8 ||
