@@ -11,6 +11,18 @@
 
 Admin registration follows the same orchestration but `POST /register/admin` requires `accounts:create-admin`.
 
+## Development administrator bootstrap
+
+When `BootstrapAdmin:Enabled` is explicitly true in Development, AuthenticationApi checks whether any local account already has the `Admin` role. A PostgreSQL advisory lock serializes this check across replicas. If none exists, the bootstrap uses the normal administrator registration workflow to create the Keycloak identity, local account/role link, and UserApi profile, then verifies email in both Keycloak and the local account. If the process previously reached account creation but not verification, the next run repairs confirmation for the configured bootstrap account. Any other existing administrator causes a no-op.
+
+The bootstrap password has no source-controlled default. For AppHost development, store it with:
+
+```powershell
+dotnet user-secrets set "Parameters:bootstrap-admin-password" "choose-a-local-password" --project eCommerce.AppHost/src/eCommerce.AppHost
+```
+
+AppHost injects the secret as `BootstrapAdmin__Password`; only non-secret development identity fields are stored in `appsettings.Development.json`. No bootstrap configuration belongs in a non-development `appsettings.json`.
+
 ## Login, session, and refresh
 
 1. `LoginPage` -> `AuthStore.login` -> `POST /auth/login`.

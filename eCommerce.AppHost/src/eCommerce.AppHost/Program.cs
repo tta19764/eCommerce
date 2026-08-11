@@ -21,6 +21,7 @@ var keycloakAdminUser = builder.AddParameter("keycloak-admin-user");
 var keycloakAdminPassword = builder.AddParameter("keycloak-admin-password", secret: true);
 var keycloakAdminClientSecret = builder.AddParameter("keycloak-admin-client-secret", secret: true);
 var keycloakAuthClientSecret = builder.AddParameter("keycloak-auth-client-secret", secret: true);
+var bootstrapAdminPassword = builder.AddParameter("bootstrap-admin-password", secret: true);
 var notificationFromAddress = builder.AddParameter("notification-from-address");
 var notificationSmtpUserName = builder.AddParameter("notification-smtp-user-name");
 var notificationSmtpPassword = builder.AddParameter("notification-smtp-password", secret: true);
@@ -132,6 +133,10 @@ var keycloakAdminUrl = GetRequired("AppHost:Authentication:Keycloak:AdminUrl");
 var keycloakTokenUrl = GetRequired("AppHost:Authentication:Keycloak:TokenUrl");
 var keycloakAdminClientId = GetRequired("AppHost:Authentication:Keycloak:AdminClientId");
 var keycloakAuthClientId = GetRequired("AppHost:Authentication:Keycloak:AuthClientId");
+var bootstrapAdminEnabled = GetRequired("AppHost:Authentication:BootstrapAdmin:Enabled");
+var bootstrapAdminEmail = GetRequired("AppHost:Authentication:BootstrapAdmin:Email");
+var bootstrapAdminFirstName = GetRequired("AppHost:Authentication:BootstrapAdmin:FirstName");
+var bootstrapAdminLastName = GetRequired("AppHost:Authentication:BootstrapAdmin:LastName");
 
 // Notification settings are passed to NotificationApi so background email content and SMTP delivery
 // stay environment-specific. Production should override the same keys with a real SMTP host and
@@ -265,6 +270,11 @@ var authenticationApi = builder.AddProject<Projects.AuthenticationApi_Api>("auth
     .WithEnvironment("Keycloak__AdminClientSecret", keycloakAdminClientSecret)
     .WithEnvironment("Keycloak__AuthClientId", keycloakAuthClientId)
     .WithEnvironment("Keycloak__AuthClientSecret", keycloakAuthClientSecret)
+    .WithEnvironment("BootstrapAdmin__Enabled", bootstrapAdminEnabled)
+    .WithEnvironment("BootstrapAdmin__Email", bootstrapAdminEmail)
+    .WithEnvironment("BootstrapAdmin__Password", bootstrapAdminPassword)
+    .WithEnvironment("BootstrapAdmin__FirstName", bootstrapAdminFirstName)
+    .WithEnvironment("BootstrapAdmin__LastName", bootstrapAdminLastName)
     .WaitFor(postgres)
     .WaitFor(rabbitMq)
     .WaitFor(keycloak)

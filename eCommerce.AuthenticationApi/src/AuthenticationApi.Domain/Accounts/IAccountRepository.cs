@@ -29,6 +29,11 @@ public interface IAccountRepository
 
     Task<int> CountAsync(CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Determines whether any persisted account is assigned the supplied role.
+    /// </summary>
+    Task<bool> AnyWithRoleAsync(string roleName, CancellationToken cancellationToken = default);
+
     void Add(Account account);
 
     void Delete(Account account);

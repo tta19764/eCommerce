@@ -83,5 +83,13 @@ public sealed class AccountRepository(AuthenticationDbContext dbContext)
     {
         return await DbSet.CountAsync(cancellationToken);
     }
+
+    /// <inheritdoc />
+    public Task<bool> AnyWithRoleAsync(string roleName, CancellationToken cancellationToken = default)
+    {
+        return DbSet.AnyAsync(
+            account => account.Roles.Any(accountRole => accountRole.Role.Name == roleName),
+            cancellationToken);
+    }
 }
 

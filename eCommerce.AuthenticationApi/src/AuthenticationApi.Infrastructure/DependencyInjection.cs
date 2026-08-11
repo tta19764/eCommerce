@@ -1,6 +1,7 @@
 using AuthenticationApi.Application.Abstractions;
 using AuthenticationApi.Domain.Accounts;
 using AuthenticationApi.Infrastructure.Authentication;
+using AuthenticationApi.Infrastructure.Bootstrap;
 using AuthenticationApi.Infrastructure.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,6 +30,10 @@ public static class DependencyInjection
         services.AddScoped<IUnitOfWork>(serviceProvider => serviceProvider.GetRequiredService<AuthenticationDbContext>());
 
         AddKeycloakIdentityProvider(services, configuration);
+
+        services.Configure<AdminBootstrapOptions>(
+            configuration.GetSection(AdminBootstrapOptions.SectionName));
+        services.AddHostedService<AdminBootstrapHostedService>();
 
         services.AddSharedMessaging(configuration, typeof(AuthenticationApi.Application.DependencyInjection).Assembly);
 
