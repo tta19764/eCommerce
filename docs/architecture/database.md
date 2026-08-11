@@ -26,9 +26,9 @@ EF configuration classes define mappings and indexes; service DbContexts also pa
 
 ## Development reset
 
-`scripts/reset-development-data.ps1` is the supported destructive reset for legacy local data. It previews by default and executes only when `EnvironmentName` is exactly `Development`, the typed `RESET-ECOMMERCE-DEVELOPMENT-DATA` confirmation is supplied, and the operator approves PowerShell's high-impact confirmation. It recreates the eight application databases, purges RabbitMQ queues, flushes Redis, and deletes application users from the Keycloak `ecommerce` realm while retaining realm roles, clients, and protocol mappers.
+`scripts/reset-development-data.ps1` is the supported destructive reset for legacy local order and payment data. It previews by default and executes only when `EnvironmentName` is exactly `Development`, the typed `RESET-ECOMMERCE-DEVELOPMENT-DATA` confirmation is supplied, and the operator approves PowerShell's high-impact confirmation. It recreates `order_db`, `payment_db`, `messaging_db`, and `notification_db`, purges RabbitMQ queues, and flushes Redis.
 
-Application processes should be stopped before execution. Aspire container names can vary, so execution requires the exact PostgreSQL, RabbitMQ, and Redis container names. After the reset, restarting AppHost reapplies every service migration; AuthenticationApi can then create the first administrator through the development bootstrap described in [[Authentication Flow]]. Old Stripe test PaymentIntents are intentionally not deleted and no longer correspond to local PaymentApi records.
+The reset deliberately preserves Keycloak, `authentication_db`, `user_db`, `product_db`, and `image_db`, so identities, accounts, profiles, catalog data, and image metadata survive. Messaging and notification databases are reset because their records may reference removed orders. Application processes should be stopped before execution. Aspire container names can vary, so execution requires the exact PostgreSQL, RabbitMQ, and Redis container names. After the reset, restarting AppHost reapplies migrations to the recreated databases. Old Stripe test PaymentIntents are intentionally not deleted and no longer correspond to local PaymentApi records.
 
 Example preview:
 
@@ -36,6 +36,6 @@ Example preview:
 ./scripts/reset-development-data.ps1 -EnvironmentName Development
 ```
 
-Execution additionally requires `-Execute`, the typed confirmation, and a Keycloak administrator password supplied as a `SecureString`.
+Execution additionally requires `-Execute` and the typed confirmation. It does not require or call Keycloak administration APIs.
 
 See [[Users]], [[Products]], [[Categories]], [[Orders]], and [[Reviews]].
