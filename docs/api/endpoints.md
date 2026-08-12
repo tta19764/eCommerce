@@ -33,6 +33,21 @@ This catalog reflects minimal endpoint mappings. Paths include gateway service p
 | `DELETE /product-api/v1/products/{productId}/reviews/{reviewId}` | `products:read` plus ownership rule |
 | `GET /product-api/v1/products/{productId}/review-eligibility` | No explicit endpoint policy |
 
+Product creation derives SellerApi ownership from the authenticated account. Its body does not contain `sellerId`.
+
+## SellerApi
+
+| Method/path | Access |
+| --- | --- |
+| `POST /seller-api/v1/sellers/own/application` | Authenticated user; one application per owner |
+| `GET /seller-api/v1/sellers/own` | Authenticated owner |
+| `GET /seller-api/v1/sellers/pending` | `sellers:review`; paged review queue |
+| `POST /seller-api/v1/sellers/{sellerId}/approve` | `sellers:review` |
+| `POST /seller-api/v1/sellers/{sellerId}/reject` | `sellers:review` |
+| `GET /seller-api/v1/stores/{slug}` | Public; active stores only |
+| `POST /seller-api/v1/stores/{storeId}/reviews` | Authenticated customer with verified completed seller order |
+| `GET /seller-api/v1/stores/{storeId}/reviews` | Public paged reviews |
+
 ## OrderApi
 
 | Method/path | Access |

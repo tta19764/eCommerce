@@ -2,7 +2,7 @@
 
 ## Purpose
 
-ProductApi owns the sellable catalog, seller assignment, classification, price/currency, stock, image references, and aggregate rating.
+ProductApi owns the sellable catalog, [[Sellers and Stores|seller assignment]], classification, price/currency, stock, image references, and aggregate rating.
 
 ## Entities and relationships
 
@@ -16,7 +16,7 @@ ProductApi owns the sellable catalog, seller assignment, classification, price/c
 - `AdjustQuantity` prevents stock from becoming negative. Batch order adjustments validate all products before saving to avoid partial mutation.
 - Adding/removing reviews updates aggregate rating counters; returned average rating is derived.
 - Mutations and inventory/review changes invalidate cached catalog pages.
-- Seller-scoped mutations validate the current seller against product ownership in handlers; admin permission policies also exist.
+- Product creation resolves the authenticated user's active SellerApi seller and rejects users without an approved store. The request body cannot select seller ownership.
 
 ## Application services and repositories
 

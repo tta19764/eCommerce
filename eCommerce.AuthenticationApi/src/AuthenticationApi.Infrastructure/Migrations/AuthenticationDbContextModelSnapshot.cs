@@ -172,6 +172,11 @@ namespace AuthenticationApi.Infrastructure.Migrations
                         {
                             Id = 16,
                             Name = "products:read-own"
+                        },
+                        new
+                        {
+                            Id = 17,
+                            Name = "sellers:review"
                         });
                 });
 
@@ -314,6 +319,11 @@ namespace AuthenticationApi.Infrastructure.Migrations
                         {
                             RoleId = 2,
                             PermissionId = 16
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            PermissionId = 17
                         },
                         new
                         {

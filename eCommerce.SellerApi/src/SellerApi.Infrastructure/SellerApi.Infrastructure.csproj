@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+</PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\eCommerce.SharedLibrary\SharedLibrary.Infrastructure\SharedLibrary.Infrastructure.csproj" />
+    <ProjectReference Include="..\SellerApi.Application\SellerApi.Application.csproj" />
+  </ItemGroup>
+  <ItemGroup><PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.3"><PrivateAssets>all</PrivateAssets></PackageReference></ItemGroup>
+
+</Project>

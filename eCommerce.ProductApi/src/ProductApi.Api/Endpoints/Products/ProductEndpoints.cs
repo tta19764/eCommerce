@@ -22,6 +22,7 @@ using SharedLibrary.Api.Contracts;
 using SharedLibrary.Api.Extensions;
 using SharedLibrary.Application.Authorization;
 using SharedLibrary.Application.Pagination;
+using SellerApi.Messages.Sellers;
 
 namespace ProductApi.Api.Endpoints.Products;
 
@@ -195,10 +196,28 @@ public static class ProductEndpoints
     /// <param name="cancellationToken">The request cancellation token.</param>
     /// <returns>An HTTP result containing the created product identifier or validation errors.</returns>
     public static async Task<IResult> CreateProduct(
-        CreateProductCommand command,
+        CreateProductRequest request,
         ISender sender,
+        ClaimsPrincipal user,
+        IRequestClient<GetAccountUserIdByIdentityIdRequest> accountClient,
+        IRequestClient<GetActiveSellerByOwnerRequest> sellerClient,
         CancellationToken cancellationToken)
     {
+        var ownerUserId = await user.GetCurrentUserIdAsync(accountClient, cancellationToken);
+        if (ownerUserId is null)
+        {
+            return Results.Forbid();
+        }
+
+        var sellerResponse = await sellerClient.GetResponse<GetActiveSellerByOwnerResponse>(
+            new GetActiveSellerByOwnerRequest(ownerUserId.Value), cancellationToken);
+
+        if (!sellerResponse.Message.IsActive || sellerResponse.Message.SellerId is null)
+        {
+            return Results.BadRequest(new { error = "Seller.NotActive", message = "An approved store is required before a product can be created." });
+        }
+
+        var command = new CreateProductCommand(request.Name, request.Description, request.Price, request.CurrencyCode, request.Quantity, sellerResponse.Message.SellerId.Value, request.CategoryId, request.ProductType, request.ImageIds, request.DisplayImageId);
         var result = await sender.Send(command, cancellationToken);
 
         return result.IsSuccess

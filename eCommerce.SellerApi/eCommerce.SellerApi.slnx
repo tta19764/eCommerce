@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SellerApi.Api/SellerApi.Api.csproj" />
+    <Project Path="src/SellerApi.Application/SellerApi.Application.csproj" />
+    <Project Path="src/SellerApi.Domain/SellerApi.Domain.csproj" />
+    <Project Path="src/SellerApi.Infrastructure/SellerApi.Infrastructure.csproj" />
+    <Project Path="src/SellerApi.Messages/SellerApi.Messages.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/SellerApi.Application.UnitTests/SellerApi.Application.UnitTests.csproj" />
+    <Project Path="test/SellerApi.Domain.UnitTests/SellerApi.Domain.UnitTests.csproj" />
+  </Folder>
+</Solution>

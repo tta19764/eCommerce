@@ -3,6 +3,7 @@
 ## Navigation
 
 - [[Users]]
+- [[Sellers and Stores]]
 - [[Products]]
 - [[Categories]]
 - [[Cart]]

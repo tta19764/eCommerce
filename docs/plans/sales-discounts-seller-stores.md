@@ -1,6 +1,6 @@
 # Sales, Discounts, and Seller Stores Plan
 
-> Status: proposed architecture; no sales, promotion, storefront, or seller-account capability described here is implemented yet.
+> Status: seller/store foundation is partially implemented. Promotions, seller payment onboarding, allocations, transfers, and the remaining storefront UI are not implemented.
 
 ## Goal
 
@@ -91,6 +91,8 @@ Important events include `SellerActivated`, `SellerRestricted`, `SellerPaymentAc
 ## Delivery slices
 
 ### 1. Seller/store foundation
+
+Implemented backend foundation: SellerApi projects/database/migration, one-owner/one-store pending applications, administrator approval/rejection, active-store public reads, Gateway/AppHost wiring, ProductApi active-seller resolution, and purchase-gated store reviews with aggregate ratings. Owner store editing, image attachment validation, application paging/admin UI, suspension/reactivation, frontend pages, and integration tests remain.
 
 - Add SellerApi Domain, Application, Infrastructure, Messages, API, database, migrations, tests, Gateway, and AppHost wiring.
 - Implement owner-only profile/store editing, public store reads, slug uniqueness, URL/value-object validation, authorization, and image references.

@@ -13,6 +13,7 @@ This is the hub for the repository documentation graph. Open `docs/` as the Obsi
   - [[architecture/payments|Payment Architecture]]
 - [[domains/index|Domains]]
   - [[domains/users|Users]]
+  - [[domains/sellers|Sellers and Stores]]
   - [[domains/products|Products]]
   - [[domains/categories|Categories]]
   - [[domains/cart|Cart]]

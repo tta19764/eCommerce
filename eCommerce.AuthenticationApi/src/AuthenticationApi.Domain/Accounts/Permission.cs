@@ -21,6 +21,7 @@ public sealed class Permission(int id, string name)
     public static readonly Permission ProductUpdateOwn = new(14, "products:update-own");
     public static readonly Permission ProductDeleteOwn = new(15, "products:delete-own");
     public static readonly Permission ProductReadOwn = new(16, "products:read-own");
+    public static readonly Permission SellerReview = new(17, "sellers:review");
 
     private Permission() : this(0, string.Empty)
     {
@@ -46,6 +47,7 @@ public sealed class Permission(int id, string name)
         ProductCreateOwn,
         ProductUpdateOwn,
         ProductDeleteOwn,
-        ProductReadOwn
+        ProductReadOwn,
+        SellerReview
     ];
 }

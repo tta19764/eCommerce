@@ -6,6 +6,7 @@ Each stateful service owns a logical PostgreSQL database and EF Core migrations.
 | --- | --- | --- |
 | `authentication_db` | AuthenticationApi | Accounts, Roles, Permissions, AccountRoles, RolePermissions |
 | `user_db` | UserApi | Users |
+| `seller_db` | SellerApi | Sellers, Stores, StoreReviews |
 | `product_db` | ProductApi | Products, ProductCategories, ProductReviews and product-owned value data |
 | `order_db` | OrderApi | Orders, SellerOrders, OrderItems |
 | `payment_db` | PaymentApi | Payments, StripeWebhookReceipts, payment outbox messages |
@@ -17,6 +18,7 @@ Each stateful service owns a logical PostgreSQL database and EF Core migrations.
 
 - Product categories form an adjacency list through nullable `ParentCategoryId`.
 - Products reference one category and a seller ID; image IDs are service-external references. Reviews reference products and users.
+- SellerApi permits one seller per owner and one store per seller. Store slugs are unique. Store reviews are unique per customer/store and per seller order.
 - Orders own seller-order groups and items. Items snapshot product name, price/currency, quantity, product ID, seller ID, and seller-order ID so later catalog changes do not rewrite order history.
 - Authentication accounts store Keycloak `IdentityId` and the linked UserApi `UserId`.
 - Conversation uniqueness indexes prevent duplicate product inquiries per customer/seller/product and duplicate conversations per seller-order group.

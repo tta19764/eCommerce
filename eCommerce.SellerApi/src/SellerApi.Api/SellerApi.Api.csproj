@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+</PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Asp.Versioning.Http" Version="10.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.3"><PrivateAssets>all</PrivateAssets></PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\eCommerce.AuthenticationApi\src\AuthenticationApi.Messages\AuthenticationApi.Messages.csproj" />
+    <ProjectReference Include="..\..\..\eCommerce.OrderApi\src\OrderApi.Messages\OrderApi.Messages.csproj" />
+    <ProjectReference Include="..\..\..\eCommerce.SharedLibrary\SharedLibrary.Api\SharedLibrary.Api.csproj" />
+    <ProjectReference Include="..\SellerApi.Application\SellerApi.Application.csproj" />
+    <ProjectReference Include="..\SellerApi.Infrastructure\SellerApi.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

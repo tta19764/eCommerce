@@ -35,6 +35,8 @@ public static class ApplicationPermissions
     public const string AccountCreateAdmin = "accounts:create-admin";
     /// <summary>Permission to upload images.</summary>
     public const string ImageUpload = "images:upload";
+    /// <summary>Permission to approve or reject seller applications.</summary>
+    public const string SellerReview = "sellers:review";
 
     /// <summary>
     /// Gets a collection of all registered application permissions.
@@ -55,7 +57,8 @@ public static class ApplicationPermissions
         UserRead,
         UserUpdate,
         AccountCreateAdmin,
-        ImageUpload
+        ImageUpload,
+        SellerReview
     ];
 }
 
