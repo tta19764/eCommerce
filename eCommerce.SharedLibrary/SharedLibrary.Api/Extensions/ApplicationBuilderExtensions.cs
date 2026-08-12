@@ -22,7 +22,7 @@ public static class ApplicationBuilderExtensions
         return host.UseSerilog((context, configuration) =>
             configuration.ReadFrom.Configuration(context.Configuration));
     }
-    
+
     /// <summary>
     /// Applies pending Entity Framework Core migrations for the supplied database context.
     /// </summary>
@@ -36,7 +36,7 @@ public static class ApplicationBuilderExtensions
 
         dbContext.Database.Migrate();
     }
-    
+
     /// <summary>
     /// Adds shared exception handling, gateway validation, and request logging middleware.
     /// </summary>
