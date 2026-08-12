@@ -23,7 +23,7 @@ describe('apiErrorMessage', () => {
     const result = apiErrorMessage(error);
 
     expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining('[API Error Detail] 503 OK (http://localhost:7013/api/authentication):'),
+      expect.stringContaining('[API Error Detail] 503 (http://localhost:7013/api/authentication):'),
       error,
     );
     expect(result).toBe('Service is temporarily unavailable. Please try again shortly.');

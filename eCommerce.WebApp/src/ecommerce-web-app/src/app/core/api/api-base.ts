@@ -15,7 +15,7 @@ export const apiData = <T>(response: ApiResponse<T>): T => {
  */
 export const apiErrorMessage = (error: unknown): string => {
   if (error instanceof HttpErrorResponse) {
-    console.error(`[API Error Detail] ${error.status} ${error.statusText} (${error.url}):`, error);
+    console.error(`[API Error Detail] ${error.status} (${error.url}):`, error);
 
     // Check if backend returned a clean domain-specific error payload
     const backendMessage =
