@@ -27,6 +27,12 @@ public static class DependencyInjection
         services.AddScoped<IWebhookReceiptRepository, WebhookReceiptRepository>();
         services.AddScoped<IUnitOfWork>(provider => provider.GetRequiredService<PaymentDbContext>());
 
+        services.AddOptions<MarketplaceFeeOptions>()
+            .Bind(configuration.GetSection(MarketplaceFeeOptions.SectionName))
+            .Validate(options => options.DefaultSellerFeePercentage is >= 0 and <= 100, "The default seller fee percentage must be between 0 and 100.")
+            .Validate(options => options.AdminSellerFeePercentage is >= 0 and <= 100, "The administrator seller fee percentage must be between 0 and 100.")
+            .ValidateOnStart();
+
         services.AddOptions<StripeOptions>()
             .Bind(configuration.GetSection(StripeOptions.SectionName))
             .Validate(options => options.SecretKey.StartsWith("sk_", StringComparison.Ordinal), "Stripe secret key is required")
