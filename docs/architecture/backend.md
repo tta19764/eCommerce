@@ -6,6 +6,7 @@
 | --- | --- |
 | AuthenticationApi | Local accounts, roles/permissions, Keycloak users and tokens, email confirmation |
 | UserApi | User profile names, email, and profile image reference |
+| SellerApi | Seller/store applications, administrative approval, public stores, and purchase-gated store reviews |
 | ProductApi | [[Products]], [[Categories]], inventory, seller ownership, images, [[Reviews]] |
 | OrderApi | [[Orders]], seller-order groups, line snapshots, status transitions |
 | PaymentApi | [[Payments]], Stripe PaymentIntents, signed webhook inbox, and payment outcome events |
@@ -48,3 +49,7 @@ The strongest coverage is in ProductApi, OrderApi, PaymentApi, UserApi, Authenti
 - the Angular app has a small number of component/store specs, so frontend workflow coverage is materially lighter.
 
 Gateway and AppHost behavior appears to rely primarily on composition/runtime testing rather than substantial dedicated test suites.
+
+## AppHost composition
+
+AppHost keeps `Program.cs` as a small entry point. `AddEcommerceResources` only coordinates the composition steps. Separate extensions add parameters, infrastructure, backend services, the gateway, and development processes. `AppHostSettings` loads typed settings. `ConfigurationExtensions` stops startup when a required value is absent or invalid. Typed resource records pass dependencies between the composition steps.
