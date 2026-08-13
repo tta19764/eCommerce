@@ -6,6 +6,7 @@ import { apiErrorMessage } from '../../../../core/api/api-base';
 import { ImagesApiClient } from '../../../../core/api/images-api';
 import { OrdersApiClient } from '../../../../core/api/orders-api';
 import { ProductsApiClient } from '../../../../core/api/products-api';
+import { SellerApiClient } from '../../../../core/api/seller-api';
 import { UsersApiClient } from '../../../../core/api/users-api';
 import { OrderStatus, SellerOrder } from '../../../../core/models/order-model';
 import {
@@ -15,9 +16,13 @@ import {
   ProductCategory,
   ProductType,
   ProductTypeOption,
+  UpdateProductRequest,
 } from '../../../../core/models/product-model';
+import { SellerResponse, SellerStatus } from '../../../../core/models/seller-model';
 import { UserProfile } from '../../../../core/models/user-model';
 import { flattenCategories } from '../../../../shared/utils/category-utils';
+
+export type PortalState = 'loading' | 'no_application' | 'pending' | 'active' | 'rejected' | 'suspended';
 
 @Component({
   selector: 'app-seller-products-page',
@@ -29,18 +34,24 @@ import { flattenCategories } from '../../../../shared/utils/category-utils';
 })
 export class SellerProductsPage {
   protected readonly maxProductImages = 8;
+  protected readonly SellerStatus = SellerStatus;
 
   private readonly productsApi = inject(ProductsApiClient);
   private readonly imagesApi = inject(ImagesApiClient);
   private readonly usersApi = inject(UsersApiClient);
   private readonly ordersApi = inject(OrdersApiClient);
+  private readonly sellerApi = inject(SellerApiClient);
+
+  // Portal State & Seller Identity
+  protected readonly portalState = signal<PortalState>('loading');
+  protected readonly seller = signal<SellerResponse | null>(null);
+  protected readonly sellerId = signal('');
+  protected readonly profile = signal<UserProfile | null>(null);
 
   // Tab State
   protected readonly activeTab = signal<'store' | 'products' | 'orders'>('products');
 
-  // Seller Data
-  protected readonly profile = signal<UserProfile | null>(null);
-  protected readonly sellerId = signal('');
+  // Catalog & Order Data
   protected readonly categories = signal<ProductCategory[]>([]);
   protected readonly flatCategories = computed(() => flattenCategories(this.categories()));
   protected readonly productTypes = signal<ProductTypeOption[]>([]);
@@ -52,6 +63,7 @@ export class SellerProductsPage {
   protected readonly loadingProducts = signal(false);
   protected readonly loadingOrders = signal(false);
   protected readonly saving = signal(false);
+  protected readonly submittingApplication = signal(false);
   protected readonly uploadingImages = signal(false);
   protected readonly showProductForm = signal(false);
   protected readonly editingProduct = signal<Product | null>(null);
@@ -71,7 +83,25 @@ export class SellerProductsPage {
   protected newCategoryName = '';
   protected selectedParentCategoryId: string | null = null;
 
-  // Product Form
+  // Store Application Form
+  protected readonly applicationForm = new FormGroup({
+    slug: new FormControl('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.pattern(/^[a-z0-9-]+$/)],
+    }),
+    name: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    description: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    countryCode: new FormControl('US', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.minLength(2), Validators.maxLength(2)],
+    }),
+    defaultCurrency: new FormControl('USD', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.minLength(3), Validators.maxLength(3)],
+    }),
+  });
+
+  // Product Form (without sellerId)
   protected readonly form = new FormGroup({
     name: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     description: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
@@ -95,7 +125,67 @@ export class SellerProductsPage {
   });
 
   constructor() {
-    this.loadFormOptions();
+    this.loadInitialData();
+  }
+
+  protected loadSellerStatus(): void {
+    this.sellerApi.getOwnSeller().subscribe({
+      next: (seller) => {
+        this.seller.set(seller);
+        this.sellerId.set(seller.id);
+        if (seller.status === SellerStatus.PendingReview) {
+          this.portalState.set('pending');
+        } else if (seller.status === SellerStatus.Active) {
+          this.portalState.set('active');
+          this.loadSellerProducts();
+          this.loadSellerOrders();
+        } else if (seller.status === SellerStatus.Rejected) {
+          this.portalState.set('rejected');
+        } else if (seller.status === SellerStatus.Suspended) {
+          this.portalState.set('suspended');
+        }
+      },
+      error: (err) => {
+        if (err?.status === 404) {
+          this.portalState.set('no_application');
+        } else {
+          this.portalState.set('no_application');
+          this.error.set(apiErrorMessage(err));
+        }
+      },
+    });
+  }
+
+  protected submitApplication(): void {
+    if (this.applicationForm.invalid) {
+      this.applicationForm.markAllAsTouched();
+      return;
+    }
+
+    this.submittingApplication.set(true);
+    this.clearMessages();
+
+    const raw = this.applicationForm.getRawValue();
+    this.sellerApi
+      .createApplication({
+        slug: raw.slug.toLowerCase().trim(),
+        name: raw.name.trim(),
+        description: raw.description.trim(),
+        countryCode: raw.countryCode.toUpperCase().trim(),
+        defaultCurrency: raw.defaultCurrency.toUpperCase().trim(),
+      })
+      .subscribe({
+        next: () => {
+          this.submittingApplication.set(false);
+          this.success.set('Store application submitted successfully! Pending review by system administration.');
+          this.loadSellerStatus();
+        },
+        error: (err) => {
+          console.error('[Seller submitApplication error]:', err);
+          this.error.set(apiErrorMessage(err));
+          this.submittingApplication.set(false);
+        },
+      });
   }
 
   protected setTab(tab: 'store' | 'products' | 'orders'): void {
@@ -212,7 +302,7 @@ export class SellerProductsPage {
   }
 
   protected saveProduct(): void {
-    if (this.form.invalid || !this.sellerId()) {
+    if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
@@ -221,34 +311,59 @@ export class SellerProductsPage {
     this.clearMessages();
 
     const value = this.form.getRawValue();
-    const request: CreateProductRequest = {
-      ...value,
-      currencyCode: value.currencyCode.toUpperCase(),
-      sellerId: this.sellerId(),
-      imageIds: this.imageIds(),
-      displayImageId: this.imageIds()[0] ?? null,
-    };
-
     const editing = this.editingProduct();
-    const save$: Observable<unknown> = editing
-      ? this.productsApi.update(editing.id, request)
-      : this.productsApi.create(request);
 
-    save$.subscribe({
-      next: () => {
-        this.success.set(
-          editing ? 'Product listing updated successfully.' : 'Product published to marketplace.',
-        );
-        this.saving.set(false);
-        this.closeProductForm();
-        this.loadSellerProducts();
-      },
-      error: (error) => {
-        console.error('[Seller saveProduct error]:', error);
-        this.error.set(apiErrorMessage(error));
-        this.saving.set(false);
-      },
-    });
+    if (editing) {
+      const updateReq: UpdateProductRequest = {
+        name: value.name,
+        description: value.description,
+        price: value.price,
+        currencyCode: value.currencyCode.toUpperCase(),
+        quantity: value.quantity,
+        categoryId: value.categoryId,
+        productType: value.productType,
+        imageIds: this.imageIds(),
+        displayImageId: this.imageIds()[0] ?? null,
+      };
+
+      this.productsApi.update(editing.id, updateReq).subscribe({
+        next: () => {
+          this.success.set('Product listing updated successfully.');
+          this.saving.set(false);
+          this.closeProductForm();
+          this.loadSellerProducts();
+        },
+        error: (error) => {
+          console.error('[Seller saveProduct update error]:', error);
+          this.handleProductError(error);
+        },
+      });
+    } else {
+      const createReq: CreateProductRequest = {
+        name: value.name,
+        description: value.description,
+        price: value.price,
+        currencyCode: value.currencyCode.toUpperCase(),
+        quantity: value.quantity,
+        categoryId: value.categoryId,
+        productType: value.productType,
+        imageIds: this.imageIds(),
+        displayImageId: this.imageIds()[0] ?? null,
+      };
+
+      this.productsApi.create(createReq).subscribe({
+        next: () => {
+          this.success.set('Product published to marketplace.');
+          this.saving.set(false);
+          this.closeProductForm();
+          this.loadSellerProducts();
+        },
+        error: (error) => {
+          console.error('[Seller saveProduct create error]:', error);
+          this.handleProductError(error);
+        },
+      });
+    }
   }
 
   protected deleteProduct(product: Product): void {
@@ -293,7 +408,6 @@ export class SellerProductsPage {
         this.addingCategory.set(false);
         this.closeCategoryModal();
         this.success.set(`Category "${request.name}" created!`);
-        // Refresh categories
         this.productsApi.getCategories().subscribe({
           next: (cats) => {
             this.categories.set(cats);
@@ -326,7 +440,7 @@ export class SellerProductsPage {
     });
   }
 
-  private loadFormOptions(): void {
+  private loadInitialData(): void {
     forkJoin({
       profile: this.usersApi.getOwn(),
       categories: this.productsApi.getCategories(),
@@ -334,7 +448,6 @@ export class SellerProductsPage {
     }).subscribe({
       next: ({ profile, categories, productTypes }) => {
         this.profile.set(profile);
-        this.sellerId.set(profile.id);
         this.categories.set(categories);
         this.productTypes.set(productTypes);
         const flat = this.flatCategories();
@@ -343,12 +456,13 @@ export class SellerProductsPage {
           productType: productTypes[0]?.value ?? 'Physical',
         });
         this.loadingOptions.set(false);
-        this.loadSellerProducts();
+        this.loadSellerStatus();
       },
       error: (error) => {
-        console.error('[Seller loadFormOptions error]:', error);
+        console.error('[Seller loadInitialData error]:', error);
         this.error.set(apiErrorMessage(error));
         this.loadingOptions.set(false);
+        this.loadSellerStatus();
       },
     });
   }
@@ -384,6 +498,16 @@ export class SellerProductsPage {
         this.loadingOrders.set(false);
       },
     });
+  }
+
+  private handleProductError(error: unknown): void {
+    const msg = apiErrorMessage(error);
+    this.saving.set(false);
+    if (msg.includes('NotActive') || msg.includes('Seller.NotActive')) {
+      this.error.set('Your seller status must be Active to manage marketplace listings. Please verify your store application status.');
+    } else {
+      this.error.set(msg);
+    }
   }
 
   private uploadNext(files: File[], index: number): void {

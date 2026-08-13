@@ -94,11 +94,20 @@ export interface CreateProductRequest {
   price: number;
   currencyCode: string;
   quantity: number;
-  sellerId: string;
   categoryId: string;
   productType: ProductType;
   imageIds?: string[] | null;
   displayImageId?: string | null;
 }
 
-export type UpdateProductRequest = CreateProductRequest;
+export interface UpdateProductRequest {
+  name: string;
+  description: string;
+  price: number;
+  currencyCode: string;
+  quantity: number;
+  categoryId: string;
+  productType: ProductType;
+  imageIds?: string[] | null;
+  displayImageId?: string | null;
+}

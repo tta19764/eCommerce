@@ -233,24 +233,26 @@
       </div>
 
       <!-- Mobile Role Portals -->
-      <div class="pt-2 border-t border-slate-200 dark:border-slate-800 flex flex-col gap-2">
-        @if (auth.isAdmin()) {
-          <a
-            [routerLink]="isAdminPortal() ? '/' : '/admin'"
-            class="rounded-md bg-amber-500/10 border border-amber-500/30 px-3 py-2 text-xs font-bold text-amber-700 dark:text-amber-400 text-center"
-          >
-            {{ isAdminPortal() ? 'Switch to Store View' : 'Admin Portal' }}
-          </a>
-        }
-        @if (auth.isSeller()) {
-          <a
-            [routerLink]="isSellerPortal() ? '/' : '/seller'"
-            class="rounded-md bg-emerald-500/10 border border-emerald-500/30 px-3 py-2 text-xs font-bold text-emerald-700 dark:text-emerald-400 text-center"
-          >
-            {{ isSellerPortal() ? 'Switch to Store View' : 'Seller Hub' }}
-          </a>
-        }
-      </div>
+      @if (auth.isAdmin() || auth.isSeller()) {
+        <div class="pt-2 border-t border-slate-200 dark:border-slate-800 flex flex-col gap-2">
+          @if (auth.isAdmin()) {
+            <a
+              [routerLink]="isAdminPortal() ? '/' : '/admin'"
+              class="rounded-md bg-amber-500/10 border border-amber-500/30 px-3 py-2 text-xs font-bold text-amber-700 dark:text-amber-400 text-center"
+            >
+              {{ isAdminPortal() ? 'Switch to Store View' : 'Admin Portal' }}
+            </a>
+          }
+          @if (auth.isSeller()) {
+            <a
+              [routerLink]="isSellerPortal() ? '/' : '/seller'"
+              class="rounded-md bg-emerald-500/10 border border-emerald-500/30 px-3 py-2 text-xs font-bold text-emerald-700 dark:text-emerald-400 text-center"
+            >
+              {{ isSellerPortal() ? 'Switch to Store View' : 'Seller Hub' }}
+            </a>
+          }
+        </div>
+      }
 
       <!-- Mobile Auth Action Buttons -->
       <div class="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">

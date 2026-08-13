@@ -10,23 +10,27 @@ Visual styling is governed by semantic CSS tokens and accessibility rules docume
 | --- | --- | --- |
 | `/` | catalog page | Public |
 | `/products/:id`, `/products/:id/review` | product/review page | Public route; review operations require authentication/backend permission |
+| `/stores/:slug` | public store page | Public |
 | `/cart` | cart page | Public route; checkout requires login |
 | `/login`, `/register`, `/confirm-email` | auth pages | Public |
 | `/orders`, `/messages`, `/profile` | customer pages | `authGuard` |
 | `/seller` | seller products page | `sellerGuard` |
-| `/admin/products`, `/admin/categories`, `/admin/orders`, `/admin/users` | admin pages | parent `adminGuard` |
+| `/admin/products`, `/admin/categories`, `/admin/orders`, `/admin/users`, `/admin/sellers` | admin pages | parent `adminGuard` |
 
 ## API clients
 
-Clients under `core/api/` use `environment.gatewayUrl` and service prefixes. `AuthApiClient`, `ProductsApiClient`, `OrdersApiClient`, `UsersApiClient`, `AccountsApiClient`, `ImagesApiClient`, and `MessagingApiClient` unwrap the shared `ApiResponse<T>` envelope with `apiData`. The auth interceptor adds bearer tokens and coordinates refresh behavior. Image content URLs are used directly in `<img>` sources.
+Clients under `core/api/` use `environment.gatewayUrl` and service prefixes. `AuthApiClient`, `ProductsApiClient`, `OrdersApiClient`, `UsersApiClient`, `AccountsApiClient`, `ImagesApiClient`, `MessagingApiClient`, and `SellerApiClient` unwrap the shared `ApiResponse<T>` envelope with `apiData` (except 204 No Content endpoints). The auth interceptor adds bearer tokens and coordinates refresh behavior. Image content URLs are used directly in `<img>` sources.
 
 Page-to-backend examples:
 
 - `CatalogPage`/`ProductPage` -> `ProductsApiClient` -> public ProductApi endpoints.
+- `StorePage` -> `SellerApiClient` -> public `/stores/{slug}` and `/stores/{storeId}/reviews` endpoints.
+- `SellerProductsPage` -> `SellerApiClient` (`/sellers/own`, `/sellers/own/application`) plus `ProductsApiClient` -> seller portal state, store onboarding, and seller inventory management.
+- `AdminSellersPage` -> `SellerApiClient` -> pending seller application reviews and approve/reject commands.
 - `CartPage` -> `CartStore` -> `OrdersApiClient.createOwn` -> `POST /order-api/v1/orders/own`.
 - `OrdersPage` -> `OrdersApiClient.getOwn/cancelOwn` -> own-order endpoints.
 - `ProfilePage` -> `UsersApiClient` plus `ImagesApiClient` -> UserApi and ImageApi.
-- admin pages -> product/order/account/user clients -> permission-protected endpoints.
+- admin pages -> product/order/account/user/seller clients -> permission-protected endpoints.
 - `ConversationsPage` and `ChatWindow` -> messaging HTTP client/service plus SignalR hub.
 
 ## State management

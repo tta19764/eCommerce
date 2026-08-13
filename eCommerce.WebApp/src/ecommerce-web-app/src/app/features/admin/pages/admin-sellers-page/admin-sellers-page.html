@@ -1,0 +1,347 @@
+<section class="space-y-6">
+  <!-- Header Banner -->
+  <div
+    class="glass-panel rounded-2xl p-6 border border-slate-300 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-lg"
+  >
+    <div>
+      <div class="flex items-center gap-2">
+        <span
+          class="rounded bg-indigo-500/10 px-2.5 py-0.5 text-xs font-bold text-indigo-600 dark:text-indigo-400"
+          >Admin Review</span
+        >
+        <h2 class="text-xl font-bold text-slate-900 dark:text-white">
+          Pending Seller Applications
+        </h2>
+      </div>
+      <p class="text-xs text-slate-600 dark:text-slate-400 mt-1">
+        Review pending marketplace seller applications and issue store approvals or rejections.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      (click)="loadPending()"
+      class="rounded-xl bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-4 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-700 transition-all self-start sm:self-auto"
+    >
+      Refresh Applications
+    </button>
+  </div>
+
+  <!-- Global Alerts -->
+  @if (success()) {
+    <div
+      class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-xs font-semibold text-emerald-700 dark:text-emerald-300 flex items-center justify-between"
+    >
+      <span>{{ success() }}</span>
+      <button
+        (click)="success.set('')"
+        class="text-emerald-600 dark:text-emerald-400 hover:underline font-bold"
+      >
+        ✕
+      </button>
+    </div>
+  }
+
+  @if (error()) {
+    <div
+      class="rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 text-xs font-semibold text-rose-300 flex items-center justify-between"
+    >
+      <span>{{ error() }}</span>
+      <button (click)="error.set('')" class="text-rose-400 hover:text-white font-bold">✕</button>
+    </div>
+  }
+
+  <!-- Pending Applications List -->
+  @if (loading()) {
+    <div class="space-y-4">
+      @for (item of [1, 2, 3]; track item) {
+        <div class="h-44 animate-pulse rounded-2xl bg-slate-200 dark:bg-slate-800/50"></div>
+      }
+    </div>
+  } @else if (!pendingSellers().length) {
+    <div
+      class="glass-panel rounded-2xl p-12 text-center text-slate-600 dark:text-slate-400 space-y-2 border border-slate-300 dark:border-slate-800"
+    >
+      <div class="text-3xl">✅</div>
+      <h3 class="text-base font-bold text-slate-900 dark:text-white">No Pending Applications</h3>
+      <p class="text-xs text-slate-600 dark:text-slate-400">
+        All marketplace seller applications have been reviewed.
+      </p>
+    </div>
+  } @else {
+    <div class="space-y-4">
+      @for (app of pendingSellers(); track app.sellerId) {
+        <div
+          class="glass-panel rounded-2xl border border-slate-300 dark:border-slate-800 p-6 shadow-md space-y-4 hover:border-indigo-500/40 transition-all"
+        >
+          <!-- Top Row: Badges, Seller ID & Dates -->
+          <div
+            class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3"
+          >
+            <div class="flex items-center gap-2.5 flex-wrap">
+              <span
+                class="font-mono text-xs font-bold bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 px-2.5 py-1 rounded-lg border border-indigo-500/20"
+              >
+                Seller ID: {{ app.sellerId }}
+              </span>
+              <span
+                class="rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30 px-2.5 py-0.5 text-[10px] font-bold"
+              >
+                Pending Review
+              </span>
+            </div>
+
+            <div class="text-xs text-slate-500 dark:text-slate-400">
+              Submitted:
+              <span class="font-semibold text-slate-700 dark:text-slate-300">{{
+                app.submittedOnUtc | date: 'medium'
+              }}</span>
+            </div>
+          </div>
+
+          <!-- Profile Consistency Warning if applicant.found is false -->
+          @if (!app.applicant.found) {
+            <div
+              class="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3.5 text-xs font-semibold text-amber-800 dark:text-amber-300 flex items-center gap-2.5"
+            >
+              <svg
+                class="h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                />
+              </svg>
+              <div>
+                <strong class="font-bold block text-amber-900 dark:text-amber-200"
+                  >Profile-Consistency Warning:</strong
+                >
+                <span
+                  >Applicant user profile could not be located in UserApi for User ID
+                  <code class="font-mono">{{ app.applicant.userId }}</code
+                  >. Verify user state before proceeding.</span
+                >
+              </div>
+            </div>
+          }
+
+          <!-- Grid: Applicant Info & Store Details -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-1">
+            <!-- Applicant Details -->
+            <div class="space-y-2">
+              <h4
+                class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500"
+              >
+                Applicant Information
+              </h4>
+              <div class="space-y-1 text-xs">
+                <p class="text-slate-800 dark:text-slate-200">
+                  <strong class="font-bold text-slate-900 dark:text-white">Full Name:</strong>
+                  <span class="ml-1.5 font-semibold">{{ app.applicant.fullName || '—' }}</span>
+                </p>
+                <p class="text-slate-800 dark:text-slate-200">
+                  <strong class="font-bold text-slate-900 dark:text-white">Email:</strong>
+                  <span class="ml-1.5 text-indigo-600 dark:text-indigo-400 font-semibold">{{
+                    app.applicant.email || '—'
+                  }}</span>
+                </p>
+                <p class="text-slate-600 dark:text-slate-400">
+                  <strong class="font-bold text-slate-800 dark:text-slate-300">User ID:</strong>
+                  <span class="font-mono text-slate-600 dark:text-slate-400 ml-1.5">{{
+                    app.applicant.userId
+                  }}</span>
+                </p>
+              </div>
+            </div>
+
+            <!-- Store Details -->
+            <div class="space-y-2">
+              <h4
+                class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500"
+              >
+                Proposed Store Details
+              </h4>
+              <div class="space-y-1 text-xs">
+                <p class="text-slate-800 dark:text-slate-200">
+                  <strong class="font-bold text-slate-900 dark:text-white">Store Name:</strong>
+                  <span class="ml-1.5 font-bold text-indigo-700 dark:text-indigo-300">{{
+                    app.store.name
+                  }}</span>
+                </p>
+                <p class="text-slate-800 dark:text-slate-200">
+                  <strong class="font-bold text-slate-900 dark:text-white">Slug:</strong>
+                  <span class="font-mono text-slate-600 dark:text-slate-400 ml-1.5"
+                    >/store/{{ app.store.slug }}</span
+                  >
+                </p>
+                <p class="text-slate-800 dark:text-slate-200">
+                  <strong class="font-bold text-slate-900 dark:text-white"
+                    >Country & Currency:</strong
+                  >
+                  <span class="ml-1.5 font-semibold"
+                    >{{ app.store.countryCode }} ({{ app.store.defaultCurrency }})</span
+                  >
+                </p>
+                @if (app.store.description) {
+                  <p class="text-slate-600 dark:text-slate-400 mt-1 italic leading-relaxed">
+                    "{{ app.store.description }}"
+                  </p>
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Action Buttons -->
+          <div
+            class="flex items-center justify-end gap-3 pt-3 border-t border-slate-200 dark:border-slate-800"
+          >
+            <button
+              type="button"
+              (click)="openApproveModal(app)"
+              [disabled]="approvingId() === app.sellerId"
+              class="rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 text-xs font-bold shadow-md transition-all disabled:opacity-50 flex items-center gap-1.5"
+            >
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+              <span>Approve Application</span>
+            </button>
+
+            <button
+              type="button"
+              (click)="openRejectModal(app)"
+              class="rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30 px-4 py-2 text-xs font-bold transition-all flex items-center gap-1.5"
+            >
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+              <span>Reject Application</span>
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- Pagination Controls -->
+      <div
+        class="flex items-center justify-between border-t border-slate-300 dark:border-slate-800 pt-4 text-xs font-semibold text-slate-600 dark:text-slate-400"
+      >
+        <span
+          >Showing Page {{ page() }} of {{ totalPages() }} ({{ totalCount() }} Total
+          Applications)</span
+        >
+
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            [disabled]="page() <= 1 || loading()"
+            (click)="setPage(page() - 1)"
+            class="rounded-lg bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 px-3.5 py-2 text-xs font-bold text-slate-800 dark:text-slate-200 disabled:opacity-40 transition-colors"
+          >
+            Previous Page
+          </button>
+
+          <button
+            type="button"
+            [disabled]="page() >= totalPages() || loading()"
+            (click)="setPage(page() + 1)"
+            class="rounded-lg bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 px-3.5 py-2 text-xs font-bold text-slate-800 dark:text-slate-200 disabled:opacity-40 transition-colors"
+          >
+            Next Page
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Approval Confirmation Modal -->
+  <app-confirm-modal
+    [isOpen]="!!approvingSeller()"
+    title="Approve Seller Application"
+    description="Are you sure you want to approve this marketplace seller application? The seller will be granted active store status."
+    [details]="approveDetails()"
+    confirmText="Approve Application"
+    cancelText="Cancel"
+    variant="success"
+    [loading]="approvingId() === approvingSeller()?.sellerId"
+    (confirmed)="confirmApprove()"
+    (cancelled)="closeApproveModal()"
+  />
+
+  <!-- Rejection Modal -->
+  @if (rejectingSeller()) {
+    <div
+      class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/75 p-4 animate-fade-in isolate transform-gpu"
+    >
+      <div
+        class="glass-panel rounded-2xl p-6 max-w-md w-full border border-rose-500/40 space-y-4 shadow-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md transform-gpu"
+      >
+        <div
+          class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3"
+        >
+          <h3 class="font-bold text-sm text-slate-900 dark:text-white">
+            Reject Seller Application
+          </h3>
+          <button
+            (click)="closeRejectModal()"
+            class="text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-bold"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div class="space-y-2 text-xs">
+          <p class="text-slate-700 dark:text-slate-300">
+            Rejecting seller application for applicant
+            <strong class="font-bold text-slate-900 dark:text-white">{{
+              rejectingSeller()!.applicant.fullName || rejectingSeller()!.applicant.email
+            }}</strong>
+            and proposed store
+            <strong class="font-bold text-indigo-600 dark:text-indigo-400">{{
+              rejectingSeller()!.store.name
+            }}</strong
+            >:
+          </p>
+          <textarea
+            [ngModel]="rejectionReason()"
+            (ngModelChange)="rejectionReason.set($event)"
+            placeholder="Specify explicit reason for rejection..."
+            class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs min-h-24"
+          ></textarea>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-2">
+          <button
+            type="button"
+            (click)="closeRejectModal()"
+            class="rounded-xl bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            (click)="confirmReject()"
+            [disabled]="submittingReject() || !rejectionReason().trim()"
+            class="rounded-xl bg-rose-600 hover:bg-rose-500 text-white px-5 py-2 text-xs font-bold shadow-md disabled:opacity-40"
+          >
+            {{ submittingReject() ? 'Rejecting...' : 'Confirm Rejection' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</section>

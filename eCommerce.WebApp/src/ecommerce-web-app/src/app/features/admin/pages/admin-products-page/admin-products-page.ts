@@ -1,21 +1,23 @@
 import { AppCurrencyPipe } from '../../../../shared/pipes/app-currency.pipe';
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, HostListener, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { apiErrorMessage } from '../../../../core/api/api-base';
 import { ImagesApiClient } from '../../../../core/api/images-api';
 import { ProductsApiClient } from '../../../../core/api/products-api';
 import {
-  Product,
   CreateProductRequest,
+  Product,
   ProductCategory,
   ProductType,
   ProductTypeOption,
+  UpdateProductRequest,
 } from '../../../../core/models/product-model';
 import { flattenCategories } from '../../../../shared/utils/category-utils';
 
 @Component({
   selector: 'app-admin-products-page',
+  standalone: true,
   imports: [AppCurrencyPipe, ReactiveFormsModule],
   templateUrl: './admin-products-page.html',
   styleUrl: './admin-products-page.scss',
@@ -41,6 +43,8 @@ export class AdminProductsPage {
   protected readonly productImageIds = signal<string[]>([]);
   protected readonly uploadingImages = signal(false);
   protected readonly draggedImageIndex = signal<number | null>(null);
+  protected readonly deletingProduct = signal<Product | null>(null);
+  protected readonly deleting = signal(false);
 
   protected readonly form = new FormGroup({
     name: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
@@ -57,7 +61,6 @@ export class AdminProductsPage {
       nonNullable: true,
       validators: [Validators.required, Validators.min(0)],
     }),
-    sellerId: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     categoryId: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     productType: new FormControl<ProductType>('Physical', {
       nonNullable: true,
@@ -73,13 +76,11 @@ export class AdminProductsPage {
 
   protected imageUrl(product: Product): string | null {
     const imageId = product.displayImageId ?? product.imageIds[0];
-
     return imageId ? this.images.contentUrl(imageId) : null;
   }
 
   protected openCreateForm(): void {
     this.editingProduct.set(null);
-    this.form.controls.sellerId.enable();
     this.resetForm();
     this.productImageIds.set([]);
     this.formOpen.set(true);
@@ -94,11 +95,9 @@ export class AdminProductsPage {
       price: product.price,
       currencyCode: product.currency,
       quantity: product.quantity,
-      sellerId: product.sellerId,
       categoryId: product.categoryId,
       productType: product.productType,
     });
-    this.form.controls.sellerId.disable();
     this.productImageIds.set(this.orderedImageIds(product));
     this.formOpen.set(true);
     this.clearMessages();
@@ -107,7 +106,6 @@ export class AdminProductsPage {
   protected closeForm(): void {
     this.formOpen.set(false);
     this.editingProduct.set(null);
-    this.form.controls.sellerId.enable();
     this.resetForm();
     this.productImageIds.set([]);
   }
@@ -196,55 +194,108 @@ export class AdminProductsPage {
     this.error.set('');
 
     const editingProduct = this.editingProduct();
-    const request = this.productRequest();
-    const saveRequest: Observable<unknown> = editingProduct
-      ? this.api.update(editingProduct.id, request)
-      : this.api.create(request);
+    const formValue = this.form.getRawValue();
 
-    saveRequest.subscribe({
-      next: () => {
-        this.success.set(
-          editingProduct ? 'Product updated successfully.' : 'Product created successfully.',
-        );
-        this.saving.set(false);
-        this.closeForm();
-        this.load();
-      },
-      error: (error) => {
-        console.error('[AdminProducts save error]:', error);
-        this.error.set(apiErrorMessage(error));
-        this.saving.set(false);
-      },
-    });
+    if (editingProduct) {
+      const request: UpdateProductRequest = {
+        name: formValue.name,
+        description: formValue.description,
+        price: formValue.price,
+        currencyCode: formValue.currencyCode.toUpperCase(),
+        quantity: formValue.quantity,
+        categoryId: formValue.categoryId,
+        productType: formValue.productType,
+        imageIds: this.productImageIds(),
+        displayImageId: this.productImageIds()[0] ?? null,
+      };
+
+      this.api.update(editingProduct.id, request).subscribe({
+        next: () => {
+          this.success.set('Product updated successfully.');
+          this.saving.set(false);
+          this.closeForm();
+          this.load();
+        },
+        error: (error) => {
+          console.error('[AdminProducts save error]:', error);
+          this.error.set(apiErrorMessage(error));
+          this.saving.set(false);
+        },
+      });
+    } else {
+      const request: CreateProductRequest = {
+        name: formValue.name,
+        description: formValue.description,
+        price: formValue.price,
+        currencyCode: formValue.currencyCode.toUpperCase(),
+        quantity: formValue.quantity,
+        categoryId: formValue.categoryId,
+        productType: formValue.productType,
+        imageIds: this.productImageIds(),
+        displayImageId: this.productImageIds()[0] ?? null,
+      };
+
+      this.api.create(request).subscribe({
+        next: () => {
+          this.success.set('Product created successfully.');
+          this.saving.set(false);
+          this.closeForm();
+          this.load();
+        },
+        error: (error) => {
+          console.error('[AdminProducts save error]:', error);
+          this.error.set(apiErrorMessage(error));
+          this.saving.set(false);
+        },
+      });
+    }
   }
 
-  protected remove(product: Product): void {
-    if (!confirm(`Delete "${product.name}"?`)) {
+  @HostListener('window:keydown.escape')
+  protected handleEscape(): void {
+    if (this.deletingProduct() && !this.deleting()) {
+      this.cancelDelete();
+    }
+  }
+
+  protected promptDelete(product: Product): void {
+    this.clearMessages();
+    this.deletingProduct.set(product);
+  }
+
+  protected cancelDelete(): void {
+    if (this.deleting()) {
+      return;
+    }
+    this.deletingProduct.set(null);
+  }
+
+  protected confirmDelete(): void {
+    const product = this.deletingProduct();
+    if (!product || this.deleting()) {
       return;
     }
 
+    this.deleting.set(true);
+    this.clearMessages();
+
     this.api.delete(product.id).subscribe({
       next: () => {
-        this.success.set('Product deleted successfully.');
+        this.success.set(`Product "${product.name}" deleted successfully.`);
+        this.deleting.set(false);
+        this.deletingProduct.set(null);
         this.load();
       },
       error: (error) => {
         console.error('[AdminProducts delete error]:', error);
         this.error.set(apiErrorMessage(error));
+        this.deleting.set(false);
       },
     });
   }
 
-  private productRequest(): CreateProductRequest {
-    const formValue = this.form.getRawValue();
-
-    return {
-      ...formValue,
-      currencyCode: formValue.currencyCode.toUpperCase(),
-      productType: formValue.productType,
-      imageIds: this.productImageIds(),
-      displayImageId: this.productImageIds()[0] ?? null,
-    };
+  protected remove(product: Product): void {
+    this.promptDelete(product);
   }
 
   private resetForm(): void {
@@ -255,7 +306,6 @@ export class AdminProductsPage {
       price: 0,
       currencyCode: 'USD',
       quantity: 0,
-      sellerId: '',
       categoryId: defaultCatId,
       productType: 'Physical',
     });

@@ -1,10 +1,13 @@
 <section class="space-y-6">
-  
   <!-- Section Title & Action Button -->
-  <div class="flex items-center justify-between border-b border-slate-300 dark:border-slate-800 pb-4">
+  <div
+    class="flex items-center justify-between border-b border-slate-300 dark:border-slate-800 pb-4"
+  >
     <div>
       <h2 class="text-xl font-bold text-slate-900 dark:text-white">Catalog Product Inventory</h2>
-      <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">Create, edit pricing, manage stock levels, and delete products across all sellers.</p>
+      <p class="mt-1 text-xs text-slate-600 dark:text-slate-400">
+        Create, edit pricing, manage stock levels, and delete products across all sellers.
+      </p>
     </div>
     <button
       type="button"
@@ -19,13 +22,17 @@
   </div>
 
   @if (success()) {
-    <div class="rounded-md border border-emerald-500/30 bg-emerald-500/10 p-4 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+    <div
+      class="rounded-md border border-emerald-500/30 bg-emerald-500/10 p-4 text-xs font-semibold text-emerald-700 dark:text-emerald-300"
+    >
       {{ success() }}
     </div>
   }
 
   @if (error()) {
-    <div class="rounded-md border border-rose-500/30 bg-rose-500/10 p-4 text-xs font-semibold text-rose-700 dark:text-rose-300">
+    <div
+      class="rounded-md border border-rose-500/30 bg-rose-500/10 p-4 text-xs font-semibold text-rose-700 dark:text-rose-300"
+    >
       {{ error() }}
     </div>
   }
@@ -42,21 +49,31 @@
           {{ editingProduct() ? 'Update Existing Product' : 'Create Marketplace Product' }}
         </h3>
         @if (editingProduct()) {
-          <p class="text-xs text-indigo-600 dark:text-indigo-400 font-mono mt-0.5">Editing Product ID: #{{ editingProduct()!.id }}</p>
+          <p class="text-xs text-indigo-600 dark:text-indigo-400 font-mono mt-0.5">
+            Editing Product ID: #{{ editingProduct()!.id }}
+          </p>
         }
       </div>
 
       <div class="grid gap-4 md:grid-cols-2">
         <div>
-          <label class="block text-xs font-bold text-slate-900 dark:text-slate-300 mb-1">Product Title <span class="required-star">*</span></label>
-          <input formControlName="name" class="w-full app-input rounded-md px-3.5 py-2.5 text-xs" placeholder="e.g. Mechanical Gaming Keyboard" />
+          <label class="block text-xs font-bold text-slate-900 dark:text-slate-300 mb-1"
+            >Product Title <span class="required-star">*</span></label
+          >
+          <input
+            formControlName="name"
+            class="w-full app-input rounded-md px-3.5 py-2.5 text-xs"
+            placeholder="e.g. Mechanical Gaming Keyboard"
+          />
           @if (form.controls.name.touched && form.controls.name.invalid) {
             <p class="field-error-msg">Product title is required.</p>
           }
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-900 dark:text-slate-300 mb-1">Currency <span class="required-star">*</span></label>
+          <label class="block text-xs font-bold text-slate-900 dark:text-slate-300 mb-1"
+            >Currency <span class="required-star">*</span></label
+          >
           <select
             formControlName="currencyCode"
             class="w-full app-input rounded-md px-3.5 py-2.5 text-xs bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700"
@@ -68,59 +85,84 @@
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-900 dark:text-slate-300 mb-1">Price <span class="required-star">*</span></label>
-          <input type="number" min="0.01" step="0.01" formControlName="price" class="w-full app-input rounded-md px-3.5 py-2.5 text-xs" />
+          <label class="block text-xs font-bold text-slate-900 dark:text-slate-300 mb-1"
+            >Price <span class="required-star">*</span></label
+          >
+          <input
+            type="number"
+            min="0.01"
+            step="0.01"
+            formControlName="price"
+            class="w-full app-input rounded-md px-3.5 py-2.5 text-xs"
+          />
           @if (form.controls.price.touched && form.controls.price.invalid) {
             <p class="field-error-msg">Price must be greater than 0.</p>
           }
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-900 dark:text-slate-300 mb-1">Stock Quantity <span class="required-star">*</span></label>
-          <input type="number" min="0" formControlName="quantity" class="w-full app-input rounded-md px-3.5 py-2.5 text-xs" />
+          <label class="block text-xs font-bold text-slate-900 dark:text-slate-300 mb-1"
+            >Stock Quantity <span class="required-star">*</span></label
+          >
+          <input
+            type="number"
+            min="0"
+            formControlName="quantity"
+            class="w-full app-input rounded-md px-3.5 py-2.5 text-xs"
+          />
           @if (form.controls.quantity.touched && form.controls.quantity.invalid) {
             <p class="field-error-msg">Stock quantity cannot be negative.</p>
           }
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-900 dark:text-slate-300 mb-1">Seller Account ID <span class="required-star">*</span></label>
-          <input
-            formControlName="sellerId"
-            class="w-full app-input rounded-md px-3.5 py-2.5 text-xs font-mono disabled:opacity-60 disabled:cursor-not-allowed"
-          />
-          @if (form.controls.sellerId.touched && form.controls.sellerId.invalid) {
-            <p class="field-error-msg">Seller Account ID is required.</p>
-          }
-          @if (editingProduct()) {
-            <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium mt-1 block">
-              Seller Account ID cannot be changed after creation.
-            </span>
-          }
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold text-slate-900 dark:text-slate-300 mb-1">Category <span class="required-star">*</span></label>
-          <select formControlName="categoryId" class="w-full app-input rounded-md px-3.5 py-2.5 text-xs bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+          <label class="block text-xs font-bold text-slate-900 dark:text-slate-300 mb-1"
+            >Category <span class="required-star">*</span></label
+          >
+          <select
+            formControlName="categoryId"
+            class="w-full app-input rounded-md px-3.5 py-2.5 text-xs bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
+          >
             @for (cat of flatCategories(); track cat.id) {
-              <option [value]="cat.id" class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">{{ cat.fullPath }}</option>
+              <option
+                [value]="cat.id"
+                class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
+              >
+                {{ cat.fullPath }}
+              </option>
             }
           </select>
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-900 dark:text-slate-300 mb-1">Product Type <span class="required-star">*</span></label>
-          <select formControlName="productType" class="w-full app-input rounded-md px-3.5 py-2.5 text-xs bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+          <label class="block text-xs font-bold text-slate-900 dark:text-slate-300 mb-1"
+            >Product Type <span class="required-star">*</span></label
+          >
+          <select
+            formControlName="productType"
+            class="w-full app-input rounded-md px-3.5 py-2.5 text-xs bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
+          >
             @for (type of productTypes(); track type.value) {
-              <option [value]="type.value" class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">{{ type.label }}</option>
+              <option
+                [value]="type.value"
+                class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
+              >
+                {{ type.label }}
+              </option>
             }
           </select>
         </div>
       </div>
 
       <div>
-        <label class="block text-xs font-bold text-slate-900 dark:text-slate-300 mb-1">Description <span class="required-star">*</span></label>
-        <textarea formControlName="description" class="w-full app-input rounded-md px-3.5 py-2.5 text-xs min-h-24" placeholder="Product details..."></textarea>
+        <label class="block text-xs font-bold text-slate-900 dark:text-slate-300 mb-1"
+          >Description <span class="required-star">*</span></label
+        >
+        <textarea
+          formControlName="description"
+          class="w-full app-input rounded-md px-3.5 py-2.5 text-xs min-h-24"
+          placeholder="Product details..."
+        ></textarea>
         @if (form.controls.description.touched && form.controls.description.invalid) {
           <p class="field-error-msg">Description is required.</p>
         }
@@ -129,7 +171,9 @@
       <!-- Image Drag & Drop Uploader -->
       <div class="space-y-3 pt-3 border-t border-slate-200 dark:border-slate-800">
         <div class="flex items-center justify-between">
-          <h4 class="text-xs font-bold text-slate-900 dark:text-slate-200">Product Images Showcase</h4>
+          <h4 class="text-xs font-bold text-slate-900 dark:text-slate-200">
+            Product Images Showcase
+          </h4>
           <span class="text-[10px] text-slate-500 dark:text-slate-400 font-bold">
             {{ productImageIds().length }} / {{ maxProductImages }} uploaded
           </span>
@@ -147,9 +191,15 @@
               (dragover)="$event.preventDefault()"
               (drop)="dropImage(index)"
             >
-              <img class="h-full w-full object-cover" [src]="imageContentUrl(imageId)" [alt]="'Product image ' + (index + 1)" />
+              <img
+                class="h-full w-full object-cover"
+                [src]="imageContentUrl(imageId)"
+                [alt]="'Product image ' + (index + 1)"
+              />
               @if (index === 0) {
-                <span class="absolute bottom-1 left-1 rounded bg-indigo-600 px-1.5 py-0.5 text-[9px] font-bold text-white shadow-xs">
+                <span
+                  class="absolute bottom-1 left-1 rounded bg-indigo-600 px-1.5 py-0.5 text-[9px] font-bold text-white shadow-xs"
+                >
                   Main
                 </span>
               }
@@ -191,7 +241,9 @@
           [disabled]="saving() || uploadingImages()"
           class="rounded-md bg-indigo-600 hover:bg-indigo-700 px-5 py-2.5 text-xs font-bold text-white shadow-sm disabled:opacity-40"
         >
-          {{ saving() ? 'Saving Product...' : (editingProduct() ? 'Update Product' : 'Publish Product') }}
+          {{
+            saving() ? 'Saving Product...' : editingProduct() ? 'Update Product' : 'Publish Product'
+          }}
         </button>
         <button
           type="button"
@@ -213,41 +265,66 @@
     </div>
   } @else if (!products().length) {
     <div class="app-card rounded-lg p-12 text-center text-slate-500 dark:text-slate-400">
-      <p class="text-sm font-bold text-slate-900 dark:text-white">No marketplace products available</p>
+      <p class="text-sm font-bold text-slate-900 dark:text-white">
+        No marketplace products available
+      </p>
     </div>
   } @else {
     <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
       @for (product of products(); track product.id) {
         @let imageSource = imageUrl(product);
 
-        <article class="app-card rounded-lg border border-slate-300 dark:border-slate-800 overflow-hidden shadow-sm flex flex-col">
-          <div class="h-44 bg-slate-200 dark:bg-slate-950 flex items-center justify-center relative overflow-hidden">
+        <article
+          class="app-card rounded-lg border border-slate-300 dark:border-slate-800 overflow-hidden shadow-sm flex flex-col"
+        >
+          <div
+            class="h-44 bg-slate-200 dark:bg-slate-950 flex items-center justify-center relative overflow-hidden"
+          >
             @if (imageSource) {
               <img [src]="imageSource" [alt]="product.name" class="h-full w-full object-cover" />
             } @else {
               <span class="text-slate-500 font-bold text-sm">No Image</span>
             }
 
-            <span class="absolute top-3 right-3 rounded bg-white/80 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700/80 px-2.5 py-0.5 text-[10px] font-bold text-slate-900 dark:text-slate-300 backdrop-blur-md">
+            <span
+              class="absolute top-3 right-3 rounded bg-white/80 dark:bg-slate-900/80 border border-slate-300 dark:border-slate-700/80 px-2.5 py-0.5 text-[10px] font-bold text-slate-900 dark:text-slate-300 backdrop-blur-md"
+            >
               {{ product.productType }}
             </span>
           </div>
 
           <div class="p-5 flex-1 flex flex-col">
             <div class="flex items-start justify-between gap-2">
-              <h3 class="font-bold text-slate-900 dark:text-slate-100 text-sm truncate">{{ product.name }}</h3>
-              <strong class="text-indigo-600 dark:text-indigo-400 font-extrabold text-sm whitespace-nowrap">
+              <h3 class="font-bold text-slate-900 dark:text-slate-100 text-sm truncate">
+                {{ product.name }}
+              </h3>
+              <strong
+                class="text-indigo-600 dark:text-indigo-400 font-extrabold text-sm whitespace-nowrap"
+              >
                 {{ product.price | appCurrency: product.currency }}
               </strong>
             </div>
 
-            <p class="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 mt-1.5 flex-1">{{ product.description }}</p>
+            <p class="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 mt-1.5 flex-1">
+              {{ product.description }}
+            </p>
 
-            <div class="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs">
-              <span class="text-slate-500">Qty: <strong class="text-slate-900 dark:text-slate-200 font-bold">{{ product.quantity }}</strong></span>
+            <div
+              class="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs"
+            >
+              <span class="text-slate-500"
+                >Qty:
+                <strong class="text-slate-900 dark:text-slate-200 font-bold">{{
+                  product.quantity
+                }}</strong></span
+              >
               <span
                 class="rounded px-2 py-0.5 text-[10px] font-bold"
-                [class]="product.quantity ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-400' : 'bg-rose-500/20 text-rose-700 dark:text-rose-400'"
+                [class]="
+                  product.quantity
+                    ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-400'
+                    : 'bg-rose-500/20 text-rose-700 dark:text-rose-400'
+                "
               >
                 {{ product.quantity ? 'In Stock' : 'Out of Stock' }}
               </span>
@@ -263,7 +340,7 @@
               </button>
               <button
                 type="button"
-                (click)="remove(product)"
+                (click)="promptDelete(product)"
                 class="flex-1 rounded-md bg-rose-500/10 border border-rose-500/30 py-2 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 transition-all"
               >
                 Delete
@@ -272,6 +349,148 @@
           </div>
         </article>
       }
+    </div>
+  }
+
+  <!-- Delete Confirmation Modal -->
+  @if (deletingProduct()) {
+    @let prod = deletingProduct()!;
+    @let thumbUrl = imageUrl(prod);
+
+    <div
+      class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-4 animate-fade-in"
+      (click)="cancelDelete()"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="delete-modal-title"
+      aria-describedby="delete-modal-description"
+    >
+      <div
+        class="glass-panel rounded-2xl p-6 max-w-md w-full border border-rose-500/40 space-y-5 shadow-2xl relative bg-white dark:bg-slate-900"
+        (click)="$event.stopPropagation()"
+      >
+        <!-- Modal Header with Warning Icon -->
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <div
+              class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20"
+            >
+              <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
+              </svg>
+            </div>
+            <div>
+              <h3
+                id="delete-modal-title"
+                class="font-bold text-base text-slate-900 dark:text-white"
+              >
+                Delete Product
+              </h3>
+              <p id="delete-modal-description" class="text-xs text-slate-500 dark:text-slate-400">
+                This action is permanent and cannot be undone.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            (click)="cancelDelete()"
+            [disabled]="deleting()"
+            class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-1 rounded-md"
+            aria-label="Close dialog"
+          >
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Product Preview Card -->
+        <div
+          class="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/60 p-3.5 flex items-center gap-3.5"
+        >
+          <div
+            class="h-14 w-14 shrink-0 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-200 dark:bg-slate-900 flex items-center justify-center"
+          >
+            @if (thumbUrl) {
+              <img [src]="thumbUrl" [alt]="prod.name" class="h-full w-full object-cover" />
+            } @else {
+              <span class="text-[10px] text-slate-400 font-bold">No Image</span>
+            }
+          </div>
+          <div class="min-w-0 flex-1">
+            <h4 class="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
+              {{ prod.name }}
+            </h4>
+            <div class="mt-1 flex items-center gap-2 text-[11px]">
+              <strong class="text-indigo-600 dark:text-indigo-400 font-extrabold">
+                {{ prod.price | appCurrency: prod.currency }}
+              </strong>
+              <span class="text-slate-400">•</span>
+              <span class="text-slate-500">Qty: {{ prod.quantity }}</span>
+            </div>
+            <p class="text-[10px] font-mono text-slate-400 mt-0.5 truncate">ID: {{ prod.id }}</p>
+          </div>
+        </div>
+
+        <!-- Warning Message -->
+        <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+          Are you sure you want to remove
+          <strong class="text-slate-900 dark:text-white font-semibold">"{{ prod.name }}"</strong>
+          from the marketplace catalog? Customers will no longer be able to view or purchase this
+          item.
+        </p>
+
+        <!-- Dialog Footer Actions -->
+        <div
+          class="flex items-center justify-end gap-3 pt-2 border-t border-slate-200 dark:border-slate-800"
+        >
+          <button
+            type="button"
+            (click)="cancelDelete()"
+            [disabled]="deleting()"
+            class="rounded-xl bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700/60 px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700 transition-all disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            (click)="confirmDelete()"
+            [disabled]="deleting()"
+            class="rounded-xl bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white px-5 py-2.5 text-xs font-bold shadow-md hover:shadow-rose-600/20 transition-all disabled:opacity-50 flex items-center gap-2"
+          >
+            @if (deleting()) {
+              <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                ></circle>
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+              <span>Deleting...</span>
+            } @else {
+              <span>Delete Product</span>
+            }
+          </button>
+        </div>
+      </div>
     </div>
   }
 </section>

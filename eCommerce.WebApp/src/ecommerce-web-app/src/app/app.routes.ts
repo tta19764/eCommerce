@@ -24,6 +24,12 @@ export const routes: Routes = [
     title: 'Write Review · eCommerce',
   },
   {
+    path: 'stores/:slug',
+    loadComponent: () =>
+      import('./features/store/pages/store-page/store-page').then((m) => m.StorePage),
+    title: 'Storefront · eCommerce',
+  },
+  {
     path: 'cart',
     loadComponent: () =>
       import('./features/cart/pages/cart-page/cart-page').then((m) => m.CartPage),
@@ -130,6 +136,14 @@ export const routes: Routes = [
             (m) => m.AdminUsersPage,
           ),
         title: 'Manage users · eCommerce',
+      },
+      {
+        path: 'sellers',
+        loadComponent: () =>
+          import('./features/admin/pages/admin-sellers-page/admin-sellers-page').then(
+            (m) => m.AdminSellersPage,
+          ),
+        title: 'Pending Sellers · eCommerce',
       },
     ],
   },
