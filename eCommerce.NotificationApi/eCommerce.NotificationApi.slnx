@@ -1,4 +1,5 @@
 <Solution>
+  <Folder Name="/test/"><Project Path="test/NotificationApi.Application.IntegrationTests/NotificationApi.Application.IntegrationTests.csproj" /></Folder>
   <Folder Name="/src/">
     <Project Path="src/NotificationApi.Api/NotificationApi.Api.csproj" />
     <Project Path="src/NotificationApi.Application/NotificationApi.Application.csproj" />

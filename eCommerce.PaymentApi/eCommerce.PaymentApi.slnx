@@ -7,6 +7,7 @@
     <Project Path="src/PaymentApi.Messages/PaymentApi.Messages.csproj" />
   </Folder>
   <Folder Name="/test/">
+    <Project Path="test/PaymentApi.Application.IntegrationTests/PaymentApi.Application.IntegrationTests.csproj" />
     <Project Path="test/PaymentApi.Application.UnitTests/PaymentApi.Application.UnitTests.csproj" />
     <Project Path="test/PaymentApi.Domain.UnitTests/PaymentApi.Domain.UnitTests.csproj" />
   </Folder>

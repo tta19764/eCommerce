@@ -7,6 +7,7 @@
     <Project Path="src/ImageApi.Messages/ImageApi.Messages.csproj" />
   </Folder>
   <Folder Name="/test/">
+    <Project Path="test/ImageApi.Application.IntegrationTests/ImageApi.Application.IntegrationTests.csproj" />
     <Project Path="test/ImageApi.Application.UnitTests/ImageApi.Application.UnitTests.csproj" />
   </Folder>
   <Project Path="../eCommerce.SharedLibrary/SharedLibrary.Api/SharedLibrary.Api.csproj" />
