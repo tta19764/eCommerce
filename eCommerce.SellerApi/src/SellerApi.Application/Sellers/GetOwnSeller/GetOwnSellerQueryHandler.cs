@@ -11,7 +11,10 @@ public sealed class GetOwnSellerQueryHandler(ISellerRepository repository)
     /// <inheritdoc />
     public async Task<Result<SellerResponse>> Handle(GetOwnSellerQuery request, CancellationToken cancellationToken)
     {
-        var seller = await repository.GetByOwnerAsync(request.OwnerUserId, cancellationToken);
+        var seller = request.IsAdmin
+            ? await repository.GetMarketplaceSellerAsync(cancellationToken)
+            : await repository.GetByOwnerAsync(request.OwnerUserId, cancellationToken);
+
         return seller is null
             ? Result.Failure<SellerResponse>(SellerApplicationErrors.NotFound)
             : Result.Success(SellerMapper.Map(seller));

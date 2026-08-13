@@ -191,8 +191,11 @@ public static class ProductEndpoints
     /// <summary>
     /// Creates a product.
     /// </summary>
-    /// <param name="command">The product creation command.</param>
+    /// <param name="request">The product creation command.</param>
     /// <param name="sender">The MediatR sender.</param>
+    /// <param name="user">The current user.</param>
+    /// <param name="accountClient">The account client.</param>
+    /// <param name="sellerClient">The seller client.</param>
     /// <param name="cancellationToken">The request cancellation token.</param>
     /// <returns>An HTTP result containing the created product identifier or validation errors.</returns>
     public static async Task<IResult> CreateProduct(
@@ -210,7 +213,10 @@ public static class ProductEndpoints
         }
 
         var sellerResponse = await sellerClient.GetResponse<GetActiveSellerByOwnerResponse>(
-            new GetActiveSellerByOwnerRequest(ownerUserId.Value), cancellationToken);
+            new GetActiveSellerByOwnerRequest(
+                ownerUserId.Value,
+                user.IsInRole(ApplicationRoles.Admin.Name)),
+            cancellationToken);
 
         if (!sellerResponse.Message.IsActive || sellerResponse.Message.SellerId is null)
         {
@@ -311,6 +317,9 @@ public static class ProductEndpoints
     /// <param name="productId">The reviewed product identifier.</param>
     /// <param name="request">The review request body.</param>
     /// <param name="sender">The MediatR sender.</param>
+    /// <param name="user">The current user.</param>
+    /// <param name="accountClient">The account client.</param>
+    /// <param name="userClient">The user client.</param>
     /// <param name="cancellationToken">The request cancellation token.</param>
     /// <returns>An HTTP result containing the created review identifier or validation errors.</returns>
     public static async Task<IResult> CreateProductReview(

@@ -1,14 +1,22 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using SellerApi.Domain.Sellers;
 using SellerApi.Domain.Stores;
+using SellerApi.Infrastructure.Bootstrap;
 
 namespace SellerApi.Infrastructure.Repositories;
 
 /// <summary>
 /// Reads and tracks seller aggregates with Entity Framework Core.
 /// </summary>
-public sealed class SellerRepository(SellerDbContext dbContext) : ISellerRepository
+public sealed class SellerRepository(
+    SellerDbContext dbContext,
+    IOptions<MarketplaceStoreOptions> marketplaceStoreOptions) : ISellerRepository
 {
+    private readonly string _marketplaceStoreSlug = marketplaceStoreOptions.Value.Slug
+        .Trim()
+        .ToLowerInvariant();
+
     /// <summary>
     /// Gets a tracked seller by its identifier.
     /// </summary>
@@ -26,6 +34,24 @@ public sealed class SellerRepository(SellerDbContext dbContext) : ISellerReposit
     /// <returns>The tracked seller, or null if the owner does not have a seller application.</returns>
     public Task<Seller?> GetByOwnerAsync(Guid ownerUserId, CancellationToken cancellationToken = default) =>
         dbContext.Sellers.FirstOrDefaultAsync(seller => seller.OwnerUserId == ownerUserId, cancellationToken);
+
+    /// <summary>
+    /// Gets the seller that owns the configured marketplace store.
+    /// </summary>
+    /// <param name="cancellationToken">The token that cancels the operation.</param>
+    /// <returns>The untracked marketplace seller, or null if the marketplace store does not exist.</returns>
+    public Task<Seller?> GetMarketplaceSellerAsync(CancellationToken cancellationToken = default)
+    {
+        return dbContext.Stores
+            .AsNoTracking()
+            .Where(store => store.Slug == _marketplaceStoreSlug)
+            .Join(
+                dbContext.Sellers.AsNoTracking(),
+                store => store.SellerId,
+                seller => seller.Id,
+                (_, seller) => seller)
+            .SingleOrDefaultAsync(cancellationToken);
+    }
 
     /// <summary>
     /// Gets a tracked store by its seller identifier.
@@ -86,21 +112,53 @@ public sealed class SellerRepository(SellerDbContext dbContext) : ISellerReposit
     }
 
     /// <summary>
-    /// Gets one page of pending seller applications in creation order.
+    /// Gets one page of pending seller applications and proposed stores in creation order.
     /// </summary>
     /// <param name="page">The one-based page number.</param>
     /// <param name="pageSize">The maximum number of applications in the page.</param>
     /// <param name="cancellationToken">The token that cancels the operation.</param>
-    /// <returns>An untracked list of pending sellers for the requested page.</returns>
-    public async Task<IReadOnlyList<Seller>> GetPendingAsync(int page, int pageSize, CancellationToken cancellationToken = default)
+    /// <returns>An untracked list of pending applications for the requested page.</returns>
+    public async Task<IReadOnlyList<PendingSellerApplication>> GetPendingApplicationsAsync(
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default)
     {
-        return await dbContext.Sellers
+        var applications = await dbContext.Sellers
             .AsNoTracking()
             .Where(seller => seller.Status == SellerStatus.PendingReview)
-            .OrderBy(seller => seller.CreatedOnUtc)
+            .Join(
+                dbContext.Stores.AsNoTracking(),
+                seller => seller.Id,
+                store => store.SellerId,
+                (seller, store) => new { Seller = seller, Store = store })
+            .OrderBy(application => application.Seller.CreatedOnUtc)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(cancellationToken);
+
+        return applications
+            .Select(application => new PendingSellerApplication(
+                application.Seller,
+                application.Store))
+            .ToArray();
+    }
+
+    /// <summary>
+    /// Counts pending seller applications that have a proposed store.
+    /// </summary>
+    /// <param name="cancellationToken">The token that cancels the operation.</param>
+    /// <returns>The number of pending applications.</returns>
+    public Task<int> CountPendingApplicationsAsync(CancellationToken cancellationToken = default)
+    {
+        return dbContext.Sellers
+            .AsNoTracking()
+            .Where(seller => seller.Status == SellerStatus.PendingReview)
+            .Join(
+                dbContext.Stores.AsNoTracking(),
+                seller => seller.Id,
+                store => store.SellerId,
+                (seller, _) => seller.Id)
+            .CountAsync(cancellationToken);
     }
 
     /// <summary>

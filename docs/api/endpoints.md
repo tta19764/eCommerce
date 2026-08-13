@@ -37,16 +37,20 @@ Product creation derives SellerApi ownership from the authenticated account. Its
 
 ## SellerApi
 
+SellerApi success and domain-error payloads use the shared `ApiResponse<T>` envelope. Successful approval and rejection commands return `204 No Content`. Seller application and store review creation return the created identifier as `ApiResponse<Guid>`.
+
 | Method/path | Access |
 | --- | --- |
 | `POST /seller-api/v1/sellers/own/application` | Authenticated user; one application per owner |
-| `GET /seller-api/v1/sellers/own` | Authenticated owner |
-| `GET /seller-api/v1/sellers/pending` | `sellers:review`; paged review queue |
+| `GET /seller-api/v1/sellers/own` | Authenticated seller owner; every Admin resolves to the marketplace seller |
+| `GET /seller-api/v1/sellers/pending?page={page}&pageSize={pageSize}` | `sellers:review`; enriched paged review queue |
 | `POST /seller-api/v1/sellers/{sellerId}/approve` | `sellers:review` |
 | `POST /seller-api/v1/sellers/{sellerId}/reject` | `sellers:review` |
 | `GET /seller-api/v1/stores/{slug}` | Public; active stores only |
 | `POST /seller-api/v1/stores/{storeId}/reviews` | Authenticated customer with verified completed seller order |
 | `GET /seller-api/v1/stores/{storeId}/reviews` | Public paged reviews |
+
+`GET /seller-api/v1/sellers/pending` returns `ApiResponse<PagedListResponse<PendingSellerApplicationResponse>>`. Each item contains `sellerId`, numeric `status`, `submittedOnUtc`, an `applicant` object with `userId`, `fullName`, `email`, and `found`, and a `store` object with `storeId`, `slug`, `name`, `description`, `countryCode`, `defaultCurrency`, `logoImageId`, and `bannerImageId`. SellerApi reads the store from its database and enriches the applicant through UserApi messaging. The client does not need additional calls. `page` is normalized to at least `1`, and `pageSize` is limited to `1` through `100`.
 
 ## OrderApi
 

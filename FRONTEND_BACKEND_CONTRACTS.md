@@ -1316,6 +1316,66 @@ connection.on("ConversationRead", (event: ConversationReadRealtimeEvent) => {
 });
 ```
 
+## Sellers and stores
+
+SellerApi routes use the `/seller-api/v1` gateway prefix. Successful queries and create commands return the shared response envelope:
+
+```ts
+interface ApiResponse<T> {
+  data: T | null;
+  error: { code: string; name: string } | null;
+}
+```
+
+Seller application creation and store review creation return `ApiResponse<string>`, where `data` is the created identifier. Own-seller, public-store, and store-review reads return `ApiResponse<SellerResponse>`, `ApiResponse<StoreResponse>`, and `ApiResponse<StoreReviewResponse[]>` respectively. Domain failures use the same envelope in `400` or `404` responses. Successful approve and reject commands return `204 No Content`.
+
+The administrator review queue is one enriched request:
+
+```http
+GET /seller-api/v1/sellers/pending?page=1&pageSize=20
+```
+
+Its successful response is `ApiResponse<PagedListResponse<PendingSellerApplicationResponse>>`:
+
+```ts
+interface PagedListResponse<T> {
+  items: T[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+}
+
+interface PendingSellerApplicationResponse {
+  sellerId: string;
+  status: SellerStatus;
+  applicant: {
+    userId: string;
+    fullName: string;
+    email: string;
+    found: boolean;
+  };
+  store: {
+    storeId: string;
+    slug: string;
+    name: string;
+    description: string;
+    countryCode: string;
+    defaultCurrency: string;
+    logoImageId: string | null;
+    bannerImageId: string | null;
+  };
+  submittedOnUtc: string;
+}
+```
+
+SellerApi joins the proposed store and requests applicant details from UserApi before it responds. The frontend must not issue a UserApi or public-store request for each queue item. A false `applicant.found` value identifies a missing UserApi profile that the admin UI must display clearly. If UserApi messaging is unavailable, the pending request fails instead of returning partial applicant data. The backend normalizes `page` to at least `1` and limits `pageSize` to `1` through `100`.
+
+`GET /seller-api/v1/sellers/own` is role-aware. A Seller receives the seller application owned by that user's UserApi identifier. Any authenticated Admin receives the configured marketplace seller, even when another administrator is the persisted marketplace owner. Product creation uses the same resolution rule, so products created by any Admin belong to the marketplace seller. The frontend must not compare the returned `ownerUserId` with the current Admin user ID to decide whether the Admin can manage the marketplace store.
+
+Product creation does not accept `sellerId`. ProductApi resolves the authenticated user's active SellerApi seller. Product response and filter models still use SellerApi seller identifiers.
+
+OrderApi order and seller-order responses do not currently expose a store identifier or slug. The frontend cannot derive store-review navigation from a completed order without an additional implemented contract.
+
 ## Notifications
 
 The Notification service sends email through SMTP and uses Quartz background jobs. The frontend does not call the Notification service directly for email confirmation in the current backend flow.

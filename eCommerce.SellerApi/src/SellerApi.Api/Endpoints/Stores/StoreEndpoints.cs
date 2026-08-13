@@ -27,14 +27,16 @@ public static class StoreEndpoints
     private static async Task<IResult> GetStore(string slug, ISender sender, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new GetStoreQuery(slug), cancellationToken);
-        return result.IsSuccess ? Results.Ok(result.Value) : Results.NotFound();
+        return result.IsSuccess
+            ? Results.Ok(result.MapToApiResponse())
+            : Results.NotFound(result.MapToApiResponse());
     }
 
     /// <summary>Gets one page of reviews for a store.</summary>
     private static async Task<IResult> GetReviews(Guid storeId, int page, int pageSize, ISender sender, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new GetStoreReviewsQuery(storeId, page, pageSize), cancellationToken);
-        return Results.Ok(result.Value);
+        return Results.Ok(result.MapToApiResponse());
     }
 
     /// <summary>Creates a review after OrderApi verifies the completed purchase.</summary>
@@ -47,11 +49,13 @@ public static class StoreEndpoints
 
         if (result.IsSuccess)
         {
-            return Results.Created($"/api/v1/stores/{storeId}/reviews/{result.Value}", new { reviewId = result.Value });
+            return Results.Created(
+                $"/api/v1/stores/{storeId}/reviews/{result.Value}",
+                result.MapToApiResponse());
         }
 
         return result.Error == SellerApplicationErrors.StoreNotFound
-            ? Results.NotFound()
-            : Results.BadRequest(new { error = result.Error.Code, message = result.Error.Name });
+            ? Results.NotFound(result.MapToApiResponse())
+            : Results.BadRequest(result.MapToApiResponse());
     }
 }

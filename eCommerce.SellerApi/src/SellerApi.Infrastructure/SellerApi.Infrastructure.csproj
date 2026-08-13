@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
 </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\eCommerce.AuthenticationApi\src\AuthenticationApi.Messages\AuthenticationApi.Messages.csproj" />
     <ProjectReference Include="..\..\..\eCommerce.SharedLibrary\SharedLibrary.Infrastructure\SharedLibrary.Infrastructure.csproj" />
     <ProjectReference Include="..\SellerApi.Application\SellerApi.Application.csproj" />
   </ItemGroup>

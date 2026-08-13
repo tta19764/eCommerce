@@ -35,8 +35,8 @@ public static class SellerEndpoints
 
         var result = await sender.Send(new SubmitSellerApplicationCommand(userId.Value, request.Slug, request.Name, request.Description, request.CountryCode, request.DefaultCurrency), cancellationToken);
         return result.IsSuccess
-            ? Results.Created("/api/v1/sellers/own", new { sellerId = result.Value })
-            : Results.BadRequest(new { error = result.Error.Code, message = result.Error.Name });
+            ? Results.Created("/api/v1/sellers/own", result.MapToApiResponse())
+            : Results.BadRequest(result.MapToApiResponse());
     }
 
     /// <summary>Gets the current user's seller application.</summary>
@@ -44,15 +44,20 @@ public static class SellerEndpoints
     {
         var userId = await principal.GetCurrentUserIdAsync(accounts, cancellationToken);
         if (userId is null) return Results.Forbid();
-        var result = await sender.Send(new GetOwnSellerQuery(userId.Value), cancellationToken);
-        return result.IsSuccess ? Results.Ok(result.Value) : Results.NotFound();
+        var isAdmin = principal.IsInRole(ApplicationRoles.Admin.Name);
+        var result = await sender.Send(
+            new GetOwnSellerQuery(userId.Value, isAdmin),
+            cancellationToken);
+        return result.IsSuccess
+            ? Results.Ok(result.MapToApiResponse())
+            : Results.NotFound(result.MapToApiResponse());
     }
 
     /// <summary>Gets one page of pending seller applications.</summary>
     private static async Task<IResult> GetPending(int page, int pageSize, ISender sender, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new GetPendingSellersQuery(page, pageSize), cancellationToken);
-        return Results.Ok(result.Value);
+        return Results.Ok(result.MapToApiResponse());
     }
 
     /// <summary>Approves one pending seller application.</summary>
@@ -61,7 +66,9 @@ public static class SellerEndpoints
         var adminId = await principal.GetCurrentUserIdAsync(accounts, cancellationToken);
         if (adminId is null) return Results.Forbid();
         var result = await sender.Send(new ApproveSellerCommand(sellerId, adminId.Value), cancellationToken);
-        return result.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = result.Error.Code });
+        return result.IsSuccess
+            ? Results.NoContent()
+            : Results.BadRequest(result.MapToApiResponse());
     }
 
     /// <summary>Rejects one pending seller application.</summary>
@@ -70,6 +77,8 @@ public static class SellerEndpoints
         var adminId = await principal.GetCurrentUserIdAsync(accounts, cancellationToken);
         if (adminId is null) return Results.Forbid();
         var result = await sender.Send(new RejectSellerCommand(sellerId, adminId.Value, request.Reason), cancellationToken);
-        return result.IsSuccess ? Results.NoContent() : Results.BadRequest(new { error = result.Error.Code });
+        return result.IsSuccess
+            ? Results.NoContent()
+            : Results.BadRequest(result.MapToApiResponse());
     }
 }

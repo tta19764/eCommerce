@@ -19,6 +19,11 @@ public interface ISellerRepository
     /// <returns>The seller, or null if the owner does not have a seller application.</returns>
     Task<Seller?> GetByOwnerAsync(Guid ownerUserId, CancellationToken cancellationToken = default);
 
+    /// <summary>Gets the seller that owns the configured marketplace store.</summary>
+    /// <param name="cancellationToken">The token that cancels the operation.</param>
+    /// <returns>The marketplace seller, or null if the marketplace store does not exist.</returns>
+    Task<Seller?> GetMarketplaceSellerAsync(CancellationToken cancellationToken = default);
+
     /// <summary>Gets a tracked store by its seller identifier.</summary>
     /// <param name="sellerId">The seller identifier.</param>
     /// <param name="cancellationToken">The token that cancels the operation.</param>
@@ -52,12 +57,20 @@ public interface ISellerRepository
     /// <returns>The reviews for the requested page.</returns>
     Task<IReadOnlyList<StoreReview>> GetReviewsAsync(Guid storeId, int page, int pageSize, CancellationToken cancellationToken = default);
 
-    /// <summary>Gets one page of pending seller applications.</summary>
+    /// <summary>Gets one page of pending seller applications and proposed stores.</summary>
     /// <param name="page">The one-based page number.</param>
     /// <param name="pageSize">The maximum number of applications in the page.</param>
     /// <param name="cancellationToken">The token that cancels the operation.</param>
-    /// <returns>The pending sellers for the requested page.</returns>
-    Task<IReadOnlyList<Seller>> GetPendingAsync(int page, int pageSize, CancellationToken cancellationToken = default);
+    /// <returns>The pending applications for the requested page.</returns>
+    Task<IReadOnlyList<PendingSellerApplication>> GetPendingApplicationsAsync(
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>Counts pending seller applications that have a proposed store.</summary>
+    /// <param name="cancellationToken">The token that cancels the operation.</param>
+    /// <returns>The number of pending applications.</returns>
+    Task<int> CountPendingApplicationsAsync(CancellationToken cancellationToken = default);
 
     /// <summary>Adds a seller to the current unit of work.</summary>
     /// <param name="seller">The seller to add.</param>
