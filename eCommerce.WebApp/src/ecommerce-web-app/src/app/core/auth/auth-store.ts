@@ -30,8 +30,8 @@ export class AuthStore {
 
   readonly user = computed(() => this.decodeUser(this.tokens()?.accessToken));
   readonly isAuthenticated = computed(() => !!this.user() && !this.isExpired(this.tokens()));
-  readonly isAdmin = computed(() => this.user()?.role === 'Admin');
-  readonly isSeller = computed(() => this.user()?.role === 'Seller');
+  readonly isAdmin = computed(() => this.isAuthenticated() && this.user()?.role === 'Admin');
+  readonly isSeller = computed(() => this.isAuthenticated() && this.user()?.role === 'Seller');
   readonly accessToken = computed(() => this.tokens()?.accessToken ?? null);
   readonly refreshToken = computed(() => this.tokens()?.refreshToken ?? null);
 
@@ -66,7 +66,15 @@ export class AuthStore {
   private restore(): TokenResponse | null {
     try {
       const value = sessionStorage.getItem(STORAGE_KEY);
-      return value ? (JSON.parse(value) as TokenResponse) : null;
+      if (!value) {
+        return null;
+      }
+      const tokens = JSON.parse(value) as TokenResponse;
+      if (this.isExpired(tokens)) {
+        sessionStorage.removeItem(STORAGE_KEY);
+        return null;
+      }
+      return tokens;
     } catch {
       return null;
     }
