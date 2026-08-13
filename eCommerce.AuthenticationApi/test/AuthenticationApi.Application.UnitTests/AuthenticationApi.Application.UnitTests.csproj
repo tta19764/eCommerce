@@ -23,6 +23,11 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\AuthenticationApi.Application\AuthenticationApi.Application.csproj" />
+        <ProjectReference Include="..\..\..\eCommerce.SharedLibrary\SharedLibrary.Testing\SharedLibrary.Testing.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Using Include="SharedLibrary.Testing.Messaging" />
     </ItemGroup>
 
 </Project>

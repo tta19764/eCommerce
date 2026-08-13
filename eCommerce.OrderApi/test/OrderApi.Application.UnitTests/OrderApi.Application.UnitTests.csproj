@@ -24,6 +24,11 @@
     <ItemGroup>
         <ProjectReference Include="..\..\src\OrderApi.Application\OrderApi.Application.csproj" />
         <ProjectReference Include="..\..\src\OrderApi.Messages\OrderApi.Messages.csproj" />
+        <ProjectReference Include="..\..\..\eCommerce.SharedLibrary\SharedLibrary.Testing\SharedLibrary.Testing.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Using Include="SharedLibrary.Testing.Messaging" />
     </ItemGroup>
 
 </Project>
