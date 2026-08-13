@@ -6,6 +6,7 @@ using MassTransit;
 using Microsoft.Extensions.Logging.Abstractions;
 using NotificationApi.Messages.Emails;
 using NSubstitute;
+using SharedLibrary.Application.Abstractions.Caching;
 using SharedLibrary.Domain.Abstractions;
 using UserApi.Messages.Users;
 using Xunit;
@@ -21,6 +22,7 @@ public class RegisterCommandHandlerTests
     private readonly IRequestClient<CreateUserProfileRequest> _userProfileClientMock =
         Substitute.For<IRequestClient<CreateUserProfileRequest>>();
     private readonly IPublishEndpoint _publishEndpointMock = Substitute.For<IPublishEndpoint>();
+    private readonly ICacheService _cacheServiceMock = Substitute.For<ICacheService>();
 
     [Fact]
     public async Task Handle_Should_RegisterIdentityAndCreateAccount()
@@ -47,6 +49,12 @@ public class RegisterCommandHandlerTests
                 cancellationToken)
             .Returns(new TestResponse<CreateUserProfileResponse>(
                 new CreateUserProfileResponse(Guid.Parse("11111111-1111-1111-1111-111111111111"), true, null, null)));
+        _cacheServiceMock
+            .GetAsync<List<string>>("auth:accounts:page-keys", cancellationToken)
+            .Returns([
+                "auth:accounts:page:1:size:10",
+                "auth:accounts:page:2:size:10"
+            ]);
 
         var handler = new RegisterCommandHandler(
             _accountRepositoryMock,
@@ -55,6 +63,7 @@ public class RegisterCommandHandlerTests
             _identityProviderMock,
             _userProfileClientMock,
             _publishEndpointMock,
+            _cacheServiceMock,
             NullLogger<RegisterCommandHandler>.Instance);
 
         var command = new RegisterCommand(
@@ -86,6 +95,15 @@ public class RegisterCommandHandlerTests
             account.Roles.Any(accountRole => accountRole.RoleId == customerRole.Id)));
 
         await _unitOfWorkMock.Received(2).SaveChangesAsync(cancellationToken);
+        await _cacheServiceMock.Received(1).RemoveAsync(
+            "auth:accounts:page:1:size:10",
+            cancellationToken);
+        await _cacheServiceMock.Received(1).RemoveAsync(
+            "auth:accounts:page:2:size:10",
+            cancellationToken);
+        await _cacheServiceMock.Received(1).RemoveAsync(
+            "auth:accounts:page-keys",
+            cancellationToken);
 
         await _userProfileClientMock.Received(1).GetResponse<CreateUserProfileResponse>(
             Arg.Is<CreateUserProfileRequest>(request =>
@@ -123,6 +141,7 @@ public class RegisterCommandHandlerTests
             _identityProviderMock,
             _userProfileClientMock,
             _publishEndpointMock,
+            _cacheServiceMock,
             NullLogger<RegisterCommandHandler>.Instance);
 
         // Act
@@ -139,6 +158,9 @@ public class RegisterCommandHandlerTests
             Arg.Any<string>(),
             Arg.Any<string>(),
             Arg.Any<string>(),
+            Arg.Any<string>(),
+            Arg.Any<CancellationToken>());
+        await _cacheServiceMock.DidNotReceive().RemoveAsync(
             Arg.Any<string>(),
             Arg.Any<CancellationToken>());
     }

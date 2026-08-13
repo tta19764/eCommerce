@@ -1,5 +1,6 @@
 using AuthenticationApi.Application.Abstractions;
 using AuthenticationApi.Domain.Accounts;
+using SharedLibrary.Application.Abstractions.Caching;
 using SharedLibrary.Application.Abstractions.Messaging;
 using SharedLibrary.Domain.Abstractions;
 
@@ -11,7 +12,8 @@ namespace AuthenticationApi.Application.Accounts.ConfirmEmail;
 public sealed class ConfirmEmailCommandHandler(
     IAccountRepository accountRepository,
     IUnitOfWork unitOfWork,
-    IIdentityProvider identityProvider) : ICommandHandler<ConfirmEmailCommand>
+    IIdentityProvider identityProvider,
+    ICacheService cacheService) : ICommandHandler<ConfirmEmailCommand>
 {
     /// <summary>
     /// Executes the Handle operation.
@@ -54,6 +56,7 @@ public sealed class ConfirmEmailCommandHandler(
         }
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
+        await AccountCacheKeys.InvalidatePagesAsync(cacheService, cancellationToken);
 
         return Result.Success();
     }

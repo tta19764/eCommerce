@@ -2,6 +2,7 @@ using AuthenticationApi.Domain.Accounts;
 using AuthenticationApi.Application.Abstractions;
 using MassTransit;
 using Microsoft.Extensions.Logging;
+using SharedLibrary.Application.Abstractions.Caching;
 using SharedLibrary.Application.Abstractions.Messaging;
 using SharedLibrary.Domain.Abstractions;
 using UserApi.Messages.Users;
@@ -16,6 +17,7 @@ public sealed class DeleteAccountCommandHandler(
     IUnitOfWork unitOfWork,
     IIdentityProvider identityProvider,
     IRequestClient<DeleteUserProfileRequest> userProfileClient,
+    ICacheService cacheService,
     ILogger<DeleteAccountCommandHandler> logger) : ICommandHandler<DeleteAccountCommand>
 {
     /// <summary>
@@ -54,6 +56,7 @@ public sealed class DeleteAccountCommandHandler(
 
         accountRepository.Delete(account);
         await unitOfWork.SaveChangesAsync(cancellationToken);
+        await AccountCacheKeys.InvalidatePagesAsync(cacheService, cancellationToken);
 
         var identityDeletion = await identityProvider.DeleteAsync(account.IdentityId, cancellationToken);
 

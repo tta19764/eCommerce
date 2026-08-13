@@ -3,6 +3,7 @@ using AuthenticationApi.Domain.Accounts;
 using MassTransit;
 using Microsoft.Extensions.Logging;
 using NotificationApi.Messages.Emails;
+using SharedLibrary.Application.Abstractions.Caching;
 using SharedLibrary.Application.Abstractions.Messaging;
 using SharedLibrary.Application.Authorization;
 using SharedLibrary.Domain.Abstractions;
@@ -20,6 +21,7 @@ public sealed class RegisterAdminCommandHandler(
     IIdentityProvider identityProvider,
     IRequestClient<CreateUserProfileRequest> userProfileClient,
     IPublishEndpoint publishEndpoint,
+    ICacheService cacheService,
     ILogger<RegisterAdminCommandHandler> logger) : ICommandHandler<RegisterAdminCommand, Guid>
 {
     /// <summary>
@@ -95,6 +97,7 @@ public sealed class RegisterAdminCommandHandler(
         {
             accountRepository.Delete(accountResult.Value);
             await unitOfWork.SaveChangesAsync(cancellationToken);
+            await AccountCacheKeys.InvalidatePagesAsync(cacheService, cancellationToken);
             await identityProvider.DeleteAsync(identityResult.Value, cancellationToken);
 
             logger.LogWarning(
@@ -111,12 +114,14 @@ public sealed class RegisterAdminCommandHandler(
         {
             accountRepository.Delete(accountResult.Value);
             await unitOfWork.SaveChangesAsync(cancellationToken);
+            await AccountCacheKeys.InvalidatePagesAsync(cacheService, cancellationToken);
             await identityProvider.DeleteAsync(identityResult.Value, cancellationToken);
 
             return Result.Failure<Guid>(profileLinkResult.Error);
         }
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
+        await AccountCacheKeys.InvalidatePagesAsync(cacheService, cancellationToken);
 
         await publishEndpoint.Publish(
             new SendEmailConfirmationRequest(

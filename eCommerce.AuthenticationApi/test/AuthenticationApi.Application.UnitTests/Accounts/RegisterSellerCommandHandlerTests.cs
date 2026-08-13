@@ -6,6 +6,7 @@ using MassTransit;
 using Microsoft.Extensions.Logging.Abstractions;
 using NotificationApi.Messages.Emails;
 using NSubstitute;
+using SharedLibrary.Application.Abstractions.Caching;
 using SharedLibrary.Application.Authorization;
 using SharedLibrary.Domain.Abstractions;
 using UserApi.Messages.Users;
@@ -22,6 +23,7 @@ public class RegisterSellerCommandHandlerTests
     private readonly IRequestClient<CreateUserProfileRequest> _userProfileClientMock =
         Substitute.For<IRequestClient<CreateUserProfileRequest>>();
     private readonly IPublishEndpoint _publishEndpointMock = Substitute.For<IPublishEndpoint>();
+    private readonly ICacheService _cacheServiceMock = Substitute.For<ICacheService>();
 
     [Fact]
     public async Task Handle_Should_RegisterIdentityAndCreateSellerAccount()
@@ -57,6 +59,7 @@ public class RegisterSellerCommandHandlerTests
             _identityProviderMock,
             _userProfileClientMock,
             _publishEndpointMock,
+            _cacheServiceMock,
             NullLogger<RegisterSellerCommandHandler>.Instance);
 
         var command = new RegisterSellerCommand(
@@ -89,6 +92,9 @@ public class RegisterSellerCommandHandlerTests
             account.Roles.Any(accountRole => accountRole.RoleId == sellerRole.Id)));
 
         await _unitOfWorkMock.Received(2).SaveChangesAsync(cancellationToken);
+        await _cacheServiceMock.Received(1).RemoveAsync(
+            "auth:accounts:page-keys",
+            cancellationToken);
 
         await _publishEndpointMock.Received(1).Publish(
             Arg.Is<SendEmailConfirmationRequest>(request =>

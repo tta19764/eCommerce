@@ -1,5 +1,6 @@
 using AuthenticationApi.Domain.Accounts;
 using MassTransit;
+using SharedLibrary.Application.Abstractions.Caching;
 using SharedLibrary.Application.Abstractions.Messaging;
 using SharedLibrary.Application.Pagination;
 using SharedLibrary.Domain.Abstractions;
@@ -12,7 +13,8 @@ namespace AuthenticationApi.Application.Accounts.GetAccounts;
 /// </summary>
 public sealed class GetAccountsPageQueryHandler(
     IAccountRepository accountRepository,
-    IRequestClient<GetUserDetailsRequest> userDetailsClient)
+    IRequestClient<GetUserDetailsRequest> userDetailsClient,
+    ICacheService cacheService)
     : IQueryHandler<GetAccountsPageQuery, PagedListResponse<AccountResponse>>
 {
     /// <summary>
@@ -43,6 +45,11 @@ public sealed class GetAccountsPageQueryHandler(
             page,
             pageSize,
             totalCount);
+
+        await AccountCacheKeys.TrackPageAsync(
+            cacheService,
+            request.CacheKey,
+            cancellationToken);
 
         return Result.Success(response);
     }

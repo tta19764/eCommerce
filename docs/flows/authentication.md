@@ -13,6 +13,10 @@ Admin registration follows the same orchestration but `POST /register/admin` req
 
 Seller registration creates credentials, the Seller role, and the normal UserApi profile. It does not create or approve a store. The user must submit a [[Sellers and Stores|store application]], and an administrator must approve it before ProductApi permits product creation.
 
+## Account query cache
+
+The administrator account-page query caches each page and page-size variant for five minutes. AuthenticationApi records each populated account-page cache key in a registry. Successful customer, seller, or administrator registration, email confirmation, and account deletion remove every registered account-page entry. Registration compensation also invalidates the cache when it deletes an account that was already persisted. Role pages use a separate cache and are not invalidated by account mutations because these operations do not change role or permission definitions.
+
 ## Development administrator bootstrap
 
 When `BootstrapAdmin:Enabled` is explicitly true in Development, AuthenticationApi checks whether any local account already has the `Admin` role. A PostgreSQL advisory lock serializes this check across replicas. If none exists, the bootstrap uses the normal administrator registration workflow to create the Keycloak identity, local account/role link, and UserApi profile, then verifies email in both Keycloak and the local account. If the process previously reached account creation but not verification, the next run repairs confirmation for the configured bootstrap account. Any other existing administrator causes a no-op.

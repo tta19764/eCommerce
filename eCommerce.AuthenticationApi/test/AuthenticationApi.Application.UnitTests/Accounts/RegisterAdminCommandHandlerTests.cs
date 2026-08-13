@@ -6,6 +6,7 @@ using MassTransit;
 using Microsoft.Extensions.Logging.Abstractions;
 using NotificationApi.Messages.Emails;
 using NSubstitute;
+using SharedLibrary.Application.Abstractions.Caching;
 using SharedLibrary.Application.Authorization;
 using SharedLibrary.Domain.Abstractions;
 using UserApi.Messages.Users;
@@ -22,6 +23,7 @@ public class RegisterAdminCommandHandlerTests
     private readonly IRequestClient<CreateUserProfileRequest> _userProfileClientMock =
         Substitute.For<IRequestClient<CreateUserProfileRequest>>();
     private readonly IPublishEndpoint _publishEndpointMock = Substitute.For<IPublishEndpoint>();
+    private readonly ICacheService _cacheServiceMock = Substitute.For<ICacheService>();
 
     [Fact]
     public async Task Handle_Should_RegisterIdentityAndCreateAdminAccount()
@@ -57,6 +59,7 @@ public class RegisterAdminCommandHandlerTests
             _identityProviderMock,
             _userProfileClientMock,
             _publishEndpointMock,
+            _cacheServiceMock,
             NullLogger<RegisterAdminCommandHandler>.Instance);
 
         var command = new RegisterAdminCommand(
@@ -89,6 +92,9 @@ public class RegisterAdminCommandHandlerTests
             account.Roles.Any(accountRole => accountRole.RoleId == adminRole.Id)));
 
         await _unitOfWorkMock.Received(2).SaveChangesAsync(cancellationToken);
+        await _cacheServiceMock.Received(1).RemoveAsync(
+            "auth:accounts:page-keys",
+            cancellationToken);
 
         await _userProfileClientMock.Received(1).GetResponse<CreateUserProfileResponse>(
             Arg.Is<CreateUserProfileRequest>(request =>
@@ -126,6 +132,7 @@ public class RegisterAdminCommandHandlerTests
             _identityProviderMock,
             _userProfileClientMock,
             _publishEndpointMock,
+            _cacheServiceMock,
             NullLogger<RegisterAdminCommandHandler>.Instance);
 
         // Act
@@ -144,6 +151,9 @@ public class RegisterAdminCommandHandlerTests
             Arg.Any<string>(),
             Arg.Any<string>(),
             Arg.Any<ApplicationRoles>(),
+            Arg.Any<CancellationToken>());
+        await _cacheServiceMock.DidNotReceive().RemoveAsync(
+            Arg.Any<string>(),
             Arg.Any<CancellationToken>());
     }
 }

@@ -3,6 +3,7 @@ using AuthenticationApi.Application.Accounts.ConfirmEmail;
 using AuthenticationApi.Domain.Accounts;
 using FluentAssertions;
 using NSubstitute;
+using SharedLibrary.Application.Abstractions.Caching;
 using SharedLibrary.Domain.Abstractions;
 using Xunit;
 
@@ -13,6 +14,7 @@ public class ConfirmEmailCommandHandlerTests
     private readonly IAccountRepository _accountRepositoryMock = Substitute.For<IAccountRepository>();
     private readonly IUnitOfWork _unitOfWorkMock = Substitute.For<IUnitOfWork>();
     private readonly IIdentityProvider _identityProviderMock = Substitute.For<IIdentityProvider>();
+    private readonly ICacheService _cacheServiceMock = Substitute.For<ICacheService>();
 
     [Fact]
     public async Task Handle_Should_ConfirmEmail_WhenAccountAndEmailMatch()
@@ -35,7 +37,8 @@ public class ConfirmEmailCommandHandlerTests
         var handler = new ConfirmEmailCommandHandler(
             _accountRepositoryMock,
             _unitOfWorkMock,
-            _identityProviderMock);
+            _identityProviderMock,
+            _cacheServiceMock);
 
         // Act
         Result result = await handler.Handle(
@@ -48,6 +51,9 @@ public class ConfirmEmailCommandHandlerTests
 
         await _identityProviderMock.Received(1).ConfirmEmailAsync("keycloak-user-id", cancellationToken);
         await _unitOfWorkMock.Received(1).SaveChangesAsync(cancellationToken);
+        await _cacheServiceMock.Received(1).RemoveAsync(
+            "auth:accounts:page-keys",
+            cancellationToken);
     }
 
     [Fact]
@@ -66,7 +72,8 @@ public class ConfirmEmailCommandHandlerTests
         var handler = new ConfirmEmailCommandHandler(
             _accountRepositoryMock,
             _unitOfWorkMock,
-            _identityProviderMock);
+            _identityProviderMock,
+            _cacheServiceMock);
 
         // Act
         Result result = await handler.Handle(
@@ -80,5 +87,8 @@ public class ConfirmEmailCommandHandlerTests
         await _identityProviderMock
             .DidNotReceive()
             .ConfirmEmailAsync(Arg.Any<string>(), Arg.Any<CancellationToken>());
+        await _cacheServiceMock.DidNotReceive().RemoveAsync(
+            Arg.Any<string>(),
+            Arg.Any<CancellationToken>());
     }
 }
