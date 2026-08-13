@@ -1,11 +1,11 @@
-using PaymentApi.Api;
+using PaymentApi.Api.Extensions;
 using PaymentApi.Application;
 using PaymentApi.Infrastructure;
 using SharedLibrary.Api.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseSharedSerilog();
-builder.Services.AddPaymentApi();
+builder.Services.AddApi();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
@@ -18,8 +18,5 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseSharedMiddleware();
-app.MapPaymentEndpoints();
+app.MapEndpoints();
 app.Run();
-
-/// <summary>Marker partial type used by in-process API test hosts.</summary>
-public partial class Program;
