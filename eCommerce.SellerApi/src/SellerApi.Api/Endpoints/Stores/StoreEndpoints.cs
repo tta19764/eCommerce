@@ -92,8 +92,9 @@ public static class StoreEndpoints
 
         if (result.IsSuccess)
         {
-            return Results.Created(
-                $"/api/v1/stores/{storeId}/reviews/{result.Value}",
+            return Results.CreatedAtRoute(
+                nameof(GetReviews),
+                new { storeId, version = SellerApiVersions.V1RouteValue },
                 result.MapToApiResponse());
         }
 

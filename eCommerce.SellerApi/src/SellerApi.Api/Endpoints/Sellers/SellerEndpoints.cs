@@ -85,7 +85,10 @@ public static class SellerEndpoints
 
         var result = await sender.Send(new SubmitSellerApplicationCommand(userId.Value, request.Slug, request.Name, request.Description, request.CountryCode, request.DefaultCurrency), cancellationToken);
         return result.IsSuccess
-            ? Results.Created("/api/v1/sellers/own", result.MapToApiResponse())
+            ? Results.CreatedAtRoute(
+                nameof(GetOwn),
+                new { version = SellerApiVersions.V1RouteValue },
+                result.MapToApiResponse())
             : Results.BadRequest(result.MapToApiResponse());
     }
 
