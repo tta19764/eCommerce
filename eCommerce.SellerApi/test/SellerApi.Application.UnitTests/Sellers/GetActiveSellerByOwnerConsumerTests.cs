@@ -8,10 +8,14 @@ using SellerApi.Messages.Sellers;
 
 namespace SellerApi.Application.UnitTests.Sellers;
 
+/// <summary>Verifies seller ownership responses from the MassTransit consumer.</summary>
 public sealed class GetActiveSellerByOwnerConsumerTests
 {
     private readonly ISellerRepository _repository = Substitute.For<ISellerRepository>();
+    private readonly IStoreRepository _storeRepository = Substitute.For<IStoreRepository>();
 
+    /// <summary>Verifies that an administrator receives the marketplace seller and store.</summary>
+    /// <returns>A task that completes when the consumer assertions finish.</returns>
     [Fact]
     public async Task Consume_ShouldReturnMarketplaceSellerForAdmin()
     {
@@ -31,8 +35,8 @@ public sealed class GetActiveSellerByOwnerConsumerTests
         _repository
             .GetMarketplaceSellerAsync(CancellationToken.None)
             .Returns(marketplaceSeller);
-        _repository
-            .GetStoreBySellerAsync(marketplaceSeller.Id, CancellationToken.None)
+        _storeRepository
+            .GetBySellerIdAsync(marketplaceSeller.Id, CancellationToken.None)
             .Returns(marketplaceStore);
 
         GetActiveSellerByOwnerResponse? response = null;
@@ -42,7 +46,7 @@ public sealed class GetActiveSellerByOwnerConsumerTests
         context
             .RespondAsync(Arg.Do<GetActiveSellerByOwnerResponse>(message => response = message))
             .Returns(Task.CompletedTask);
-        var consumer = new GetActiveSellerByOwnerConsumer(_repository);
+        var consumer = new GetActiveSellerByOwnerConsumer(_repository, _storeRepository);
 
         // Act
         await consumer.Consume(context);

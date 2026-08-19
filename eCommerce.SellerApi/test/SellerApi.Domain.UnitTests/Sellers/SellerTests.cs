@@ -2,8 +2,10 @@ using SellerApi.Domain.Sellers;
 
 namespace SellerApi.Domain.UnitTests.Sellers;
 
+/// <summary>Verifies seller review-state transitions.</summary>
 public sealed class SellerTests
 {
+    /// <summary>Verifies that approval changes a pending seller to active.</summary>
     [Fact]
     public void Approve_ChangesPendingSellerToActive()
     {
@@ -13,6 +15,7 @@ public sealed class SellerTests
         Assert.Equal(SellerStatus.Active, seller.Status);
     }
 
+    /// <summary>Verifies that an approved seller cannot be reviewed again.</summary>
     [Fact]
     public void Approve_RejectsSecondReview()
     {

@@ -7,13 +7,24 @@ using UserApi.Messages.Users;
 
 namespace SellerApi.Application.Sellers.GetPendingSellers;
 
-/// <summary>Handles pending seller application queries.</summary>
+/// <summary>Builds the administrator review page for pending seller applications.</summary>
+/// <param name="repository">The repository that pages pending seller and proposed-store records.</param>
+/// <param name="userClient">The UserApi client that resolves applicant profile data.</param>
+/// <remarks>Applicant requests for a page run concurrently. A missing profile remains visible through its found flag.</remarks>
 public sealed class GetPendingSellersQueryHandler(
     ISellerRepository repository,
     IRequestClient<GetUserDetailsRequest> userClient)
     : IQueryHandler<GetPendingSellersQuery, PagedListResponse<PendingSellerApplicationResponse>>
 {
-    /// <inheritdoc />
+    /// <summary>Gets pending applications with proposed stores and applicant data.</summary>
+    /// <param name="request">The requested page values.</param>
+    /// <param name="cancellationToken">The token that cancels database and UserApi requests.</param>
+    /// <returns>
+    /// A successful paged result ordered by application creation time. Page numbers below one become one, and page
+    /// size is clamped from 1 through 100.
+    /// </returns>
+    /// <exception cref="OperationCanceledException">The operation is canceled.</exception>
+    /// <exception cref="RequestException">UserApi does not return an applicant response.</exception>
     public async Task<Result<PagedListResponse<PendingSellerApplicationResponse>>> Handle(
         GetPendingSellersQuery request,
         CancellationToken cancellationToken)
@@ -33,6 +44,12 @@ public sealed class GetPendingSellersQueryHandler(
             totalCount));
     }
 
+    /// <summary>Enriches one pending application with its UserApi applicant profile.</summary>
+    /// <param name="application">The pending seller and proposed store read model.</param>
+    /// <param name="cancellationToken">The token that cancels the UserApi request.</param>
+    /// <returns>The administrator-facing application response.</returns>
+    /// <exception cref="OperationCanceledException">The operation is canceled.</exception>
+    /// <exception cref="RequestException">UserApi does not return an applicant response.</exception>
     private async Task<PendingSellerApplicationResponse> MapAsync(
         PendingSellerApplication application,
         CancellationToken cancellationToken)

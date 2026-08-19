@@ -36,6 +36,8 @@ src/app/
     cart/
     catalog/
     orders/
+    seller/
+    store/
   shared/
     ui/
 ```
@@ -44,8 +46,8 @@ src/app/
 
 | Area | Description |
 | --- | --- |
-| `core/api` | API clients for auth, accounts, products, orders, and images |
-| `core/auth` | Auth store, auth guard, admin guard, and HTTP interceptor |
+| `core/api` | API clients for auth, accounts, products, orders, sellers/stores, and images |
+| `core/auth` | Auth store, auth guard, seller/admin guards, and HTTP interceptor |
 | `core/layout` | Application shell and shared layout frame |
 | `core/models` | Shared frontend contracts and typed response models |
 
@@ -57,8 +59,10 @@ src/app/
 | Cart | `/cart` | Local cart state and claim-based own-order creation workflow |
 | Auth | `/login`, `/register`, `/confirm-email` | Login, public registration, email confirmation |
 | Orders | `/orders` | Authenticated user order history and own-order cancellation |
+| Seller | `/seller` | Store application state and owned-product management |
+| Store | `/stores/:slug` | Public store details and reviews |
 | Profile | Future profile route | Current user's own profile through `/user-api/v1/users/own` |
-| Admin | `/admin/products`, `/admin/users` | Admin-only product and user/account management |
+| Admin | `/admin/products`, `/admin/users`, `/admin/sellers` | Admin-only product, user/account, and seller-application management |
 
 ## Backend Integration Rules
 
@@ -91,7 +95,8 @@ https://localhost:7059/image-api/v1/images/{imageId}/content
 | Catalog | Product cards, product details, reviews, image display |
 | Cart and Orders | Cart state, checkout through `/order-api/v1/orders/own`, order history, cancellation through `/order-api/v1/orders/{orderId}/cancel` |
 | Profile | Own-profile read/update contract through `/user-api/v1/users/own` |
-| Administration | Product management, image uploads, account/user management |
+| Sellers and stores | Seller application submission, public storefronts, store reviews, and seller-owned product management |
+| Administration | Product management, image uploads, account/user management, and seller application review |
 
 ## Contracts
 

@@ -8,6 +8,8 @@ namespace SellerApi.Api.Extensions;
 public static class EndpointMappings
 {
     /// <summary>Maps the versioned seller and store endpoint groups.</summary>
+    /// <param name="builder">The endpoint route builder to update.</param>
+    /// <returns>The same endpoint route builder.</returns>
     public static IEndpointRouteBuilder MapEndpoints(this IEndpointRouteBuilder builder)
     {
         var versionSet = builder.NewApiVersionSet().HasApiVersion(SellerApiVersions.V1).ReportApiVersions().Build();

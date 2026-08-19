@@ -92,7 +92,7 @@ Important events include `SellerActivated`, `SellerRestricted`, `SellerPaymentAc
 
 ### 1. Seller/store foundation
 
-Implemented backend foundation: SellerApi projects/database/migration, one-owner/one-store pending applications, administrator approval/rejection, active-store public reads, Gateway/AppHost wiring, ProductApi active-seller resolution, and purchase-gated store reviews with aggregate ratings. Owner store editing, image attachment validation, application paging/admin UI, suspension/reactivation, frontend pages, and integration tests remain.
+Implemented foundation: SellerApi projects/database/migration, one-owner/one-store pending applications, paged administrator review and approval/rejection, active-store public reads, Gateway/AppHost wiring, ProductApi active-seller resolution, purchase-gated store reviews with aggregate ratings, seller/store/admin frontend pages, and PostgreSQL seller-workflow integration tests. Owner store editing, image attachment validation, suspension/reactivation, store search, payment onboarding, and PostgreSQL store-review integration coverage remain.
 
 - Add SellerApi Domain, Application, Infrastructure, Messages, API, database, migrations, tests, Gateway, and AppHost wiring.
 - Implement owner-only profile/store editing, public store reads, slug uniqueness, URL/value-object validation, authorization, and image references.

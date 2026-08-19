@@ -6,7 +6,7 @@ This repository contains a microservice-based eCommerce application with an Angu
 
 The backend is composed of independently scoped ASP.NET Core services. Each service owns its persistence model and exposes versioned HTTP endpoints. Cross-service workflows use RabbitMQ through MassTransit. Keycloak provides identity management and token issuing. Redis is used for selected read-model caching. Seq centralizes logs. MinIO stores image content. Quartz drives durable notification processing.
 
-The frontend is an Angular application that consumes the backend through the gateway. Its feature areas map directly to backend vertical slices: authentication, catalog, cart, orders, admin management, image rendering, and email confirmation.
+The frontend is an Angular application that consumes the backend through the gateway. Its feature areas map directly to backend vertical slices, including authentication, catalog, cart, orders, seller onboarding, public stores, seller administration, image rendering, and email confirmation.
 
 ## Architecture
 
@@ -16,7 +16,7 @@ The system is organized around these boundaries:
 | --- | --- |
 | Browser | Angular application served by the web app project |
 | Gateway | Single browser-facing backend entry point |
-| Services | Independent APIs for authentication, products, orders, users, images, and notifications |
+| Services | Independent APIs for authentication, products, orders, users, sellers/stores, images, messaging, payments, and notifications |
 | Shared Library | Shared API middleware, application abstractions, authorization, caching, and infrastructure utilities |
 | Infrastructure | PostgreSQL, RabbitMQ, Keycloak, Redis, Seq, MinIO, Mailpit, pgAdmin |
 
@@ -57,6 +57,7 @@ Primary local entry points:
 | Catalog | [Catalog Slice](./vertical-slices/catalog.md) |
 | Orders | [Orders Slice](./vertical-slices/orders.md) |
 | Users | [Users Slice](./vertical-slices/users.md) |
+| Sellers and stores | [Sellers and Stores](./domains/sellers.md) |
 | Images | [Images Slice](./vertical-slices/images.md) |
 | Notifications | [Notifications Slice](./vertical-slices/notifications.md) |
 | Gateway and AppHost | [Gateway And AppHost](./vertical-slices/gateway-apphost.md) |

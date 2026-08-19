@@ -43,7 +43,14 @@ public sealed class StoreReview : Entity
     public DateTime CreatedOnUtc { get; private set; }
 
     /// <summary>Creates a store review.</summary>
+    /// <param name="storeId">The reviewed store identifier. It must not be empty.</param>
+    /// <param name="customerUserId">The UserApi identifier of the reviewer. It must not be empty.</param>
+    /// <param name="sellerOrderId">The completed seller-order identifier. It must not be empty.</param>
+    /// <param name="rating">The rating from 1 through 5.</param>
+    /// <param name="comment">The review text. Its trimmed length must not exceed 2,000 characters.</param>
+    /// <param name="createdOnUtc">The UTC creation time.</param>
     /// <returns>The new review, or a validation failure.</returns>
+    /// <remarks>Purchase eligibility and uniqueness are application and database responsibilities, not factory checks.</remarks>
     public static Result<StoreReview> Create(
         Guid storeId,
         Guid customerUserId,
@@ -60,7 +67,7 @@ public sealed class StoreReview : Entity
             || rating is < 1 or > 5
             || normalizedComment.Length > 2000)
         {
-            return Result.Failure<StoreReview>(SellerErrors.InvalidReview);
+            return Result.Failure<StoreReview>(StoreReviewErrors.Invalid);
         }
 
         return Result.Success(new StoreReview(

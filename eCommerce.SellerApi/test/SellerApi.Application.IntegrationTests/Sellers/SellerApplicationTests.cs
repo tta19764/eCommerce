@@ -10,16 +10,21 @@ using SellerApi.Domain.Stores;
 
 namespace SellerApi.Application.IntegrationTests.Sellers;
 
+/// <summary>Verifies seller application workflows against the SellerApi database.</summary>
 public sealed class SellerApplicationTests : BaseIntegrationTest
 {
     private readonly IntegrationTestWebAppFactory _factory;
 
+    /// <summary>Creates the seller application integration tests.</summary>
+    /// <param name="factory">The shared test application factory.</param>
     public SellerApplicationTests(IntegrationTestWebAppFactory factory)
         : base(factory)
     {
         _factory = factory;
     }
 
+    /// <summary>Verifies that submission and approval persist a queryable active seller and store.</summary>
+    /// <returns>A task that completes when the database assertions finish.</returns>
     [Fact]
     public async Task SubmitAndApprove_ShouldPersistQueryableSellerAndStore()
     {
@@ -56,6 +61,8 @@ public sealed class SellerApplicationTests : BaseIntegrationTest
         store.Name.Should().Be("Test Store");
     }
 
+    /// <summary>Verifies that an administrator resolves the configured marketplace seller.</summary>
+    /// <returns>A task that completes when the database assertions finish.</returns>
     [Fact]
     public async Task GetOwn_ShouldReturnMarketplaceSellerForAnyAdmin()
     {
@@ -90,6 +97,8 @@ public sealed class SellerApplicationTests : BaseIntegrationTest
         result.Value.Status.Should().Be(SellerStatus.Active);
     }
 
+    /// <summary>Verifies that the pending queue contains applicant, store, and paging data.</summary>
+    /// <returns>A task that completes when the database assertions finish.</returns>
     [Fact]
     public async Task GetPending_ShouldReturnApplicantStoreAndPagingMetadata()
     {

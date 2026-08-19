@@ -2,8 +2,10 @@ using SellerApi.Domain.Stores;
 
 namespace SellerApi.Domain.UnitTests.Stores;
 
+/// <summary>Verifies store creation and rating-summary rules.</summary>
 public sealed class StoreTests
 {
+    /// <summary>Verifies that the average rating uses the persisted sum and count.</summary>
     [Fact]
     public void Ratings_UsePersistedSumAndCount()
     {
@@ -14,6 +16,7 @@ public sealed class StoreTests
         Assert.Equal(2, store.ReviewCount);
     }
 
+    /// <summary>Verifies that store creation rejects an invalid slug.</summary>
     [Fact]
     public void Create_RejectsInvalidSlug()
     {

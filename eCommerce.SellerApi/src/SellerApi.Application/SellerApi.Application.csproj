@@ -7,7 +7,6 @@
 </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\eCommerce.SharedLibrary\SharedLibrary.Application\SharedLibrary.Application.csproj" />
-    <ProjectReference Include="..\..\..\eCommerce.SharedLibrary\SharedLibrary.Domain\SharedLibrary.Domain.csproj" />
     <ProjectReference Include="..\..\..\eCommerce.OrderApi\src\OrderApi.Messages\OrderApi.Messages.csproj" />
     <ProjectReference Include="..\..\..\eCommerce.UserApi\src\UserApi.Messages\UserApi.Messages.csproj" />
     <ProjectReference Include="..\SellerApi.Domain\SellerApi.Domain.csproj" />

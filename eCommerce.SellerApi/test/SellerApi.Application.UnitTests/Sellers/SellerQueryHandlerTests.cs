@@ -10,21 +10,25 @@ using UserApi.Messages.Users;
 
 namespace SellerApi.Application.UnitTests.Sellers;
 
+/// <summary>Verifies seller and store query projections and access rules.</summary>
 public sealed class SellerQueryHandlerTests
 {
     private readonly ISellerRepository _repository = Substitute.For<ISellerRepository>();
+    private readonly IStoreRepository _storeRepository = Substitute.For<IStoreRepository>();
     private readonly IRequestClient<GetUserDetailsRequest> _userClient =
         Substitute.For<IRequestClient<GetUserDetailsRequest>>();
 
+    /// <summary>Verifies that a public query hides the store of an inactive seller.</summary>
+    /// <returns>A task that completes when the query assertions finish.</returns>
     [Fact]
     public async Task GetStore_ShouldHideStoreWhenSellerIsNotActive()
     {
         // Arrange
         var seller = Seller.Create(Guid.NewGuid(), DateTime.UtcNow);
         var store = CreateStore(seller.Id);
-        _repository.GetStoreBySlugAsync(store.Slug, CancellationToken.None).Returns(store);
+        _storeRepository.GetBySlugAsync(store.Slug, CancellationToken.None).Returns(store);
         _repository.GetByIdAsync(seller.Id, CancellationToken.None).Returns(seller);
-        var handler = new GetStoreQueryHandler(_repository);
+        var handler = new GetStoreQueryHandler(_repository, _storeRepository);
 
         // Act
         var result = await handler.Handle(new GetStoreQuery(store.Slug), CancellationToken.None);
@@ -33,6 +37,8 @@ public sealed class SellerQueryHandlerTests
         result.IsFailure.Should().BeTrue();
     }
 
+    /// <summary>Verifies that an administrator resolves the marketplace seller.</summary>
+    /// <returns>A task that completes when the query assertions finish.</returns>
     [Fact]
     public async Task GetOwn_ShouldReturnMarketplaceSellerForAdmin()
     {
@@ -59,6 +65,8 @@ public sealed class SellerQueryHandlerTests
             .GetByOwnerAsync(adminUserId, Arg.Any<CancellationToken>());
     }
 
+    /// <summary>Verifies pending application enrichment and page normalization.</summary>
+    /// <returns>A task that completes when the query assertions finish.</returns>
     [Fact]
     public async Task GetPending_ShouldReturnEnrichedPagedApplicationsAndNormalizePaging()
     {

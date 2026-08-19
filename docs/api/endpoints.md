@@ -52,6 +52,8 @@ SellerApi success and domain-error payloads use the shared `ApiResponse<T>` enve
 
 `GET /seller-api/v1/sellers/pending` returns `ApiResponse<PagedListResponse<PendingSellerApplicationResponse>>`. Each item contains `sellerId`, numeric `status`, `submittedOnUtc`, an `applicant` object with `userId`, `fullName`, `email`, and `found`, and a `store` object with `storeId`, `slug`, `name`, `description`, `countryCode`, `defaultCurrency`, `logoImageId`, and `bannerImageId`. SellerApi reads the store from its database and enriches the applicant through UserApi messaging. The client does not need additional calls. `page` is normalized to at least `1`, and `pageSize` is limited to `1` through `100`.
 
+Seller approval and rejection return `404` for an unknown seller and `400` when the seller state does not permit review. Store review creation returns `404` for an unknown store and `400` for failed purchase verification, an inactive seller, a duplicate review, or invalid review data. `GET /stores/{storeId}/reviews` does not verify the store; an unknown identifier returns a successful empty list. AuthenticationApi, UserApi, OrderApi, database, and cancellation failures are not converted into domain responses and propagate through shared middleware.
+
 ## OrderApi
 
 | Method/path | Access |

@@ -76,7 +76,15 @@ public sealed class Store : Entity
     public DateTime CreatedOnUtc { get; private set; }
 
     /// <summary>Creates the proposed store for a seller application.</summary>
+    /// <param name="sellerId">The identifier of the seller that owns the store. It must not be empty.</param>
+    /// <param name="slug">The public slug. Its normalized value must contain 3 through 80 ASCII letters, digits, or hyphens.</param>
+    /// <param name="name">The public name. Its trimmed length must be 2 through 120 characters.</param>
+    /// <param name="description">The public description. Its trimmed length must not exceed 2,000 characters.</param>
+    /// <param name="countryCode">The country code. Its trimmed value must contain two characters.</param>
+    /// <param name="defaultCurrency">The default currency code. Its trimmed value must contain three characters.</param>
+    /// <param name="createdOnUtc">The UTC creation time.</param>
     /// <returns>The new store, or a validation failure.</returns>
+    /// <remarks>The factory trims all text, lowercases the slug, and uppercases the country and currency codes.</remarks>
     public static Result<Store> Create(
         Guid sellerId,
         string slug,
@@ -102,7 +110,7 @@ public sealed class Store : Entity
             || normalizedCountry.Length != 2
             || normalizedCurrency.Length != 3)
         {
-            return Result.Failure<Store>(SellerErrors.InvalidStore);
+            return Result.Failure<Store>(StoreErrors.Invalid);
         }
 
         return Result.Success(new Store(
@@ -118,6 +126,7 @@ public sealed class Store : Entity
 
     /// <summary>Adds one rating to the store rating summary.</summary>
     /// <param name="rating">The rating from 1 through 5.</param>
+    /// <remarks>The caller must validate the range and persist this change in the same transaction as the review.</remarks>
     public void AddRating(byte rating)
     {
         RatingSum += rating;
@@ -126,6 +135,7 @@ public sealed class Store : Entity
 
     /// <summary>Removes one rating from the store rating summary.</summary>
     /// <param name="rating">The rating to remove.</param>
+    /// <remarks>The caller must supply an existing rating and persist this change with the review removal.</remarks>
     public void RemoveRating(byte rating)
     {
         RatingSum -= rating;

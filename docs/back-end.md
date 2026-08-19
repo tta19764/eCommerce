@@ -61,6 +61,7 @@ Not every service has every project type. Message projects are used where other 
 | Catalog | `ProductApi` | Products, descriptions, images, reviews, ratings, inventory adjustments |
 | Orders | `OrderApi` | Claim-based own-order creation, explicit client order creation, ownership, cancellation, admin reads, status changes |
 | Users | `UserApi` | Own-profile reads/updates and admin profile management linked to auth accounts |
+| Sellers | `SellerApi` | Seller applications, administrative review, public stores, ownership resolution, and store reviews |
 | Images | `ImageApi` | Image metadata and binary content |
 | Notifications | `NotificationApi` | Email confirmation jobs and SMTP delivery |
 | Messaging | `MessagingApi` | Customer-seller conversations for product inquiries and seller-order groups |
@@ -76,6 +77,7 @@ AppHost creates a logical PostgreSQL database per service:
 | Product API | `product_db` |
 | Order API | `order_db` |
 | User API | `user_db` |
+| Seller API | `seller_db` |
 | Image API | `image_db` |
 | Authentication API | `authentication_db` |
 | Notification API | `notification_db` |
@@ -93,7 +95,7 @@ Current roles:
 | `Seller` | Marketplace seller role with product ownership workflows |
 | `Admin` | Administration role with all configured permissions |
 
-Current permissions include product, order, user, and account-administration actions. See [Authentication Slice](./vertical-slices/authentication.md) for the full permission model.
+Current permissions include product, order, user, seller-review, and account-administration actions. See [Authentication Slice](./vertical-slices/authentication.md) for the full permission model.
 
 ## Backend Contracts
 

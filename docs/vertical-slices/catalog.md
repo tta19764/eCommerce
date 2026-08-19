@@ -24,7 +24,7 @@ Product pages support search and filters by query text, category, category desce
 
 ### Product Management
 
-Admin users create, update, and delete products. Product image IDs are supplied after uploading images through `ImageApi`. Admins must assign a seller ID, category ID, and product type. Admins can choose one attached image as `displayImageId` for product cards and primary display.
+Seller and administrator users create products through an authenticated ownership workflow. ProductApi asks SellerApi for the caller's active seller and does not accept a seller ID in the create body. Sellers resolve through their approved store; administrators resolve through the configured marketplace store. Product image IDs are supplied after uploading images through `ImageApi`. Callers choose a category and product type and can choose one attached image as `displayImageId` for product cards and primary display.
 
 ### Inventory Adjustments
 

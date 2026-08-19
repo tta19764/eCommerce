@@ -17,6 +17,7 @@ Detailed documentation lives in [docs](./docs):
 | [Catalog Slice](./docs/vertical-slices/catalog.md) | Products, descriptions, images, reviews, ratings, inventory adjustments, and catalog caching |
 | [Orders Slice](./docs/vertical-slices/orders.md) | Claim-based checkout, explicit client order creation, ownership, admin reads, status changes, cancellation, and caching |
 | [Users Slice](./docs/vertical-slices/users.md) | Own-profile workflows, user profiles, account linkage, profile updates, and image references |
+| [Sellers and Stores](./docs/domains/sellers.md) | Seller applications, administrative review, public stores, ownership resolution, and store reviews |
 | [Images Slice](./docs/vertical-slices/images.md) | Image metadata, object storage, upload, download, and deletion |
 | [Notifications Slice](./docs/vertical-slices/notifications.md) | Email confirmation, SMTP, durable jobs, retries, and Quartz |
 | [Messaging Slice](./docs/vertical-slices/messaging.md) | Customer-seller product inquiries, seller-order conversations, and chat email notifications |
@@ -34,6 +35,7 @@ The backend is split into microservices:
 | `ProductApi` | Products, descriptions, inventory, image IDs, reviews, ratings, order-driven stock changes |
 | `OrderApi` | Orders, order items, claim-based customer checkout, ownership checks, cancellation, admin order workflows |
 | `UserApi` | Own-profile endpoints and user profile records linked to authentication accounts |
+| `SellerApi` | Seller applications, administrative approval, public stores, and purchase-gated store reviews |
 | `ImageApi` | Image metadata and binary content backed by MinIO |
 | `NotificationApi` | Durable notification jobs and SMTP email delivery |
 | `MessagingApi` | Marketplace conversations between customers and sellers |
@@ -68,7 +70,9 @@ It is organized by features:
 | `features/catalog` | Product list and product details |
 | `features/cart` | Client-side cart state and checkout entry |
 | `features/orders` | Customer order history |
-| `features/admin` | Admin product and user/account management |
+| `features/seller` | Seller onboarding and owned-product management |
+| `features/store` | Public store details and store reviews |
+| `features/admin` | Admin product, user/account, and seller-application management |
 | `shared/ui` | Reusable UI components |
 
 The frontend should call only the gateway base URL in development:

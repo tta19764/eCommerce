@@ -174,7 +174,7 @@ Response:
 ApiResponse<string> // accountId
 ```
 
-This endpoint creates a seller account, assigns the `Seller` role, creates the linked User API profile, and sends the same email confirmation notification used by normal customer registration.
+This endpoint creates an account with the `Seller` role, creates the linked User API profile, and sends the same email confirmation notification used by normal customer registration. It does not create a SellerApi seller or store. The user must submit a SellerApi store application and receive administrator approval before product creation is available.
 
 ### Confirm Email
 
@@ -267,6 +267,7 @@ Current backend permissions:
 | `products:update-own` | Seller-owned product update workflow |
 | `products:delete-own` | Seller-owned product deletion workflow |
 | `products:read-own` | Seller-owned product read workflow |
+| `sellers:review` | Review, approve, and reject seller applications |
 | `orders:create` | Create orders |
 | `orders:read` | Admin order reads |
 | `orders:update-status` | Update/delete orders in current backend |
@@ -426,7 +427,7 @@ Supported query parameters:
 | `categoryId` | Restrict results to one category |
 | `includeSubcategories` | Include descendant categories when `categoryId` is supplied |
 | `productType` | `Physical`, `DigitalDownload`, `LicenseKey`, `Service`, `Subscription`, or `Bundle` |
-| `sellerId` | Restrict results to one seller account/profile ID |
+| `sellerId` | Restrict results to one SellerApi seller identifier |
 | `minPrice`, `maxPrice` | Inclusive price range |
 | `minRating` | Minimum average rating, usually `0..5` |
 | `inStock` | When `true`, returns products with quantity greater than zero |
@@ -1328,6 +1329,64 @@ interface ApiResponse<T> {
 ```
 
 Seller application creation and store review creation return `ApiResponse<string>`, where `data` is the created identifier. Own-seller, public-store, and store-review reads return `ApiResponse<SellerResponse>`, `ApiResponse<StoreResponse>`, and `ApiResponse<StoreReviewResponse[]>` respectively. Domain failures use the same envelope in `400` or `404` responses. Successful approve and reject commands return `204 No Content`.
+
+The implemented routes are `POST /sellers/own/application`, `GET /sellers/own`, `GET /sellers/pending`, `POST /sellers/{sellerId}/approve`, `POST /sellers/{sellerId}/reject`, `GET /stores/{slug}`, and `GET/POST /stores/{storeId}/reviews` under the SellerApi gateway prefix. Public store reads return only stores whose seller is active. Review listing does not perform that visibility check; an unknown or inactive store identifier can return an empty successful review list.
+
+```ts
+type SellerStatus = 0 | 1 | 2 | 3; // PendingReview, Active, Rejected, Suspended
+
+interface CreateSellerApplicationRequest {
+  slug: string;
+  name: string;
+  description: string;
+  countryCode: string;
+  defaultCurrency: string;
+}
+
+interface SellerResponse {
+  id: string;
+  ownerUserId: string;
+  status: SellerStatus;
+  rejectionReason: string | null;
+  createdOnUtc: string;
+  reviewedOnUtc: string | null;
+}
+
+interface StoreResponse {
+  id: string;
+  sellerId: string;
+  slug: string;
+  name: string;
+  description: string;
+  countryCode: string;
+  defaultCurrency: string;
+  logoImageId: string | null;
+  bannerImageId: string | null;
+  averageRating: number;
+  reviewCount: number;
+}
+
+interface CreateStoreReviewRequest {
+  sellerOrderId: string;
+  rating: number;
+  comment: string;
+}
+
+interface StoreReviewResponse {
+  id: string;
+  customerUserId: string;
+  sellerOrderId: string;
+  rating: number;
+  comment: string;
+  createdOnUtc: string;
+}
+
+interface RejectSellerRequest {
+  reason: string;
+}
+```
+
+Application slugs contain 3 through 80 ASCII letters, digits, or hyphens. Store names contain 2 through 120 trimmed characters, descriptions contain at most 2,000 trimmed characters, country codes contain two characters, and currency codes contain three characters. SellerApi normalizes the slug to lowercase and the country and currency codes to uppercase. Rejection reasons are nonblank and contain at most 1,000 characters. Store ratings are integers from 1 through 5; review comments may be empty and contain at most 2,000 characters.
 
 The administrator review queue is one enriched request:
 
