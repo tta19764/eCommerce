@@ -20,11 +20,15 @@ OrderApi owns checkout records, immutable item snapshots, multi-seller grouping,
 - Status domain events publish notification/integration events and invalidate relevant caches. Seller-order status events add system messages to existing customer-seller conversations in MessagingApi.
 - `Paid` is a compatibility lifecycle projection applied only by `PaymentSucceededIntegrationEventConsumer`; admin and seller commands cannot apply it.
 
+Inventory adjustment and order persistence cross ProductApi and OrderApi without a distributed transaction. The status handlers first apply the in-memory transition, then ask ProductApi to accept the complete stock batch, and finally commit OrderApi. A rejected stock batch prevents the order commit. A later OrderApi persistence failure can leave accepted stock changes without the matching status transition and requires operational reconciliation.
+
 [[Stripe Payment Model Decision]] gives an order one immutable checkout currency and preserves original/converted item prices with Frankfurter quote provenance. FX expiry limits creation of the snapshot; payment eligibility is determined only by the required payment deadline. PaymentApi owns provider state while OrderApi retains the temporary `Paid` fulfillment projection.
 
 ## Application services and repositories
 
 Important handlers include `CreateOrderCommandHandler`, `GetOrderQueryHandler`, `GetOrdersPageQueryHandler`, own/client/seller query handlers, `UpdateOrderStatusCommandHandler`, `UpdateSellerOrderStatusCommandHandler`, `CancelOwnOrderCommandHandler`, `UpdateOrderCommandHandler`, and `DeleteOrderCommandHandler`. `IOrderRepository`/`OrderRepository` loads tracked aggregates for commands and untracked specialized pages via `OrderDbContext`; status and item changes are made through `Order` methods and committed by the unit of work.
+
+`IOrderPricingService` loads one authoritative ProductApi snapshot per distinct product, limits a basket to 50 distinct products and 10,000 combined units per product, and obtains one exchange-rate quote for the complete source-currency set. Duplicate product requests are combined before these limits and calls. Pricing previews do not reserve stock or guarantee the price used by later order creation.
 
 ## API and frontend
 

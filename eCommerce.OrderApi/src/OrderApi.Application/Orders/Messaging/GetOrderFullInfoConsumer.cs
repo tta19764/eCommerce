@@ -18,6 +18,7 @@ public sealed class GetOrderFullInfoConsumer(
     /// Handles a full-order-info request and returns the order with item snapshots when it exists.
     /// </summary>
     /// <param name="context">The MassTransit consume context.</param>
+    /// <returns>A task that completes after an order snapshot or not-found response is sent.</returns>
     public async Task Consume(ConsumeContext<GetOrderFullInfoRequest> context)
     {
         var order = await orderRepository.GetByIdAsync(context.Message.OrderId, context.CancellationToken);

@@ -12,6 +12,12 @@ namespace OrderApi.Application.Orders.Pricing;
 /// persisted orders. It merges duplicates before external calls, validates current stock, obtains one
 /// multi-currency quote, rounds each converted unit once, and aggregates checked minor-unit totals.
 /// </summary>
+/// <remarks>
+/// ProductApi is authoritative for current price, seller, currency, and stock. The service limits a basket to
+/// <see cref="MaximumDistinctItems"/> distinct products and each combined quantity to
+/// <see cref="MaximumItemQuantity"/>. It makes one product request per distinct item and one exchange-rate request
+/// for the complete currency set. The result does not reserve stock or guarantee a later order price.
+/// </remarks>
 public sealed class OrderPricingService(
     IRequestClient<GetProductDetailsRequest> productClient,
     IExchangeRateProvider exchangeRateProvider) : IOrderPricingService
@@ -20,6 +26,7 @@ public sealed class OrderPricingService(
     public const int MaximumItemQuantity = 10_000;
 
     /// <inheritdoc />
+    /// <exception cref="RequestException">A ProductApi request failed or did not receive a valid response.</exception>
     public async Task<Result<OrderPricingResult>> PriceAsync(
         IReadOnlyCollection<OrderItemRequest> items,
         string checkoutCurrency,

@@ -11,6 +11,10 @@ namespace OrderApi.Application.Orders.UpdateSellerOrderStatus;
 /// <summary>
 /// Handles seller-order status changes and product inventory adjustments.
 /// </summary>
+/// <remarks>
+/// The aggregate derives the main order status from its seller-order groups. Confirmation removes stock, while
+/// cancellation restores stock that a prior confirmation removed. Paid status is reserved for PaymentApi events.
+/// </remarks>
 public sealed class UpdateSellerOrderStatusCommandHandler(
     IOrderRepository orderRepository,
     IUnitOfWork unitOfWork,
@@ -18,7 +22,16 @@ public sealed class UpdateSellerOrderStatusCommandHandler(
     ICacheService cacheService,
     ILogger<UpdateSellerOrderStatusCommandHandler> logger) : ICommandHandler<UpdateSellerOrderStatusCommand>
 {
-    /// <inheritdoc />
+    /// <summary>
+    /// Applies a lifecycle transition to one seller-order group and coordinates its inventory changes.
+    /// </summary>
+    /// <param name="request">The command that identifies the seller order and requested status.</param>
+    /// <param name="cancellationToken">The token that cancels repository, messaging, persistence, or cache work.</param>
+    /// <returns>
+    /// A success result, or a failure for a missing seller order, invalid transition, provider-only Paid transition,
+    /// missing product, or insufficient stock.
+    /// </returns>
+    /// <exception cref="RequestException">The ProductApi inventory request failed or did not receive a valid response.</exception>
     public async Task<Result> Handle(UpdateSellerOrderStatusCommand request, CancellationToken cancellationToken)
     {
         if (request.Status == OrderStatus.Paid)

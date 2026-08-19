@@ -16,6 +16,7 @@ public sealed class HasOrdersForClientConsumer(
     /// Handles a client-order existence request.
     /// </summary>
     /// <param name="context">The MassTransit consume context.</param>
+    /// <returns>A task that completes after the order-existence response is sent.</returns>
     public async Task Consume(ConsumeContext<HasOrdersForClientRequest> context)
     {
         var order = await orderRepository.GetByAsync(

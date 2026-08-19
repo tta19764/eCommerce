@@ -14,6 +14,9 @@ public sealed class GetOrderPaymentSnapshotConsumer(IOrderRepository orderReposi
     /// Returns frozen money only when the supplied customer owns a confirmed, unexpired payable order.
     /// PaymentApi therefore never relies on browser-provided ownership, currency, or totals.
     /// </summary>
+    /// <param name="context">The context containing the order and expected customer identifiers.</param>
+    /// <returns>A task that completes after an authoritative payable or rejection response is sent.</returns>
+    /// <remarks>The FX quote expiry does not affect payment eligibility. The independent payment deadline does.</remarks>
     public async Task Consume(ConsumeContext<GetOrderPaymentSnapshotRequest> context)
     {
         var order = await orderRepository.GetByIdAsync(context.Message.OrderId, context.CancellationToken);

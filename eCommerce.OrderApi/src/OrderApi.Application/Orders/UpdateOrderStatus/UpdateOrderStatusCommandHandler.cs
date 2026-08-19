@@ -9,8 +9,13 @@ using SharedLibrary.Domain.Abstractions;
 namespace OrderApi.Application.Orders.UpdateOrderStatus;
 
 /// <summary>
-/// Defines the UpdateOrderStatusCommandHandler class used by this slice.
+/// Applies administrator-controlled main-order status transitions and coordinates inventory changes.
 /// </summary>
+/// <remarks>
+/// Confirmation removes stock and cancellation restores stock that a prior confirmation removed. The handler asks
+/// ProductApi to accept the complete inventory batch before it commits the order transition. Paid status is reserved
+/// for the verified payment integration path.
+/// </remarks>
 public sealed class UpdateOrderStatusCommandHandler(
     IOrderRepository orderRepository,
     IUnitOfWork unitOfWork,
@@ -19,10 +24,15 @@ public sealed class UpdateOrderStatusCommandHandler(
     ILogger<UpdateOrderStatusCommandHandler> logger) : ICommandHandler<UpdateOrderStatusCommand>
 {
     /// <summary>
-    /// Executes the Handle operation.
+    /// Applies the requested lifecycle transition to an existing order.
     /// </summary>
-    /// <param name="request">The request value.</param>
-    /// <param name="cancellationToken">The cancellationToken value.</param>
+    /// <param name="request">The command that identifies the order and requested status.</param>
+    /// <param name="cancellationToken">The token that cancels repository, messaging, persistence, or cache work.</param>
+    /// <returns>
+    /// A success result, or a failure for a missing order, invalid transition, provider-only Paid transition,
+    /// missing product, or insufficient stock.
+    /// </returns>
+    /// <exception cref="RequestException">The ProductApi inventory request failed or did not receive a valid response.</exception>
     public async Task<Result> Handle(UpdateOrderStatusCommand request, CancellationToken cancellationToken)
     {
         if (request.Status == OrderStatus.Paid)

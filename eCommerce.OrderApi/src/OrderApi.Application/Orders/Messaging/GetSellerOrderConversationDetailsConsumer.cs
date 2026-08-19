@@ -13,7 +13,9 @@ public sealed class GetSellerOrderConversationDetailsConsumer(
     ILogger<GetSellerOrderConversationDetailsConsumer> logger)
     : IConsumer<GetSellerOrderConversationDetailsRequest>
 {
-    /// <inheritdoc />
+    /// <summary>Returns the customer and seller identifiers for an existing seller-order group.</summary>
+    /// <param name="context">The context containing the seller-order identifier.</param>
+    /// <returns>A task that completes after a found or not-found response is sent.</returns>
     public async Task Consume(ConsumeContext<GetSellerOrderConversationDetailsRequest> context)
     {
         var order = await orderRepository.GetBySellerOrderIdAsync(context.Message.SellerOrderId, context.CancellationToken);

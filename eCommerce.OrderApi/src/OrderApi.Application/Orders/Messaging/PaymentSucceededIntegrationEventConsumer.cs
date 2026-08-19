@@ -17,6 +17,12 @@ public sealed class PaymentSucceededIntegrationEventConsumer(
     /// Matches customer, order, internal payment ID, amount, and currency before applying the paid
     /// projection. Re-delivery of the same success is an aggregate-level idempotent operation.
     /// </summary>
+    /// <param name="context">The context containing a payment success verified and published by PaymentApi.</param>
+    /// <returns>A task that completes after the event is rejected, treated as a duplicate, or committed.</returns>
+    /// <remarks>
+    /// Contract mismatches are logged and ignored because the event cannot authorize this order. Persistence and
+    /// cache failures propagate so MassTransit can apply its configured retry and error handling.
+    /// </remarks>
     public async Task Consume(ConsumeContext<PaymentSucceededIntegrationEvent> context)
     {
         var message = context.Message;

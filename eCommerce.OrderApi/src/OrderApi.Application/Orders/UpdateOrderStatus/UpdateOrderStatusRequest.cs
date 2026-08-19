@@ -3,7 +3,7 @@ using OrderApi.Domain.Orders;
 namespace OrderApi.Application.Orders.UpdateOrderStatus;
 
 /// <summary>
-/// Defines the UpdateOrderStatusRequest record used by this slice.
+/// Supplies the requested main-order lifecycle status from the HTTP body.
 /// </summary>
-/// <param name="Status">The Status value.</param>
+/// <param name="Status">The requested status. Paid cannot be selected through the administrative endpoint.</param>
 public sealed record UpdateOrderStatusRequest(OrderStatus Status);

@@ -16,6 +16,7 @@ public sealed class GetUserProductPurchaseStatusConsumer(
     /// Handles a user product purchase status request.
     /// </summary>
     /// <param name="context">The MassTransit consume context.</param>
+    /// <returns>A task that completes after purchase and completed-order flags are sent.</returns>
     public async Task Consume(ConsumeContext<GetUserProductPurchaseStatusRequest> context)
     {
         var userId = context.Message.UserId;

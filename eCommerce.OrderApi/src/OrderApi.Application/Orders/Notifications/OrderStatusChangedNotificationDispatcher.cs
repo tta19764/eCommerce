@@ -10,6 +10,11 @@ namespace OrderApi.Application.Orders.Notifications;
 /// <summary>
 /// Sends order status change notifications for confirmed customer email addresses.
 /// </summary>
+/// <remarks>
+/// Account and profile lookup failures are logged and suppressed. A missing account or unconfirmed email prevents
+/// publication. Missing profile data only removes the recipient name. Notification publication failures propagate
+/// so the domain-event pipeline can retry or fail the transaction as configured.
+/// </remarks>
 public sealed class OrderStatusChangedNotificationDispatcher(
     IOrderRepository orderRepository,
     IRequestClient<GetAccountContactByUserIdRequest> accountClient,
@@ -24,6 +29,7 @@ public sealed class OrderStatusChangedNotificationDispatcher(
     /// <param name="status">The new order status.</param>
     /// <param name="changedAtUtc">The UTC status change time.</param>
     /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
+    /// <returns>A task that completes after publication or after a documented skip condition.</returns>
     public async Task DispatchAsync(
         Guid orderId,
         OrderStatus status,

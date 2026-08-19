@@ -12,9 +12,10 @@ namespace OrderApi.Application;
 public static class DependencyInjection
 {
     /// <summary>
-    /// Executes the AddApplication operation.
+    /// Registers OrderApi handlers, validators, pricing, and domain-event dispatch services.
     /// </summary>
-    /// <param name="services">The services value.</param>
+    /// <param name="services">The service collection to update.</param>
+    /// <returns>The same service collection for chained registration.</returns>
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         services.AddSharedApplication(typeof(DependencyInjection).Assembly);
