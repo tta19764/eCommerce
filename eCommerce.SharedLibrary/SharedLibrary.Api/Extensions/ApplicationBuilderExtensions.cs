@@ -20,7 +20,9 @@ public static class ApplicationBuilderExtensions
     public static IHostBuilder UseSharedSerilog(this IHostBuilder host)
     {
         return host.UseSerilog((context, configuration) =>
-            configuration.ReadFrom.Configuration(context.Configuration));
+            configuration
+                .ReadFrom.Configuration(context.Configuration)
+                .Enrich.WithProperty("Service", context.HostingEnvironment.ApplicationName));
     }
 
     /// <summary>
