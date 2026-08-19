@@ -8,6 +8,8 @@ namespace UserApi.Application.Users.GetUser;
 /// <summary>
 /// Handles single-user profile queries.
 /// </summary>
+/// <param name="userRepository">The repository that reads user profiles.</param>
+/// <param name="logger">The logger that records missing profiles.</param>
 public sealed class GetUserQueryHandler(
     IUserRepository userRepository,
     ILogger<GetUserQueryHandler> logger) : IQueryHandler<GetUserQuery, UserResponse>
@@ -16,8 +18,9 @@ public sealed class GetUserQueryHandler(
     /// Reads one user profile.
     /// </summary>
     /// <param name="request">The user query.</param>
-    /// <param name="cancellationToken">The request cancellation token.</param>
+    /// <param name="cancellationToken">The token that cancels the repository query.</param>
     /// <returns>The user profile, or a not-found failure.</returns>
+    /// <exception cref="OperationCanceledException">The operation is canceled.</exception>
     public async Task<Result<UserResponse>> Handle(GetUserQuery request, CancellationToken cancellationToken)
     {
         var user = await userRepository.GetByIdAsync(request.UserId, cancellationToken);

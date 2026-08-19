@@ -10,15 +10,17 @@ UserApi owns commerce profile data, while AuthenticationApi owns credentials/acc
 
 ## Business rules
 
-- Profile creation validates names/email and rejects duplicates through the handler/repository.
-- Updates may independently change first name, last name, or image; value-object validation remains authoritative.
+- Profile creation validates required names and email. The current handler and consumer do not check for an existing profile or email, so a repeated create request can create another record.
+- Updates may independently change first name or last name; value-object validation remains authoritative. A null `ImageId` clears the current image because the command does not distinguish an omitted image field from an explicit clear.
 - Own-profile endpoints never trust a browser-supplied user ID: they resolve the bearer-token identity through AuthenticationApi.
 - Account registration creates the profile through `CreateUserProfileRequest`; account deletion coordinates profile deletion.
-- Uploaded profile images are attached through ImageApi messaging after a successful profile update.
+- A supplied uploaded profile image is attached through ImageApi messaging before local profile validation and persistence. ImageApi and UserApi do not share a transaction, so a later UserApi failure can leave an attached image that the profile does not reference.
 
 ## Application services and repositories
 
 `CreateUserCommandHandler`, `GetUserQueryHandler`, `UpdateUserCommandHandler`, and `DeleteUserCommandHandler` use `IUserRepository`/`UserRepository` and `UserDbContext`. Updates mutate the tracked `User` through its domain method and are committed by the unit of work. Consumers implement create/delete/details contracts used by AuthenticationApi and ProductApi.
+
+Deletion asks OrderApi whether the user owns any order. Any existing order blocks profile deletion. The profile-create consumer returns domain validation failures in its response, but it has no idempotency or account-correlation key and can create duplicate profiles after request redelivery.
 
 ## API and frontend
 

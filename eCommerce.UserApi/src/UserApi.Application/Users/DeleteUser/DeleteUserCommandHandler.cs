@@ -10,6 +10,11 @@ namespace UserApi.Application.Users.DeleteUser;
 /// <summary>
 /// Handles user profile deletion.
 /// </summary>
+/// <param name="userRepository">The repository that loads and deletes the profile.</param>
+/// <param name="unitOfWork">The unit of work that persists profile deletion.</param>
+/// <param name="ordersClient">The OrderApi client that checks for historical orders.</param>
+/// <param name="logger">The logger that records deletion outcomes.</param>
+/// <remarks>Any order owned by the user permanently blocks profile deletion in the current implementation.</remarks>
 public sealed class DeleteUserCommandHandler(
     IUserRepository userRepository,
     IUnitOfWork unitOfWork,
@@ -20,8 +25,9 @@ public sealed class DeleteUserCommandHandler(
     /// Deletes a user profile only when no orders exist for the user.
     /// </summary>
     /// <param name="request">The delete-user command.</param>
-    /// <param name="cancellationToken">The request cancellation token.</param>
+    /// <param name="cancellationToken">The token that cancels lookup, OrderApi messaging, and persistence.</param>
     /// <returns>A success result, or a not-found/conflict failure.</returns>
+    /// <exception cref="OperationCanceledException">The operation is canceled.</exception>
     public async Task<Result> Handle(DeleteUserCommand request, CancellationToken cancellationToken)
     {
         var user = await userRepository.GetByIdAsync(request.UserId, cancellationToken);

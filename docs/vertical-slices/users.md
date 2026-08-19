@@ -20,15 +20,21 @@ The users slice owns profile data linked to authentication accounts. Authenticat
 
 `AuthenticationApi` sends a `CreateUserProfileRequest` through MassTransit after a Keycloak account has been created. `UserApi` creates the profile and returns the profile ID. Authentication stores that ID on the account.
 
+The current create consumer does not correlate the request to an existing account or profile. Request redelivery can create another profile. Names and email are validated, but UserApi does not enforce profile or email uniqueness during creation.
+
 ### Own Profile
 
 Authenticated users can read and update their own profile through `/users/own`. The backend reads the identity id from token claims and requests the linked profile `UserId` from `AuthenticationApi`, so the frontend does not send a user ID for self-service profile workflows.
 
 Profile pictures use the Image API first. The frontend uploads the file through `POST /image-api/v1/images`, then calls `PUT /user-api/v1/users/own` with the returned `imageId`.
 
+When an image ID is supplied, UserApi asks ImageApi to attach it before it validates and commits the local profile update. The services do not share a transaction. A later UserApi failure can leave the image attached without a profile reference. A null image ID clears the current image; the update contract does not distinguish omission from an explicit clear.
+
 ### Admin Profile Update
 
 Admins can read and update user profile details by explicit user ID. The current update model supports changing the image without requiring first and last name changes.
+
+Profile deletion is allowed only when OrderApi reports that the user owns no orders. Existing order history blocks deletion.
 
 ### Account Pages With User Data
 
