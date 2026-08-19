@@ -28,6 +28,7 @@ describe('AdminProductsPage', () => {
     displayImageId: 'img-1',
     rating: 5,
     reviewsCount: 1,
+    store: null,
   };
 
   const mockPageResult: PagedList<Product> = {

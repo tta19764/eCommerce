@@ -1,6 +1,7 @@
 import { AppCurrencyPipe } from '../../../../shared/pipes/app-currency.pipe';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { LucideAngularModule, Store, Tag, Package } from 'lucide-angular';
 import { forkJoin, Observable } from 'rxjs';
 import { apiErrorMessage } from '../../../../core/api/api-base';
 import { ImagesApiClient } from '../../../../core/api/images-api';
@@ -27,12 +28,15 @@ export type PortalState = 'loading' | 'no_application' | 'pending' | 'active' | 
 @Component({
   selector: 'app-seller-products-page',
   standalone: true,
-  imports: [AppCurrencyPipe, FormsModule, ReactiveFormsModule],
+  imports: [AppCurrencyPipe, FormsModule, ReactiveFormsModule, LucideAngularModule],
   templateUrl: './seller-products-page.html',
   styleUrl: './seller-products-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SellerProductsPage {
+  readonly StoreIcon = Store;
+  readonly TagIcon = Tag;
+  readonly PackageIcon = Package;
   protected readonly maxProductImages = 8;
   protected readonly SellerStatus = SellerStatus;
 

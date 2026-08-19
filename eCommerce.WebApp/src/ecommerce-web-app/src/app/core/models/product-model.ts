@@ -1,8 +1,19 @@
 // Product API contracts used by the catalog and product administration pages.
 export type ProductType =
-  'Physical' | 'DigitalDownload' | 'LicenseKey' | 'Service' | 'Subscription' | 'Bundle';
+  | 'Physical'
+  | 'DigitalDownload'
+  | 'LicenseKey'
+  | 'Service'
+  | 'Subscription'
+  | 'Bundle';
 
 export type ProductSortBy = 'Default' | 'Name' | 'Price' | 'Rating';
+
+export interface ProductStore {
+  id: string;
+  name: string;
+  slug: string;
+}
 
 export interface Product {
   id: string;
@@ -18,6 +29,7 @@ export interface Product {
   displayImageId: string | null;
   rating: number;
   reviewsCount: number;
+  store: ProductStore | null;
 }
 
 export interface ProductCategory {

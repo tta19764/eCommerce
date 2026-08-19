@@ -30,6 +30,12 @@ export const routes: Routes = [
     title: 'Storefront · eCommerce',
   },
   {
+    path: 'store/:slug',
+    loadComponent: () =>
+      import('./features/store/pages/store-page/store-page').then((m) => m.StorePage),
+    title: 'Storefront · eCommerce',
+  },
+  {
     path: 'cart',
     loadComponent: () =>
       import('./features/cart/pages/cart-page/cart-page').then((m) => m.CartPage),

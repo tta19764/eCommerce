@@ -108,6 +108,73 @@
               <span>{{ !currentProduct.quantity ? 'Out of Stock' : (choosingQuantity() ? 'Confirm Add to Bag' : 'Add to Bag') }}</span>
             </button>
           </div>
+
+          <!-- Seller / Store Article Card -->
+          @if (store() || currentProduct.store) {
+            @let currentStore = store();
+            @let storeName = currentStore?.name || currentProduct.store?.name;
+            @let storeSlug = currentStore?.slug || currentProduct.store?.slug;
+
+            <article
+              [routerLink]="storeSlug ? ['/store', storeSlug] : null"
+              tabindex="0"
+              role="button"
+              [attr.aria-label]="'View store storefront for ' + storeName"
+              class="rounded-lg border border-slate-300 dark:border-slate-800 bg-slate-100/70 dark:bg-slate-900/60 p-4 space-y-3 shadow-xs hover:border-indigo-500/60 dark:hover:border-indigo-500/60 hover:bg-indigo-500/5 transition-all cursor-pointer group"
+            >
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="h-10 w-10 rounded-lg bg-indigo-600/10 border border-indigo-600/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-base group-hover:scale-105 transition-transform">
+                    <lucide-icon [img]="StoreIcon" class="h-5 w-5"></lucide-icon>
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-1.5">
+                      <span class="font-extrabold text-slate-900 dark:text-white text-xs group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                        {{ storeName }}
+                      </span>
+                      <span class="rounded bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 px-1.5 py-0.2 text-[9px] font-bold">
+                        Verified Store
+                      </span>
+                    </div>
+                    @if (currentStore) {
+                      <p class="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
+                        {{ currentStore.countryCode }} • {{ currentStore.defaultCurrency }}
+                      </p>
+                    }
+                  </div>
+                </div>
+
+                @if (storeSlug) {
+                  <div class="flex items-center text-xs font-bold text-indigo-600 dark:text-indigo-400 group-hover:translate-x-0.5 transition-transform">
+                    <span>Visit Store</span>
+                    <svg class="h-3.5 w-3.5 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                }
+              </div>
+
+              <!-- Store Rating & Review Stats -->
+              @if (currentStore) {
+                <div class="flex items-center gap-4 pt-2 border-t border-slate-200 dark:border-slate-800/80 text-xs">
+                  <div class="flex items-center gap-1">
+                    <span class="text-amber-500 text-xs">★</span>
+                    <strong class="font-extrabold text-slate-900 dark:text-white">
+                      {{ currentStore.averageRating ? currentStore.averageRating.toFixed(1) : 'New' }}
+                    </strong>
+                    <span class="text-slate-500 dark:text-slate-400 text-[11px]">Average Rating</span>
+                  </div>
+
+                  <div class="h-3 w-px bg-slate-300 dark:bg-slate-800"></div>
+
+                  <div class="flex items-center gap-1">
+                    <strong class="font-extrabold text-slate-900 dark:text-white">{{ currentStore.reviewCount }}</strong>
+                    <span class="text-slate-500 dark:text-slate-400 text-[11px]">Store Reviews</span>
+                  </div>
+                </div>
+              }
+            </article>
+          }
         </div>
       </div>
     </div>

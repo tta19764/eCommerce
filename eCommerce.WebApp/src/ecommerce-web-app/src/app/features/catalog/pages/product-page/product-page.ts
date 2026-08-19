@@ -3,10 +3,13 @@ import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { LucideAngularModule, Store } from 'lucide-angular';
 import { forkJoin } from 'rxjs';
 import { ImagesApiClient } from '../../../../core/api/images-api';
 import { ProductsApiClient } from '../../../../core/api/products-api';
+import { SellerApiClient } from '../../../../core/api/seller-api';
 import { Product, ProductReview, ProductReviewEligibility } from '../../../../core/models/product-model';
+import { StoreResponse } from '../../../../core/models/seller-model';
 import { AuthStore } from '../../../../core/auth/auth-store';
 import { UserStore } from '../../../../core/user/user-store';
 import { CartStore } from '../../../cart/data-access/cart-store';
@@ -19,13 +22,15 @@ export interface RatingDistributionRow {
 
 @Component({
   selector: 'app-product-page',
-  imports: [AppCurrencyPipe, DatePipe, RouterLink, FormsModule],
+  imports: [AppCurrencyPipe, DatePipe, RouterLink, FormsModule, LucideAngularModule],
   templateUrl: './product-page.html',
   styleUrl: './product-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProductPage {
+  readonly StoreIcon = Store;
   private readonly api = inject(ProductsApiClient);
+  private readonly sellerApi = inject(SellerApiClient);
   private readonly images = inject(ImagesApiClient);
   private readonly route = inject(ActivatedRoute);
 
@@ -35,6 +40,7 @@ export class ProductPage {
   protected readonly Math = Math;
 
   protected readonly product = signal<Product | null>(null);
+  protected readonly store = signal<StoreResponse | null>(null);
   protected readonly reviews = signal<ProductReview[]>([]);
   protected readonly reviewEligibility = signal<ProductReviewEligibility | null>(null);
   protected readonly loading = signal(true);
@@ -170,7 +176,11 @@ export class ProductPage {
       },
       error: (err) => {
         this.submittingReview.set(false);
-        const detail = err?.error?.error?.message || err?.error?.detail || err?.error?.title || 'Failed to publish review. Please check your eligibility and try again.';
+        const detail =
+          err?.error?.error?.message ||
+          err?.error?.detail ||
+          err?.error?.title ||
+          'Failed to publish review. Please check your eligibility and try again.';
         this.reviewError.set(detail);
       },
     });
@@ -246,6 +256,14 @@ export class ProductPage {
           this.reviewEligibility.set(res.eligibility);
         }
         this.loading.set(false);
+
+        const storeSlugOrId = res.product?.store?.slug || res.product?.sellerId;
+        if (storeSlugOrId) {
+          this.sellerApi.getStoreBySlug(storeSlugOrId).subscribe({
+            next: (storeData) => this.store.set(storeData),
+            error: () => this.store.set(null),
+          });
+        }
       },
       error: () => {
         this.failed.set(true);
