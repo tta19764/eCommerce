@@ -13,6 +13,6 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Stripe.net" Version="48.5.0" />
+    <PackageReference Include="Stripe.net" Version="52.3.0" />
   </ItemGroup>
 </Project>
