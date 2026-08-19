@@ -13,13 +13,31 @@ namespace PaymentApi.Application.Payments.CreatePayment;
 /// intent. The request contains no browser-provided money, and the stable provider idempotency key closes
 /// the gap where Stripe succeeds but the local database save must be retried.
 /// </summary>
+/// <param name="paymentRepository">The repository that reads and tracks payment aggregates.</param>
+/// <param name="unitOfWork">The unit of work that commits payment changes and outbox records.</param>
+/// <param name="orderClient">The request client that obtains the customer-authorized order payment snapshot.</param>
+/// <param name="paymentGateway">The provider boundary that creates or retrieves a PaymentIntent.</param>
+/// <remarks>
+/// OrderApi is the authority for ownership, eligibility, amount, and currency. PaymentApi sends no
+/// browser-provided monetary values to the provider. The provider operation and local database commit do not share
+/// a transaction; the deterministic idempotency key supports safe recovery after an uncertain local save.
+/// </remarks>
 public sealed class CreatePaymentCommandHandler(
     IPaymentRepository paymentRepository,
     IUnitOfWork unitOfWork,
     IRequestClient<GetOrderPaymentSnapshotRequest> orderClient,
     IPaymentGateway paymentGateway) : ICommandHandler<CreatePaymentCommand, CreatePaymentResponse>
 {
-    /// <inheritdoc />
+    /// <summary>
+    /// Creates a payment for an eligible order or returns the provider intent already linked to that order.
+    /// </summary>
+    /// <param name="request">The order and authenticated customer identifiers.</param>
+    /// <param name="cancellationToken">The token that cancels messaging, provider, and persistence operations.</param>
+    /// <returns>
+    /// A successful result with the payment identifier, client secret, status, and frozen amount. A failure result
+    /// indicates an ineligible order, invalid payment state, unavailable provider intent, or provider failure.
+    /// </returns>
+    /// <exception cref="OperationCanceledException">The operation is canceled.</exception>
     public async Task<Result<CreatePaymentResponse>> Handle(CreatePaymentCommand request, CancellationToken cancellationToken)
     {
         // Browser reloads and command redelivery must return the same provider intent rather than
