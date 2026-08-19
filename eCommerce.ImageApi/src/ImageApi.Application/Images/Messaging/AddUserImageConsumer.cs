@@ -7,17 +7,22 @@ using SharedLibrary.Domain.Abstractions;
 namespace ImageApi.Application.Images.Messaging;
 
 /// <summary>
-/// Attaches an uploaded temporary profile image before UserApi stores the image id.
+/// Attaches an uploaded temporary profile image before UserApi stores its identifier.
 /// </summary>
+/// <param name="imageRepository">The repository that resolves and tracks image metadata.</param>
+/// <param name="unitOfWork">The unit of work that persists the lifecycle change.</param>
+/// <param name="logger">The logger that records attachment outcomes.</param>
 public sealed class AddUserImageConsumer(
     IImageRepository imageRepository,
     IUnitOfWork unitOfWork,
     ILogger<AddUserImageConsumer> logger) : IConsumer<AddUserImageRequest>
 {
     /// <summary>
-    /// Executes the Consume operation.
+    /// Marks the requested image as attached and reports whether the image exists.
     /// </summary>
-    /// <param name="context">The context value.</param>
+    /// <param name="context">The consume context that contains the user and temporary image identifiers.</param>
+    /// <returns>A task that completes after the response is sent.</returns>
+    /// <exception cref="OperationCanceledException">Message processing is canceled.</exception>
     public async Task Consume(ConsumeContext<AddUserImageRequest> context)
     {
         var image = context.Message.TemporaryImageId == Guid.Empty

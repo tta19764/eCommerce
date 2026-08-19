@@ -10,8 +10,15 @@ using SharedLibrary.Domain.Abstractions;
 namespace ImageApi.Infrastructure.Storage;
 
 /// <summary>
-/// Defines the S3ImageStorage class used by this slice.
+/// Stores image content in an S3-compatible MinIO bucket.
 /// </summary>
+/// <param name="minioClient">The MinIO client used for bucket and object operations.</param>
+/// <param name="options">The object storage connection, bucket, and URL settings.</param>
+/// <param name="logger">The logger that records storage failures.</param>
+/// <remarks>
+/// MinIO failures become <see cref="ImageErrors.StorageFailure"/> results. Cancellation and non-MinIO exceptions
+/// propagate to the caller. Upload creates the configured bucket when it does not exist.
+/// </remarks>
 public sealed class S3ImageStorage(
     IMinioClient minioClient,
     IOptions<S3StorageOptions> options,
@@ -19,13 +26,11 @@ public sealed class S3ImageStorage(
 {
     private readonly S3StorageOptions _options = options.Value;
 
+    /// <inheritdoc />
     public string BucketName => _options.BucketName;
 
-    /// <summary>
-    /// Executes the CreateStorageKey operation.
-    /// </summary>
-    /// <param name="imageId">The imageId value.</param>
-    /// <param name="fileName">The fileName value.</param>
+    /// <inheritdoc />
+    /// <remarks>The method does not validate that <paramref name="imageId"/> is non-empty.</remarks>
     public string CreateStorageKey(Guid imageId, string fileName)
     {
         var extension = Path.GetExtension(fileName);
@@ -35,13 +40,7 @@ public sealed class S3ImageStorage(
             : $"images/{imageId:N}{extension.ToLowerInvariant()}";
     }
 
-    /// <summary>
-    /// Executes the UploadAsync operation.
-    /// </summary>
-    /// <param name="storageKey">The storageKey value.</param>
-    /// <param name="stream">The stream value.</param>
-    /// <param name="contentType">The contentType value.</param>
-    /// <param name="cancellationToken">The cancellationToken value.</param>
+    /// <inheritdoc />
     public async Task<Result> UploadAsync(
         string storageKey,
         Stream stream,
@@ -78,11 +77,7 @@ public sealed class S3ImageStorage(
         }
     }
 
-    /// <summary>
-    /// Executes the DownloadAsync operation.
-    /// </summary>
-    /// <param name="storageKey">The storageKey value.</param>
-    /// <param name="cancellationToken">The cancellationToken value.</param>
+    /// <inheritdoc />
     public async Task<Result<StoredImage>> DownloadAsync(string storageKey, CancellationToken cancellationToken = default)
     {
         try
@@ -116,11 +111,12 @@ public sealed class S3ImageStorage(
         }
     }
 
-    /// <summary>
-    /// Executes the GetReadUrlAsync operation.
-    /// </summary>
-    /// <param name="storageKey">The storageKey value.</param>
-    /// <param name="cancellationToken">The cancellationToken value.</param>
+    /// <inheritdoc />
+    /// <remarks>
+    /// The configured public base URL takes precedence. Otherwise, the method generates a presigned URL with the
+    /// configured expiry. The current MinIO signing API is synchronous and does not use
+    /// <paramref name="cancellationToken"/>.
+    /// </remarks>
     public Task<Result<string>> GetReadUrlAsync(string storageKey, CancellationToken cancellationToken = default)
     {
         if (!string.IsNullOrWhiteSpace(_options.PublicBaseUrl))
@@ -153,11 +149,7 @@ public sealed class S3ImageStorage(
         }
     }
 
-    /// <summary>
-    /// Executes the DeleteAsync operation.
-    /// </summary>
-    /// <param name="storageKey">The storageKey value.</param>
-    /// <param name="cancellationToken">The cancellationToken value.</param>
+    /// <inheritdoc />
     public async Task<Result> DeleteAsync(string storageKey, CancellationToken cancellationToken = default)
     {
         try

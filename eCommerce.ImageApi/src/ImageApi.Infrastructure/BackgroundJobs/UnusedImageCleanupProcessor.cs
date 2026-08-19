@@ -8,17 +8,26 @@ namespace ImageApi.Infrastructure.BackgroundJobs;
 /// <summary>
 /// Deletes expired temporary images from object storage and then removes their metadata rows.
 /// </summary>
+/// <param name="dbContext">The database context used to select and delete image metadata.</param>
+/// <param name="imageStorage">The object storage service used to delete image content.</param>
+/// <param name="logger">The logger that records objects skipped after storage failures.</param>
+/// <remarks>
+/// Each page is ordered from the oldest image. A storage failure leaves the metadata unchanged so a later job can
+/// retry it. Successful metadata deletions are committed once after the complete page is processed.
+/// </remarks>
 internal sealed class UnusedImageCleanupProcessor(
     ImageDbContext dbContext,
     IImageStorage imageStorage,
     ILogger<UnusedImageCleanupProcessor> logger)
 {
     /// <summary>
-    /// Executes the CleanupAsync operation.
+    /// Deletes one page of temporary images that are at least the specified age.
     /// </summary>
-    /// <param name="minimumAge">The minimumAge value.</param>
-    /// <param name="pageSize">The pageSize value.</param>
-    /// <param name="cancellationToken">The cancellationToken value.</param>
+    /// <param name="minimumAge">The minimum age of an image that is eligible for cleanup.</param>
+    /// <param name="pageSize">The maximum number of metadata records to process.</param>
+    /// <param name="cancellationToken">The token that cancels database and storage operations.</param>
+    /// <returns>The number of metadata records deleted from the current page.</returns>
+    /// <exception cref="OperationCanceledException">The operation is canceled.</exception>
     public async Task<int> CleanupAsync(
         TimeSpan minimumAge,
         int pageSize,

@@ -4,14 +4,15 @@ using SharedLibrary.Application;
 namespace ImageApi.Application;
 
 /// <summary>
-/// Defines the DependencyInjection class used by this slice.
+/// Registers ImageApi application-layer services.
 /// </summary>
 public static class DependencyInjection
 {
     /// <summary>
-    /// Executes the AddApplication operation.
+    /// Registers ImageApi request handlers and application pipeline behaviors.
     /// </summary>
-    /// <param name="services">The services value.</param>
+    /// <param name="services">The service collection to update.</param>
+    /// <returns>The same service collection for chained registration.</returns>
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         return services.AddSharedApplication(typeof(DependencyInjection).Assembly);

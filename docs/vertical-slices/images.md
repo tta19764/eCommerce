@@ -18,15 +18,19 @@ The images slice owns image metadata and binary content. Products and users stor
 
 ### Upload
 
-Authenticated users with `images:upload` upload image files as multipart form data. Customers use this for profile pictures, and admins use it for product images. The backend stores binary content in MinIO and metadata in PostgreSQL.
+Authenticated users with `images:upload` upload image files as multipart form data. Customers use this for profile pictures. Sellers and admins use it for product images. The backend stores binary content in MinIO and metadata in PostgreSQL.
+
+The application accepts JPEG, PNG, WebP, and GIF media types. The declared file size must be from 1 byte through 10 MiB. The upload stores the object before it commits metadata, because MinIO and PostgreSQL do not share a transaction. If metadata persistence fails, the object can remain without a database record. If read-URL generation fails after a successful commit, the upload response remains successful and contains an empty URL.
 
 ### Attach To Product Or User
 
-The client uses returned image IDs when creating or updating products and users. Uploaded images start as `Temporary`; the Image API marks them `Attached` after a product or user service confirms ownership through the image messaging contracts.
+The client uses returned image IDs when creating or updating products and users. Uploaded images start as `Temporary`; the Image API marks them `Attached` after a product or user service confirms ownership through the image messaging contracts. Product attachment removes duplicate IDs and persists the batch only when every distinct ID exists. User attachment fails when its single ID is empty or missing.
 
 ### Cleanup
 
 Image API runs a Quartz cleanup job for unused temporary images. Images that remain `Temporary` longer than `BackgroundJobs:CleanupUnusedImages:MinimumAgeMinutes` are deleted from MinIO first and then removed from the `image_db` metadata table. Attached images are never selected by this job.
+
+The job processes the oldest eligible records up to `BackgroundJobs:CleanupUnusedImages:PageSize`. If object deletion fails, metadata remains temporary so a later execution can retry it. The job cannot find an uploaded object that has no metadata record.
 
 ### Render
 
@@ -44,6 +48,9 @@ https://localhost:7059/image-api/v1/images/{imageId}/content
 | `GET /image-api/v1/images/{imageId}` | Public | Get image metadata |
 | `GET /image-api/v1/images/{imageId}/content` | Public | Stream image content |
 | `DELETE /image-api/v1/images/{imageId}` | `products:update` | Delete image |
+
+Delete removes the object before it removes metadata. A storage failure leaves the metadata record unchanged. The two deletions do not share a transaction.
+The delete endpoint currently requires the global `products:update` permission. Seller own-product permissions and customer profile ownership do not authorize direct image deletion.
 
 ## Configuration
 
