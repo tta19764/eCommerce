@@ -7,6 +7,11 @@ namespace NotificationApi.Application.Templates;
 /// <summary>
 /// Renders embedded HTML email templates using simple named placeholders.
 /// </summary>
+/// <remarks>
+/// Every substituted value is HTML encoded. Missing embedded resources cause an
+/// <see cref="InvalidOperationException"/>. Placeholders that are not present in the supplied value map remain in
+/// the output.
+/// </remarks>
 public sealed class EmbeddedEmailTemplateRenderer : IEmailTemplateRenderer
 {
     private const string EmailConfirmationResourceName =
@@ -19,6 +24,7 @@ public sealed class EmbeddedEmailTemplateRenderer : IEmailTemplateRenderer
         "NotificationApi.Application.Templates.ConversationMessage.html";
 
     /// <inheritdoc />
+    /// <exception cref="InvalidOperationException">The embedded confirmation template does not exist.</exception>
     public string RenderEmailConfirmation(
         string firstName,
         string lastName,
@@ -39,6 +45,7 @@ public sealed class EmbeddedEmailTemplateRenderer : IEmailTemplateRenderer
     }
 
     /// <inheritdoc />
+    /// <exception cref="InvalidOperationException">The embedded order-status template does not exist.</exception>
     public string RenderOrderStatusChanged(
         string fullName,
         Guid orderId,
@@ -58,6 +65,7 @@ public sealed class EmbeddedEmailTemplateRenderer : IEmailTemplateRenderer
     }
 
     /// <inheritdoc />
+    /// <exception cref="InvalidOperationException">The embedded conversation template does not exist.</exception>
     public string RenderConversationMessage(
         string recipientFullName,
         string senderFullName,

@@ -13,6 +13,17 @@ namespace NotificationApi.Application.Notifications.Messaging;
 /// <summary>
 /// Stores marketplace chat notification requests as durable email jobs.
 /// </summary>
+/// <param name="notificationJobRepository">The repository that tracks the new notification job.</param>
+/// <param name="unitOfWork">The unit of work that persists the job.</param>
+/// <param name="emailTemplateRenderer">The renderer that creates the HTML message body.</param>
+/// <param name="accountClient">The AuthenticationApi client used to resolve confirmed recipient email.</param>
+/// <param name="userClient">The UserApi client used to resolve recipient and sender display names.</param>
+/// <param name="logger">The logger that records intentionally skipped messages.</param>
+/// <remarks>
+/// No job is created when the recipient account does not exist or its email is not confirmed. Missing UserApi
+/// profiles do not block delivery; the template uses generic display-name fallbacks. The consumer does not
+/// deduplicate integration events, so message redelivery can create another email job.
+/// </remarks>
 public sealed class MessageSentConsumer(
     INotificationJobRepository notificationJobRepository,
     IUnitOfWork unitOfWork,
@@ -24,6 +35,9 @@ public sealed class MessageSentConsumer(
     /// <summary>
     /// Handles a sent-message event and queues email for confirmed recipients.
     /// </summary>
+    /// <param name="context">The consume context that contains the conversation message event.</param>
+    /// <returns>A task that completes after the job is committed or delivery is intentionally skipped.</returns>
+    /// <exception cref="OperationCanceledException">Message processing is canceled.</exception>
     public async Task Consume(ConsumeContext<MessageSentIntegrationEvent> context)
     {
         var account = await accountClient.GetResponse<GetAccountContactByUserIdResponse>(

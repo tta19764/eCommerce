@@ -20,13 +20,19 @@ The notifications slice owns durable notification jobs and email delivery. It is
 
 Authentication publishes a confirmation request after registration. NotificationApi stores a notification job and sends an HTML email containing the frontend confirmation link.
 
+The configured URL template supports `{accountId}` and `{email}` placeholders. Both replacement values are URI-escaped. Consumer redelivery is not deduplicated and can create another confirmation job.
+
 ### Marketplace Chat Messages
 
 MessagingApi publishes `MessageSentIntegrationEvent` after a conversation message is saved. NotificationApi checks the recipient account through AuthenticationApi and queues an HTML email only when the email address is confirmed.
 
+NotificationApi asks UserApi for recipient and sender display names. Missing profiles use generic names and do not block the email. Message-event redelivery is not deduplicated and can create another job. Order-status notification requests have the same duplicate-job limitation.
+
 ### Durable Retry
 
-Failed notification jobs are stored with attempts, last error, and next-attempt time. Quartz polls pending jobs and retries them until the maximum attempt count is reached.
+Failed notification jobs are stored with attempts, last error, and next-attempt time. Quartz selects the oldest due jobs up to the configured page size and processes them in sequence. The first four failures are retried after 30, 60, 120, and 240 seconds. The fifth failure changes the job to terminal `Failed` status.
+
+Before SMTP delivery, the processor commits the job as `Processing`. It commits success or retry state after the send attempt. SMTP and PostgreSQL do not share a transaction. A service stop after the first commit can leave the job in `Processing`; the current poller selects only `Pending` jobs and does not recover that record automatically. A service stop after SMTP accepts a message but before the success commit can also cause duplicate delivery if the job is manually recovered.
 
 Job state persists through AppHost restarts as long as the PostgreSQL volume/database is not cleared.
 

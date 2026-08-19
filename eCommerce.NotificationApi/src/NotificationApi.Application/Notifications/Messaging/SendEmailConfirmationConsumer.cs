@@ -11,6 +11,14 @@ namespace NotificationApi.Application.Notifications.Messaging;
 /// <summary>
 /// Stores email-confirmation requests as durable background jobs.
 /// </summary>
+/// <param name="notificationJobRepository">The repository that tracks the new notification job.</param>
+/// <param name="unitOfWork">The unit of work that persists the job.</param>
+/// <param name="emailOptions">The sender and confirmation-link configuration.</param>
+/// <param name="emailTemplateRenderer">The renderer that creates the HTML message body.</param>
+/// <remarks>
+/// The account identifier and email address are URI-escaped before they replace their configured placeholders.
+/// The consumer does not deduplicate requests. A redelivered message can create another email job.
+/// </remarks>
 public sealed class SendEmailConfirmationConsumer(
     INotificationJobRepository notificationJobRepository,
     IUnitOfWork unitOfWork,
@@ -18,9 +26,11 @@ public sealed class SendEmailConfirmationConsumer(
     IEmailTemplateRenderer emailTemplateRenderer) : IConsumer<SendEmailConfirmationRequest>
 {
     /// <summary>
-    /// Executes the Consume operation.
+    /// Builds and queues an account-confirmation email.
     /// </summary>
-    /// <param name="context">The context value.</param>
+    /// <param name="context">The consume context that contains account, recipient, and confirmation data.</param>
+    /// <returns>A task that completes after the notification job is committed.</returns>
+    /// <exception cref="OperationCanceledException">Message processing is canceled.</exception>
     public async Task Consume(ConsumeContext<SendEmailConfirmationRequest> context)
     {
         var message = context.Message;

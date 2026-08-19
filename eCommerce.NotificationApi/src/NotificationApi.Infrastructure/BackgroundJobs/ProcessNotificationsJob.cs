@@ -8,6 +8,13 @@ namespace NotificationApi.Infrastructure.BackgroundJobs;
 /// <summary>
 /// Quartz job that processes durable notification work items.
 /// </summary>
+/// <param name="notificationJobProcessor">The processor that delivers one configured page of due jobs.</param>
+/// <param name="options">The page-size configuration.</param>
+/// <param name="logger">The logger that records the number of selected jobs.</param>
+/// <remarks>
+/// <see cref="DisallowConcurrentExecutionAttribute"/> prevents overlapping executions for this Quartz job key.
+/// The logged count includes jobs that were rescheduled after delivery failure.
+/// </remarks>
 [DisallowConcurrentExecution]
 internal sealed class ProcessNotificationsJob(
     NotificationJobProcessor notificationJobProcessor,
