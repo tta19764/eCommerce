@@ -8,12 +8,21 @@ namespace MessagingApi.Application.Conversations.GetConversationMessagesPage;
 /// <summary>
 /// Handles message page queries for one conversation.
 /// </summary>
+/// <param name="conversationRepository">The repository that loads the conversation and complete message collection.</param>
 public sealed class GetConversationMessagesPageQueryHandler(IConversationRepository conversationRepository)
     : IQueryHandler<GetConversationMessagesPageQuery, PagedListResponse<ConversationMessageResponse>>
 {
     /// <summary>
     /// Reads a page of messages after verifying the current user is a participant.
     /// </summary>
+    /// <param name="request">The conversation, current-user, and requested page values.</param>
+    /// <param name="cancellationToken">The token that cancels the conversation query.</param>
+    /// <returns>
+    /// An oldest-first message page on success. Page values below one become page one; page sizes below one become
+    /// 50, and values above 100 become 100. Missing and non-owned conversations return failure results.
+    /// </returns>
+    /// <exception cref="OperationCanceledException">The operation is canceled.</exception>
+    /// <remarks>The repository loads the complete message collection before this handler applies pagination in memory.</remarks>
     public async Task<Result<PagedListResponse<ConversationMessageResponse>>> Handle(
         GetConversationMessagesPageQuery request,
         CancellationToken cancellationToken)

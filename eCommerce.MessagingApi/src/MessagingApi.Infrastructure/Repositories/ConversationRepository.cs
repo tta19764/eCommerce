@@ -6,6 +6,11 @@ namespace MessagingApi.Infrastructure.Repositories;
 /// <summary>
 /// EF Core repository for marketplace conversations.
 /// </summary>
+/// <param name="dbContext">The messaging database context.</param>
+/// <remarks>
+/// Aggregate lookups include the complete message collection and return tracked entities. Participant page queries
+/// are untracked and do not include messages.
+/// </remarks>
 public sealed class ConversationRepository(MessagingDbContext dbContext) : IConversationRepository
 {
     /// <inheritdoc />

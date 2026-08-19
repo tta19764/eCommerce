@@ -9,15 +9,17 @@ namespace MessagingApi.Api.Realtime;
 /// Provides real-time notification services using SignalR for conversation-related events.
 /// </summary>
 /// <param name="hubContext">The SignalR hub context for conversations.</param>
+/// <remarks>
+/// Each notification targets the customer and seller user groups so all connected devices receive the update.
+/// The strongly typed SignalR client methods do not accept the supplied cancellation tokens.
+/// </remarks>
 public sealed class SignalRConversationsRealtimeNotifier(IHubContext<ConversationsHub, IConversationsHubClient> hubContext) 
     : IConversationsRealtimeNotifier
 {
     /// <inheritdoc />
     public async Task NotifyMessageSentAsync(MessageSentRealtimeEvent message, CancellationToken cancellationToken = default)
     {
-        // We notify both the sender and the recipient.
-        // This ensures that the message appears instantly for the recipient 
-        // and syncs across all devices for the sender.
+        // Include the sender so their other connected devices receive the persisted message.
         await hubContext.Clients
             .Users(message.CustomerUserId.ToString(), message.SellerUserId.ToString())
             .MessageSent(message);
@@ -27,7 +29,6 @@ public sealed class SignalRConversationsRealtimeNotifier(IHubContext<Conversatio
     public async Task NotifyConversationCreatedAsync(ConversationCreatedRealtimeEvent conversation,
         CancellationToken cancellationToken = default)
     {
-        // Both participants should be notified about the new conversation.
         await hubContext.Clients
             .Users(conversation.CustomerUserId.ToString(), conversation.SellerUserId.ToString())
             .ConversationCreated(conversation);
@@ -37,8 +38,7 @@ public sealed class SignalRConversationsRealtimeNotifier(IHubContext<Conversatio
     public async Task NotifyConversationReadAsync(ConversationReadRealtimeEvent conversation,
         CancellationToken cancellationToken = default)
     {
-        // Notifying both ensures the reader's other devices clear notifications
-        // and the other participant sees the 'read' indicator update in real-time.
+        // Notify both users to synchronize the reader's devices and the other user's read indicator.
         await hubContext.Clients
             .Users(conversation.ReaderUserId.ToString(), conversation.OtherParticipantUserId.ToString())
             .ConversationRead(conversation);

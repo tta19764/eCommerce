@@ -12,6 +12,14 @@ namespace MessagingApi.Application.Conversations.SendConversationMessage;
 /// <summary>
 /// Handles sending participant messages.
 /// </summary>
+/// <param name="conversationRepository">The repository that loads the tracked conversation and messages.</param>
+/// <param name="unitOfWork">The unit of work that persists the new message and sender read marker.</param>
+/// <param name="publishEndpoint">The message bus endpoint that publishes the email-notification event.</param>
+/// <param name="realtimeNotifier">The notifier that broadcasts the new message to both participants.</param>
+/// <remarks>
+/// Only conversation participants can add messages. The domain trims the body and rejects empty content. Sending
+/// a message also advances the sender's read timestamp to the message creation time.
+/// </remarks>
 public sealed class SendConversationMessageCommandHandler(
     IConversationRepository conversationRepository,
     IUnitOfWork unitOfWork,
@@ -22,6 +30,18 @@ public sealed class SendConversationMessageCommandHandler(
     /// <summary>
     /// Adds a text message and publishes an integration event for asynchronous notifications.
     /// </summary>
+    /// <param name="request">The conversation, current-user, and message-body data.</param>
+    /// <param name="cancellationToken">The token that cancels lookup, persistence, publication, and notification.</param>
+    /// <returns>
+    /// The created message identifier on success. A failure result indicates a missing conversation, forbidden
+    /// participant, or empty message.
+    /// </returns>
+    /// <exception cref="OperationCanceledException">The operation is canceled.</exception>
+    /// <remarks>
+    /// The message is committed before bus publication and SignalR notification. These side effects do not share a
+    /// transaction. A later failure can propagate after persistence, and retrying the command can create another
+    /// message because the command has no idempotency key.
+    /// </remarks>
     public async Task<Result<Guid>> Handle(SendConversationMessageCommand request, CancellationToken cancellationToken)
     {
         var conversation = await conversationRepository.GetByIdAsync(request.ConversationId, cancellationToken);

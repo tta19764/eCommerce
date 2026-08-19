@@ -9,6 +9,9 @@ namespace MessagingApi.Application.Conversations.MarkConversationRead;
 /// <summary>
 /// Handles read-marker updates for conversations.
 /// </summary>
+/// <param name="conversationRepository">The repository that loads the tracked conversation.</param>
+/// <param name="unitOfWork">The unit of work that persists the participant read timestamp.</param>
+/// <param name="realtimeNotifier">The notifier that synchronizes read state across participant devices.</param>
 public sealed class MarkConversationReadCommandHandler(
     IConversationRepository conversationRepository,
     IUnitOfWork unitOfWork,
@@ -18,6 +21,14 @@ public sealed class MarkConversationReadCommandHandler(
     /// <summary>
     /// Updates the read timestamp for the current participant.
     /// </summary>
+    /// <param name="request">The conversation and authenticated current-user identifiers.</param>
+    /// <param name="cancellationToken">The token that cancels lookup, persistence, and notification.</param>
+    /// <returns>A successful result, or a not-found or forbidden failure result.</returns>
+    /// <exception cref="OperationCanceledException">The operation is canceled.</exception>
+    /// <remarks>
+    /// Persistence occurs before SignalR notification. A notification failure can propagate even though the read
+    /// timestamp has already been committed.
+    /// </remarks>
     public async Task<Result> Handle(MarkConversationReadCommand request, CancellationToken cancellationToken)
     {
         var conversation = await conversationRepository.GetByIdAsync(request.ConversationId, cancellationToken);

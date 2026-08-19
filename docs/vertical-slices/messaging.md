@@ -20,6 +20,8 @@ Messaging enables customer-seller communication for a marketplace with both prod
 7. After a message is saved, MessagingApi publishes `MessageSentIntegrationEvent` for email notifications and broadcasts `MessageSent` via SignalR for real-time UI updates.
 8. NotificationApi consumes the integration event and creates a durable email job only if the recipient has confirmed email.
 
+Conversation and message persistence commits before SignalR notification. Message persistence also commits before `MessageSentIntegrationEvent` publication. These side effects do not share a transaction or outbox in the current implementation. A publish or SignalR failure can therefore surface after the database commit. Retrying a send command can create a duplicate message because it has no idempotency key. Retrying conversation creation returns the existing conversation but does not repeat its creation notification.
+
 ## Endpoints
 
 - `POST /messaging-api/v1/conversations/product-inquiries/{productId}`
@@ -39,6 +41,10 @@ MessagingApi uses two tables:
 
 Unique indexes prevent duplicate product inquiry conversations for the same customer, seller, and product, and duplicate seller-order conversations for the same seller-order group.
 
+Conversation list queries use database pagination and order by latest message time. Message page queries load the full tracked conversation and its complete message collection, then paginate the messages in memory. Conversation page size defaults to 20, message page size defaults to 50, and both have a maximum of 100.
+
+Order status events create a seller-order conversation when one does not exist and add a senderless system message. Duplicate detection compares the generated message text, so repeated transitions to the same status are stored only once even when they occur at different times.
+
 ## Notifications
 
 Messaging provides both real-time and asynchronous notifications.
@@ -53,6 +59,8 @@ MessagingApi uses SignalR to provide instant updates to connected clients:
   - `ConversationRead`: Broadcast when a participant marks a conversation as read.
 
 Clients must provide a JWT in the `access_token` query string to authenticate the WebSocket connection.
+
+SignalR broadcasts target both conversation participants. This updates the recipient immediately and keeps the sender's other devices synchronized. The current SignalR client calls do not consume the cancellation token exposed by the application notifier.
 
 ### Email Notifications
 
