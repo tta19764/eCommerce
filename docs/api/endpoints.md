@@ -18,6 +18,8 @@ This catalog reflects minimal endpoint mappings. Paths include gateway service p
 
 ## ProductApi
 
+Product objects returned by the single-product and paged-product endpoints contain a nullable nested `store` summary with `id`, `name`, and `slug`. The value is null when the product seller has no active public storefront.
+
 | Method/path | Access |
 | --- | --- |
 | `GET /product-api/v1/products` | Public; paging/search/filter/sort query |
@@ -38,6 +40,7 @@ Product creation derives SellerApi ownership from the authenticated account. Its
 ## SellerApi
 
 SellerApi success and domain-error payloads use the shared `ApiResponse<T>` envelope. Successful approval and rejection commands return `204 No Content`. Seller application and store review creation return the created identifier as `ApiResponse<Guid>`.
+Their `Location` headers use named SellerApi routes and the registered API version. Application creation points to the current seller route, and review creation points to the store review collection because SellerApi does not expose a single-review endpoint.
 
 | Method/path | Access |
 | --- | --- |

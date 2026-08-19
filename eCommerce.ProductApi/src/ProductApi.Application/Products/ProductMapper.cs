@@ -4,7 +4,7 @@ namespace ProductApi.Application.Products;
 
 internal static class ProductMapper
 {
-    internal static ProductResponse ToResponse(Product product)
+    internal static ProductResponse ToResponse(Product product, ProductStoreResponse? store = null)
     {
         return new ProductResponse(
             product.Id,
@@ -14,6 +14,7 @@ internal static class ProductMapper
             product.Price.Currency.Code,
             product.Quantity.Value,
             product.SellerId,
+            store,
             product.CategoryId,
             product.ProductType.ToString(),
             product.ImageIds,

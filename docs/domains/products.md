@@ -2,7 +2,7 @@
 
 ## Purpose
 
-ProductApi owns the sellable catalog, [[Sellers and Stores|seller assignment]], classification, price/currency, stock, image references, and aggregate rating.
+ProductApi owns the sellable catalog, [[Sellers and Stores|seller assignment]], classification, price/currency, stock, image references, and aggregate rating. Public product responses include the current active storefront identifier, name, and slug when SellerApi can resolve the product seller.
 
 ## Entities and relationships
 
@@ -29,6 +29,8 @@ Key handlers: `CreateProductCommandHandler`, `UpdateProductCommandHandler`, `Del
 Public reads are `GET /product-api/v1/products`, `/categories`, `/types`, and `/{productId}`. Mutations use `POST /products`, `PUT/DELETE /products/{id}` with product permissions. Review endpoints are detailed in [[Reviews]].
 
 `CatalogPage`, `ProductPage`, `ProductCard`, `AdminProductsPage`, and `SellerProductsPage` call `ProductsApiClient`; image upload/rendering goes through `ImagesApiClient`.
+
+Single-product and paged-product queries request public storefront summaries from SellerApi. Paged queries resolve all distinct seller identifiers in one message request. ProductApi stores only the stable Seller ID; storefront names and slugs remain SellerApi-owned presentation data. The nested `store` response is null when SellerApi does not resolve an active storefront.
 
 ## Dependencies
 

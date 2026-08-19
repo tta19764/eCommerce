@@ -42,6 +42,8 @@ Application response models and mappers are grouped with their concepts: seller 
 
 ProductApi no longer accepts seller ownership from the product-create body. It resolves the current User ID and role, then requests the active Seller ID from SellerApi. Seller users resolve through their approved application. Administrators resolve through the configured marketplace store, regardless of which administrator owns its persisted seller record. ProductApi rejects creation when the applicable active store does not exist. `Product.SellerId`, `SellerOrder.SellerId`, and new order item seller snapshots therefore identify SellerApi sellers, not UserApi profiles.
 
+SellerApi also handles a batch storefront-summary message query for ProductApi reads. It returns the store identifier, name, and slug only for active sellers. ProductApi uses this current presentation data in public product responses and does not persist it with products.
+
 ## Store reviews and rating
 
 A customer can review a store once. The request identifies the completed seller-order group. SellerApi asks OrderApi to verify that the seller order belongs to the customer and store seller and has reached `Completed`. The browser cannot assert purchase eligibility.

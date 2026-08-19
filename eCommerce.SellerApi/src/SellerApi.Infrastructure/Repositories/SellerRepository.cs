@@ -34,6 +34,15 @@ public sealed class SellerRepository(
     public new Task<Seller?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default) =>
         DbSet.FirstOrDefaultAsync(seller => seller.Id == id, cancellationToken);
 
+    /// <inheritdoc />
+    public async Task<IReadOnlyList<Seller>> GetByIdsAsync(
+        IReadOnlyCollection<Guid> ids,
+        CancellationToken cancellationToken = default) =>
+        await DbSet
+            .AsNoTracking()
+            .Where(seller => ids.Contains(seller.Id))
+            .ToListAsync(cancellationToken);
+
     /// <summary>
     /// Gets a tracked seller by its owner identifier.
     /// </summary>

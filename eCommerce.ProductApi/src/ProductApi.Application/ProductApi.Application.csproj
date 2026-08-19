@@ -9,6 +9,7 @@
     <ItemGroup>
       <ProjectReference Include="..\..\..\eCommerce.ImageApi\src\ImageApi.Messages\ImageApi.Messages.csproj" />
       <ProjectReference Include="..\..\..\eCommerce.OrderApi\src\OrderApi.Messages\OrderApi.Messages.csproj" />
+      <ProjectReference Include="..\..\..\eCommerce.SellerApi\src\SellerApi.Messages\SellerApi.Messages.csproj" />
       <ProjectReference Include="..\..\..\eCommerce.SharedLibrary\SharedLibrary.Application\SharedLibrary.Application.csproj" />
       <ProjectReference Include="..\ProductApi.Domain\ProductApi.Domain.csproj" />
       <ProjectReference Include="..\ProductApi.Messages\ProductApi.Messages.csproj" />

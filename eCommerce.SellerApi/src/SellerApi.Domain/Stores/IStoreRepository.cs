@@ -19,6 +19,15 @@ public interface IStoreRepository
     /// <exception cref="OperationCanceledException">The operation is canceled.</exception>
     Task<Store?> GetBySellerIdAsync(Guid sellerId, CancellationToken cancellationToken = default);
 
+    /// <summary>Gets untracked stores for the specified seller identifiers.</summary>
+    /// <param name="sellerIds">The seller identifiers to resolve.</param>
+    /// <param name="cancellationToken">The token that cancels the operation.</param>
+    /// <returns>The stores that were found.</returns>
+    /// <exception cref="OperationCanceledException">The operation is canceled.</exception>
+    Task<IReadOnlyList<Store>> GetBySellerIdsAsync(
+        IReadOnlyCollection<Guid> sellerIds,
+        CancellationToken cancellationToken = default);
+
     /// <summary>Gets an untracked store by its normalized public slug.</summary>
     /// <param name="slug">The normalized lowercase store slug.</param>
     /// <param name="cancellationToken">The token that cancels the operation.</param>

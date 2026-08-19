@@ -37,6 +37,10 @@ public class ProductQueryTests(IntegrationTestWebAppFactory factory) : BaseInteg
         result.Value.Currency.Should().Be(createCommand.CurrencyCode);
         result.Value.Quantity.Should().Be(createCommand.Quantity);
         result.Value.SellerId.Should().Be(SellerId);
+        result.Value.Store.Should().Be(new ProductStoreResponse(
+            Guid.Parse("30000000-0000-0000-0000-000000000001"),
+            "Test Store",
+            "test-store"));
         result.Value.CategoryId.Should().Be(CategoryId);
         result.Value.ProductType.Should().Be(ProductType.Physical.ToString());
         result.Value.Rating.Should().Be(0.0m);

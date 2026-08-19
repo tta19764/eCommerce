@@ -21,6 +21,15 @@ public sealed class StoreRepository(SellerDbContext dbContext)
         DbSet.FirstOrDefaultAsync(store => store.SellerId == sellerId, cancellationToken);
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<Store>> GetBySellerIdsAsync(
+        IReadOnlyCollection<Guid> sellerIds,
+        CancellationToken cancellationToken = default) =>
+        await DbSet
+            .AsNoTracking()
+            .Where(store => sellerIds.Contains(store.SellerId))
+            .ToListAsync(cancellationToken);
+
+    /// <inheritdoc />
     public Task<Store?> GetBySlugAsync(string slug, CancellationToken cancellationToken = default) =>
         DbSet.AsNoTracking().FirstOrDefaultAsync(store => store.Slug == slug, cancellationToken);
 }

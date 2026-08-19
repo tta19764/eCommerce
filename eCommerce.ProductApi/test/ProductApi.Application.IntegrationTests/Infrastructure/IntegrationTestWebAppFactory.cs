@@ -12,6 +12,7 @@ using SharedLibrary.Application.Abstractions.Caching;
 using ProductApi.Infrastructure;
 using ProductApi.Infrastructure.Repositories;
 using SharedLibrary.Domain.Abstractions;
+using SellerApi.Messages.Stores;
 using Testcontainers.PostgreSql;
 using Xunit;
 
@@ -45,6 +46,25 @@ public sealed class IntegrationTestWebAppFactory : IAsyncLifetime
             });
 
         var cacheService = Substitute.For<ICacheService>();
+        var storefrontClient = Substitute.For<IRequestClient<GetStorefrontSummariesRequest>>();
+        storefrontClient
+            .GetResponse<GetStorefrontSummariesResponse>(
+                Arg.Any<GetStorefrontSummariesRequest>(),
+                Arg.Any<CancellationToken>())
+            .Returns(callInfo =>
+            {
+                var request = callInfo.Arg<GetStorefrontSummariesRequest>()!;
+                var stores = request.SellerIds
+                    .Select(sellerId => new StorefrontSummary(
+                        sellerId,
+                        Guid.Parse("30000000-0000-0000-0000-000000000001"),
+                        "Test Store",
+                        "test-store"))
+                    .ToArray();
+                return Task.FromResult<Response<GetStorefrontSummariesResponse>>(
+                    new TestResponse<GetStorefrontSummariesResponse>(
+                        new GetStorefrontSummariesResponse(stores)));
+            });
         var purchaseStatusClient = Substitute.For<IRequestClient<GetUserProductPurchaseStatusRequest>>();
         purchaseStatusClient
             .GetResponse<GetUserProductPurchaseStatusResponse>(
@@ -75,6 +95,7 @@ public sealed class IntegrationTestWebAppFactory : IAsyncLifetime
         services.AddSingleton(imageClient);
         services.AddSingleton(purchaseStatusClient);
         services.AddSingleton(cacheService);
+        services.AddSingleton(storefrontClient);
 
         _serviceProvider = services.BuildServiceProvider();
     }

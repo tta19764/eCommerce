@@ -10,6 +10,7 @@ namespace ProductApi.Application.Products;
 /// <param name="Currency">The product price currency code.</param>
 /// <param name="Quantity">The available product quantity.</param>
 /// <param name="SellerId">The seller that owns this marketplace listing.</param>
+/// <param name="Store">The active public storefront for the seller, or <see langword="null"/> if no active storefront was resolved.</param>
 /// <param name="CategoryId">The primary product category.</param>
 /// <param name="ProductType">The product fulfillment type.</param>
 /// <param name="ImageIds">The product image identifiers.</param>
@@ -24,9 +25,18 @@ public sealed record ProductResponse(
     string Currency,
     int Quantity,
     Guid SellerId,
+    ProductStoreResponse? Store,
     Guid CategoryId,
     string ProductType,
     IReadOnlyCollection<Guid> ImageIds,
     Guid? DisplayImageId,
     decimal Rating,
     int ReviewsCount);
+
+/// <summary>
+/// Contains storefront identity used in product presentation.
+/// </summary>
+/// <param name="Id">The storefront identifier.</param>
+/// <param name="Name">The storefront display name.</param>
+/// <param name="Slug">The storefront public route segment.</param>
+public sealed record ProductStoreResponse(Guid Id, string Name, string Slug);

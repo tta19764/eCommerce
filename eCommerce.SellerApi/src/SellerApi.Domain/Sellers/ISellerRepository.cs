@@ -12,6 +12,15 @@ public interface ISellerRepository
     /// <exception cref="OperationCanceledException">The operation is canceled.</exception>
     Task<Seller?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
 
+    /// <summary>Gets untracked sellers for the specified identifiers.</summary>
+    /// <param name="ids">The seller identifiers to resolve.</param>
+    /// <param name="cancellationToken">The token that cancels the operation.</param>
+    /// <returns>The sellers that were found.</returns>
+    /// <exception cref="OperationCanceledException">The operation is canceled.</exception>
+    Task<IReadOnlyList<Seller>> GetByIdsAsync(
+        IReadOnlyCollection<Guid> ids,
+        CancellationToken cancellationToken = default);
+
     /// <summary>Gets a tracked seller by its owner identifier.</summary>
     /// <param name="ownerUserId">The UserApi identifier of the owner.</param>
     /// <param name="cancellationToken">The token that cancels the operation.</param>

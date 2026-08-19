@@ -1,3 +1,4 @@
+using MassTransit;
 using Microsoft.Extensions.Logging;
 using ProductApi.Application.Products;
 using ProductApi.Domain.Categories;
@@ -6,6 +7,7 @@ using SharedLibrary.Application.Abstractions.Caching;
 using SharedLibrary.Application.Abstractions.Messaging;
 using SharedLibrary.Application.Pagination;
 using SharedLibrary.Domain.Abstractions;
+using SellerApi.Messages.Stores;
 
 namespace ProductApi.Application.Products.GetProductPage;
 
@@ -16,6 +18,7 @@ public sealed class GetProductPageQueryHandler(
     IProductRepository productRepository,
     IProductCategoryRepository categoryRepository,
     ICacheService cacheService,
+    IRequestClient<GetStorefrontSummariesRequest> storefrontClient,
     ILogger<GetProductPageQueryHandler> logger)
     : IQueryHandler<GetProductPageQuery, PagedListResponse<ProductResponse>>
 {
@@ -50,8 +53,18 @@ public sealed class GetProductPageQueryHandler(
         var products = await productRepository.GetPageAsync(filter, cancellationToken);
         var totalCount = await productRepository.CountAsync(filter, cancellationToken);
 
+        var sellerIds = products.Select(product => product.SellerId).Distinct().ToArray();
+        var storefrontResponse = await storefrontClient.GetResponse<GetStorefrontSummariesResponse>(
+            new GetStorefrontSummariesRequest(sellerIds),
+            cancellationToken);
+        var storefronts = storefrontResponse.Message.Stores.ToDictionary(store => store.SellerId);
+
         var items = products
-            .Select(ProductMapper.ToResponse)
+            .Select(product => ProductMapper.ToResponse(
+                product,
+                storefronts.TryGetValue(product.SellerId, out var storefront)
+                    ? new ProductStoreResponse(storefront.StoreId, storefront.Name, storefront.Slug)
+                    : null))
             .ToList();
 
         var response = new PagedListResponse<ProductResponse>(
