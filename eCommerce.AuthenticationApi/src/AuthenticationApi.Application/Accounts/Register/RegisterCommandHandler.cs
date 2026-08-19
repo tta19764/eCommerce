@@ -14,6 +14,19 @@ namespace AuthenticationApi.Application.Accounts.Register;
 /// <summary>
 /// Handles account registration in Keycloak, the local auth store, and the user profile store.
 /// </summary>
+/// <param name="accountRepository">The repository that checks email uniqueness and tracks the account.</param>
+/// <param name="roleRepository">The repository that resolves the local Customer role.</param>
+/// <param name="unitOfWork">The unit of work that persists account state.</param>
+/// <param name="identityProvider">The Keycloak boundary that creates and compensates the identity.</param>
+/// <param name="userProfileClient">The UserApi client that creates the commerce profile.</param>
+/// <param name="publishEndpoint">The bus endpoint that publishes confirmation-email work.</param>
+/// <param name="cacheService">The cache used to invalidate administrator account pages.</param>
+/// <param name="logger">The logger that records registration outcomes.</param>
+/// <remarks>
+/// Registration spans Keycloak, PostgreSQL, UserApi, cache storage, and the message broker without one distributed
+/// transaction. The local account is committed before profile creation. Confirmation work is published only after
+/// the profile link is committed. A missing local Customer role does not fail registration.
+/// </remarks>
 public sealed class RegisterCommandHandler(
     IAccountRepository accountRepository,
     IRoleRepository roleRepository,
@@ -25,10 +38,17 @@ public sealed class RegisterCommandHandler(
     ILogger<RegisterCommandHandler> logger) : ICommandHandler<RegisterCommand, Guid>
 {
     /// <summary>
-    /// Executes the Handle operation.
+    /// Registers a Customer identity, local account, and UserApi profile.
     /// </summary>
-    /// <param name="request">The request value.</param>
-    /// <param name="cancellationToken">The cancellationToken value.</param>
+    /// <param name="request">The credentials and profile data. Email is normalized for local uniqueness checks.</param>
+    /// <param name="cancellationToken">The token that cancels database, Keycloak, messaging, and cache operations.</param>
+    /// <returns>The local account identifier, or a validation, duplicate, identity, or profile failure.</returns>
+    /// <exception cref="OperationCanceledException">The operation is canceled.</exception>
+    /// <remarks>
+    /// Profile-creation failure deletes the local account and Keycloak identity. Failure to link an already created
+    /// profile performs the same compensation but does not delete that UserApi profile. Persistence or compensation
+    /// failures can leave partial state. Publication failure can propagate after registration is fully committed.
+    /// </remarks>
     public async Task<Result<Guid>> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
         var normalizedEmail = request.Email.Trim().ToUpperInvariant();

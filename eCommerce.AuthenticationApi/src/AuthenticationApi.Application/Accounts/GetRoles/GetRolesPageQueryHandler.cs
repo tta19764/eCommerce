@@ -8,14 +8,20 @@ namespace AuthenticationApi.Application.Accounts.GetRoles;
 /// <summary>
 /// Handles role page queries.
 /// </summary>
+/// <param name="roleRepository">The repository that pages roles with their permissions.</param>
 public sealed class GetRolesPageQueryHandler(IRoleRepository roleRepository)
     : IQueryHandler<GetRolesPageQuery, PagedListResponse<RoleResponse>>
 {
     /// <summary>
-    /// Executes the Handle operation.
+    /// Gets a page of roles and permissions.
     /// </summary>
-    /// <param name="request">The request value.</param>
-    /// <param name="cancellationToken">The cancellationToken value.</param>
+    /// <param name="request">The requested page values.</param>
+    /// <param name="cancellationToken">The token that cancels repository queries.</param>
+    /// <returns>
+    /// A successful page. Page values below one become one, page sizes below one become 10, and sizes above 100
+    /// become 100. Permissions are ordered by their stable identifier.
+    /// </returns>
+    /// <exception cref="OperationCanceledException">The operation is canceled.</exception>
     public async Task<Result<PagedListResponse<RoleResponse>>> Handle(
         GetRolesPageQuery request,
         CancellationToken cancellationToken)

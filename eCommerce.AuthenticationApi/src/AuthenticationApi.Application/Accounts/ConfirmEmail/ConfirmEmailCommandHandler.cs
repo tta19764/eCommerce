@@ -9,6 +9,11 @@ namespace AuthenticationApi.Application.Accounts.ConfirmEmail;
 /// <summary>
 /// Handles account email confirmation.
 /// </summary>
+/// <param name="accountRepository">The repository that loads the local account.</param>
+/// <param name="unitOfWork">The unit of work that commits the local confirmation timestamp.</param>
+/// <param name="identityProvider">The Keycloak boundary that marks the identity email as verified.</param>
+/// <param name="cacheService">The cache used to invalidate administrator account pages.</param>
+/// <remarks>Keycloak confirmation occurs before local persistence; the two updates do not share a transaction.</remarks>
 public sealed class ConfirmEmailCommandHandler(
     IAccountRepository accountRepository,
     IUnitOfWork unitOfWork,
@@ -16,10 +21,13 @@ public sealed class ConfirmEmailCommandHandler(
     ICacheService cacheService) : ICommandHandler<ConfirmEmailCommand>
 {
     /// <summary>
-    /// Executes the Handle operation.
+    /// Confirms an active account when the supplied email matches its normalized email.
     /// </summary>
-    /// <param name="request">The request value.</param>
-    /// <param name="cancellationToken">The cancellationToken value.</param>
+    /// <param name="request">The local account identifier and confirmation-link email.</param>
+    /// <param name="cancellationToken">The token that cancels lookup, Keycloak, persistence, and cache operations.</param>
+    /// <returns>A success result, or an account, email, identity-provider, or domain-state failure.</returns>
+    /// <exception cref="OperationCanceledException">The operation is canceled.</exception>
+    /// <remarks>A local save failure can leave Keycloak verified while the local account remains unconfirmed.</remarks>
     public async Task<Result> Handle(ConfirmEmailCommand request, CancellationToken cancellationToken)
     {
         var account = await accountRepository.GetByIdAsync(request.AccountId, cancellationToken);

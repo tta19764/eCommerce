@@ -12,6 +12,13 @@ namespace AuthenticationApi.Application.Accounts.DeleteAccount;
 /// <summary>
 /// Handles account deletion across the local auth store, Keycloak, and the user profile store.
 /// </summary>
+/// <param name="accountRepository">The repository that loads and deletes the local account.</param>
+/// <param name="unitOfWork">The unit of work that commits local account deletion.</param>
+/// <param name="identityProvider">The Keycloak boundary that deletes the identity.</param>
+/// <param name="userProfileClient">The UserApi client that deletes the linked profile.</param>
+/// <param name="cacheService">The cache used to invalidate administrator account pages.</param>
+/// <param name="logger">The logger that records failures and completion.</param>
+/// <remarks>UserApi deletion, local deletion, and Keycloak deletion execute in that order without one transaction.</remarks>
 public sealed class DeleteAccountCommandHandler(
     IAccountRepository accountRepository,
     IUnitOfWork unitOfWork,
@@ -21,10 +28,16 @@ public sealed class DeleteAccountCommandHandler(
     ILogger<DeleteAccountCommandHandler> logger) : ICommandHandler<DeleteAccountCommand>
 {
     /// <summary>
-    /// Executes the Handle operation.
+    /// Deletes a linked profile, local account, and Keycloak identity.
     /// </summary>
-    /// <param name="request">The request value.</param>
-    /// <param name="cancellationToken">The cancellationToken value.</param>
+    /// <param name="request">The local account identifier.</param>
+    /// <param name="cancellationToken">The token that cancels lookup, messaging, persistence, cache, and Keycloak operations.</param>
+    /// <returns>
+    /// A failure for a missing account, absent profile link, or rejected profile deletion. After local deletion,
+    /// Keycloak deletion failure is logged but the handler still returns success.
+    /// </returns>
+    /// <exception cref="OperationCanceledException">The operation is canceled.</exception>
+    /// <remarks>A local persistence failure after UserApi deletion can leave the account linked to a missing profile.</remarks>
     public async Task<Result> Handle(DeleteAccountCommand request, CancellationToken cancellationToken)
     {
         var account = await accountRepository.GetByIdAsync(request.AccountId, cancellationToken);

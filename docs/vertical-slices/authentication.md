@@ -24,6 +24,8 @@ The authentication slice owns account registration, administrator registration, 
 5. User profile is created through MassTransit request/response to `UserApi`.
 6. Email confirmation notification is published to `NotificationApi`.
 
+The local account is saved before UserApi profile creation. Registration then saves the profile link before it publishes confirmation work. No distributed transaction covers these steps. Compensation deletes the local account and Keycloak identity when profile creation fails. If profile creation succeeds but linking fails, the created UserApi profile is not deleted. Publication failure can also occur after the registration state is committed.
+
 ### Admin Registration
 
 Administrator registration uses the same core registration flow but assigns the `Admin` role. The endpoint requires `accounts:create-admin`, so only existing administrators can create administrator accounts.
@@ -38,9 +40,13 @@ GET /auth-api/v1/auth/confirm-email?accountId={accountId}&email={email}
 
 The handler verifies that the account exists, is active, and matches the supplied email. It then marks the Keycloak user as email verified and stores `EmailConfirmedAtUtc` locally.
 
+Keycloak is updated before the local timestamp is committed. A local database failure can leave Keycloak verified while AuthenticationApi still reports the email as unconfirmed.
+
 ### Login And Refresh
 
 Login validates the local account first, including active status and email confirmation. Keycloak validates credentials and issues access and refresh tokens. Refresh uses the Keycloak refresh-token grant through `AuthenticationApi`.
+
+Refresh does not load the local account, so it does not independently enforce current local active or email-confirmation state. Account deletion removes the UserApi profile first, then the local account, then the Keycloak identity. Keycloak deletion failure is logged but does not change the successful command result.
 
 ## Endpoints
 

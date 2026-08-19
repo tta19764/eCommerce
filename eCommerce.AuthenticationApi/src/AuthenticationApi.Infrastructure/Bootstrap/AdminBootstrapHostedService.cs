@@ -16,6 +16,14 @@ namespace AuthenticationApi.Infrastructure.Bootstrap;
 /// Creates the first administrator when bootstrap is explicitly enabled and no local account has
 /// the Admin role. A PostgreSQL advisory lock serializes the check and registration across replicas.
 /// </summary>
+/// <param name="scopeFactory">The factory used to resolve one scoped registration workflow per attempt.</param>
+/// <param name="options">The enable switch and administrator credentials/profile configuration.</param>
+/// <param name="environment">The host environment used to enforce development-only execution.</param>
+/// <param name="logger">The logger that records retries, repairs, no-ops, and completion.</param>
+/// <remarks>
+/// When any Admin exists, the service only repairs confirmation if that Admin matches the configured email. Any
+/// other existing Admin makes bootstrap a no-op. Identity confirmation occurs before local confirmation persistence.
+/// </remarks>
 public sealed class AdminBootstrapHostedService(
     IServiceScopeFactory scopeFactory,
     IOptions<AdminBootstrapOptions> options,
@@ -28,7 +36,18 @@ public sealed class AdminBootstrapHostedService(
 
     private readonly AdminBootstrapOptions _options = options.Value;
 
-    /// <inheritdoc />
+    /// <summary>Runs the optional development administrator bootstrap with bounded retry.</summary>
+    /// <param name="stoppingToken">The token that cancels database, service, identity, and retry-delay operations.</param>
+    /// <returns>A task that completes when bootstrap is disabled, unnecessary, repaired, or successful.</returns>
+    /// <exception cref="OperationCanceledException">Host shutdown cancels the operation.</exception>
+    /// <exception cref="InvalidOperationException">
+    /// Bootstrap is enabled outside Development, configuration or registration is invalid, or identity/local
+    /// confirmation fails on the final attempt.
+    /// </exception>
+    /// <remarks>
+    /// The service makes at most five attempts with five seconds between failed attempts. It holds a PostgreSQL
+    /// advisory lock while it checks state and runs cross-service registration and confirmation.
+    /// </remarks>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         if (!_options.Enabled)

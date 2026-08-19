@@ -8,15 +8,20 @@ namespace AuthenticationApi.Application.Accounts.Login;
 /// <summary>
 /// Handles account login and token creation.
 /// </summary>
+/// <param name="accountRepository">The repository that verifies local account state.</param>
+/// <param name="identityProvider">The Keycloak boundary that validates credentials and issues tokens.</param>
+/// <remarks>Provider login failures are intentionally mapped to one invalid-credentials error.</remarks>
 public sealed class LoginCommandHandler(
     IAccountRepository accountRepository,
     IIdentityProvider identityProvider) : ICommandHandler<LoginCommand, TokenResponse>
 {
     /// <summary>
-    /// Executes the Handle operation.
+    /// Issues tokens for an active, locally confirmed account with valid Keycloak credentials.
     /// </summary>
-    /// <param name="request">The request value.</param>
-    /// <param name="cancellationToken">The cancellationToken value.</param>
+    /// <param name="request">The email and password credentials.</param>
+    /// <param name="cancellationToken">The token that cancels account lookup and provider authentication.</param>
+    /// <returns>Tokens on success; otherwise invalid-credentials or email-not-confirmed failure.</returns>
+    /// <exception cref="OperationCanceledException">The operation is canceled.</exception>
     public async Task<Result<TokenResponse>> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
         var normalizedEmail = request.Email.Trim().ToUpperInvariant();

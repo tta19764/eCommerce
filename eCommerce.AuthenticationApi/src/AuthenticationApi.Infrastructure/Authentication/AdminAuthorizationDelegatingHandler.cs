@@ -9,10 +9,19 @@ namespace AuthenticationApi.Infrastructure.Authentication;
 /// <summary>
 /// Adds an admin client-credentials bearer token to Keycloak admin API calls.
 /// </summary>
+/// <param name="options">The Keycloak token URL and admin service-account credentials.</param>
+/// <remarks>A new service-account token is requested for every outgoing admin request; tokens are not cached.</remarks>
 public sealed class AdminAuthorizationDelegatingHandler(IOptions<KeycloakOptions> options) : DelegatingHandler
 {
     private readonly KeycloakOptions _options = options.Value;
 
+    /// <summary>Acquires an admin token, attaches it as a bearer token, and sends the original request.</summary>
+    /// <param name="request">The Keycloak Admin API request.</param>
+    /// <param name="cancellationToken">The token that cancels token acquisition and the admin request.</param>
+    /// <returns>The Keycloak Admin API response.</returns>
+    /// <exception cref="HttpRequestException">The token endpoint returns a non-success status.</exception>
+    /// <exception cref="InvalidOperationException">The token response has no deserializable body.</exception>
+    /// <exception cref="OperationCanceledException">The operation is canceled.</exception>
     protected override async Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage request,
         CancellationToken cancellationToken)

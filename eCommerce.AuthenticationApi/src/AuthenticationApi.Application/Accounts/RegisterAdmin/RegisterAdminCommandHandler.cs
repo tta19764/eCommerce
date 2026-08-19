@@ -14,6 +14,18 @@ namespace AuthenticationApi.Application.Accounts.RegisterAdmin;
 /// <summary>
 /// Handles administrator registration in Keycloak, the local auth store, and the user profile store.
 /// </summary>
+/// <param name="accountRepository">The repository that checks email uniqueness and tracks the account.</param>
+/// <param name="roleRepository">The repository that resolves the local Admin role.</param>
+/// <param name="unitOfWork">The unit of work that persists account state.</param>
+/// <param name="identityProvider">The Keycloak boundary that creates and compensates the identity.</param>
+/// <param name="userProfileClient">The UserApi client that creates the commerce profile.</param>
+/// <param name="publishEndpoint">The bus endpoint that publishes confirmation-email work.</param>
+/// <param name="cacheService">The cache used to invalidate administrator account pages.</param>
+/// <param name="logger">The logger that records registration outcomes.</param>
+/// <remarks>
+/// Endpoint authorization and development bootstrap decide who may invoke this handler. Registration itself spans
+/// multiple systems without one transaction. A missing local Admin role does not fail registration.
+/// </remarks>
 public sealed class RegisterAdminCommandHandler(
     IAccountRepository accountRepository,
     IRoleRepository roleRepository,
@@ -25,10 +37,16 @@ public sealed class RegisterAdminCommandHandler(
     ILogger<RegisterAdminCommandHandler> logger) : ICommandHandler<RegisterAdminCommand, Guid>
 {
     /// <summary>
-    /// Executes the Handle operation.
+    /// Registers an Admin identity, local account, and UserApi profile.
     /// </summary>
-    /// <param name="request">The request value.</param>
-    /// <param name="cancellationToken">The cancellationToken value.</param>
+    /// <param name="request">The administrator credentials and profile data.</param>
+    /// <param name="cancellationToken">The token that cancels database, Keycloak, messaging, and cache operations.</param>
+    /// <returns>The local account identifier, or a validation, duplicate, identity, or profile failure.</returns>
+    /// <exception cref="OperationCanceledException">The operation is canceled.</exception>
+    /// <remarks>
+    /// A failed profile-link operation can leave an orphan UserApi profile. Publication failure can propagate after
+    /// the identity, account, and profile link are committed.
+    /// </remarks>
     public async Task<Result<Guid>> Handle(RegisterAdminCommand request, CancellationToken cancellationToken)
     {
         var normalizedEmail = request.Email.Trim().ToUpperInvariant();

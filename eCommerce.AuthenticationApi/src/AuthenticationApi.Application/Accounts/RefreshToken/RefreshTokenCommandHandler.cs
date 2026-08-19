@@ -8,14 +8,18 @@ namespace AuthenticationApi.Application.Accounts.RefreshToken;
 /// <summary>
 /// Handles refresh-token exchange.
 /// </summary>
+/// <param name="identityProvider">The Keycloak boundary that exchanges refresh tokens.</param>
+/// <remarks>The handler does not load or re-check local account active or confirmation state.</remarks>
 public sealed class RefreshTokenCommandHandler(
     IIdentityProvider identityProvider) : ICommandHandler<RefreshTokenCommand, TokenResponse>
 {
     /// <summary>
-    /// Executes the Handle operation.
+    /// Exchanges a trimmed refresh token through Keycloak.
     /// </summary>
-    /// <param name="request">The request value.</param>
-    /// <param name="cancellationToken">The cancellationToken value.</param>
+    /// <param name="request">The refresh token.</param>
+    /// <param name="cancellationToken">The token that cancels provider exchange.</param>
+    /// <returns>New tokens on success, or an invalid-credentials failure for any provider failure.</returns>
+    /// <exception cref="OperationCanceledException">The operation is canceled.</exception>
     public async Task<Result<TokenResponse>> Handle(
         RefreshTokenCommand request,
         CancellationToken cancellationToken)
