@@ -18,6 +18,8 @@ ProductApi owns the sellable catalog, [[Sellers and Stores|seller assignment]], 
 - Mutations and inventory/review changes invalidate cached catalog pages.
 - Product creation resolves the authenticated user's active SellerApi seller and rejects users without an approved store. The request body cannot select seller ownership.
 
+Product creation and update ask ImageApi to attach all distinct image IDs before ProductApi commits the aggregate. ImageApi rejects the complete attachment request if any image is missing. The services do not share a transaction, so a later ProductApi validation or persistence failure can leave images attached to an identifier or product state that was not committed. Successful mutations invalidate every catalog-page cache key tracked in the shared cache registry.
+
 ## Application services and repositories
 
 Key handlers: `CreateProductCommandHandler`, `UpdateProductCommandHandler`, `DeleteProductCommandHandler`, `GetProductQueryHandler`, `GetProductPageQueryHandler`, and `AdjustProductQuantitiesConsumer`. `IProductRepository`/`ProductRepository` implement filtered paging and persistence through `ProductDbContext`; commands mutate tracked products through aggregate methods and commit them with the unit of work.

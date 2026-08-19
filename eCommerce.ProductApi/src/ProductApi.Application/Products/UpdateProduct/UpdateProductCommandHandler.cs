@@ -11,7 +11,7 @@ using SharedLibrary.Domain.Money;
 namespace ProductApi.Application.Products.UpdateProduct;
 
 /// <summary>
-/// Handles product update commands.
+/// Validates external references and updates existing catalog products.
 /// </summary>
 public sealed class UpdateProductCommandHandler(
     IProductRepository productRepository,
@@ -26,7 +26,15 @@ public sealed class UpdateProductCommandHandler(
     /// </summary>
     /// <param name="request">The product update command.</param>
     /// <param name="cancellationToken">The request cancellation token.</param>
-    /// <returns>A success result, not-found result, or validation failure result.</returns>
+    /// <returns>
+    /// A success result, or a failure when the product is missing or the category, images, or updated product values
+    /// are invalid.
+    /// </returns>
+    /// <exception cref="RequestException">The image attachment request failed or did not receive a valid response.</exception>
+    /// <remarks>
+    /// ImageApi is called before the product changes are committed. This operation is not a distributed transaction.
+    /// Successful updates invalidate all tracked catalog page cache variants.
+    /// </remarks>
     public async Task<Result> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
     {
         var product = await productRepository.GetByIdAsync(request.ProductId, cancellationToken);

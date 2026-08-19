@@ -11,7 +11,7 @@ using SharedLibrary.Domain.Money;
 namespace ProductApi.Application.Products.CreateProduct;
 
 /// <summary>
-/// Handles product creation commands.
+/// Validates external references and creates catalog products.
 /// </summary>
 public sealed class CreateProductCommandHandler(
     IProductRepository productRepository,
@@ -22,11 +22,20 @@ public sealed class CreateProductCommandHandler(
     ILogger<CreateProductCommandHandler> logger) : ICommandHandler<CreateProductCommand, Guid>
 {
     /// <summary>
-    /// Creates a product and persists it.
+    /// Creates a product, attaches its image references, and persists the resulting aggregate.
     /// </summary>
     /// <param name="request">The product creation command.</param>
     /// <param name="cancellationToken">The request cancellation token.</param>
-    /// <returns>The created product identifier when the operation succeeds.</returns>
+    /// <returns>
+    /// A successful result containing the product identifier, or a failure when the category, image references,
+    /// or product values are invalid.
+    /// </returns>
+    /// <exception cref="RequestException">The image attachment request failed or did not receive a valid response.</exception>
+    /// <remarks>
+    /// ImageApi is called before the product is committed. This operation is not a distributed transaction, so an
+    /// image can remain associated with the new product identifier if later persistence fails. Successful creation
+    /// invalidates all tracked catalog page cache variants.
+    /// </remarks>
     public async Task<Result<Guid>> Handle(CreateProductCommand request, CancellationToken cancellationToken)
     {
         logger.LogInformation("Creating product with name {ProductName}", request.Name);

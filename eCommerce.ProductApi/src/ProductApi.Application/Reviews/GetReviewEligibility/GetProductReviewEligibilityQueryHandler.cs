@@ -17,8 +17,19 @@ public sealed class GetProductReviewEligibilityQueryHandler(
     : IQueryHandler<GetProductReviewEligibilityQuery, ProductReviewEligibilityResponse>
 {
     /// <summary>
-    /// Checks whether the user has reviewed or can review the target product.
+    /// Checks whether the current user has reviewed or can review the target product.
     /// </summary>
+    /// <param name="request">The query that identifies the product and optionally identifies the current user.</param>
+    /// <param name="cancellationToken">The token that cancels repository or messaging operations.</param>
+    /// <returns>
+    /// A not-found failure when the product does not exist. Otherwise, returns eligibility, existing-review state,
+    /// and the existing review identifier when applicable. An absent user is not eligible.
+    /// </returns>
+    /// <exception cref="RequestException">The purchase-status request failed or did not receive a valid response.</exception>
+    /// <remarks>
+    /// An existing review takes precedence over purchase lookup. For users without a review, OrderApi is the
+    /// authority for whether a completed order permits review creation.
+    /// </remarks>
     public async Task<Result<ProductReviewEligibilityResponse>> Handle(
         GetProductReviewEligibilityQuery request,
         CancellationToken cancellationToken)

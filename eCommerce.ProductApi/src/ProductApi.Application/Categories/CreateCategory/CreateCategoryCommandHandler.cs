@@ -7,14 +7,26 @@ using SharedLibrary.Domain.Abstractions;
 namespace ProductApi.Application.Categories.CreateCategory;
 
 /// <summary>
-/// Handles category creation commands.
+/// Creates root or child product categories.
 /// </summary>
 public sealed class CreateCategoryCommandHandler(
     IProductCategoryRepository categoryRepository,
     IUnitOfWork unitOfWork,
     ILogger<CreateCategoryCommandHandler> logger) : ICommandHandler<CreateCategoryCommand, Guid>
 {
-    /// <inheritdoc />
+    /// <summary>
+    /// Validates the optional parent, normalizes or generates the slug, and persists the category.
+    /// </summary>
+    /// <param name="request">The command that supplies the category name, optional slug, and optional parent identifier.</param>
+    /// <param name="cancellationToken">The token that cancels repository or persistence operations.</param>
+    /// <returns>
+    /// A successful result containing the new category identifier, or a validation failure when the parent is
+    /// missing or inactive or when the category values are invalid.
+    /// </returns>
+    /// <remarks>
+    /// When the slug is blank, the handler derives it from the name with a limited character replacement scheme.
+    /// Database uniqueness errors for duplicate slugs propagate from the unit of work.
+    /// </remarks>
     public async Task<Result<Guid>> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
     {
         logger.LogInformation("Creating category with name {CategoryName}", request.Name);

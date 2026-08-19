@@ -22,8 +22,19 @@ public sealed class CreateProductReviewCommandHandler(
     ILogger<CreateProductReviewCommandHandler> logger) : ICommandHandler<CreateProductReviewCommand, Guid>
 {
     /// <summary>
-    /// Creates a review and updates the product rating summary.
+    /// Creates a verified-purchase review and updates the product rating summary in the same unit of work.
     /// </summary>
+    /// <param name="request">The command that identifies the product and reviewer and supplies the rating and comment.</param>
+    /// <param name="cancellationToken">The token that cancels repository, messaging, persistence, or cache work.</param>
+    /// <returns>
+    /// A successful result containing the review identifier, or a failure when the product is missing, the user
+    /// already reviewed it, the purchase is absent or incomplete, or domain validation fails.
+    /// </returns>
+    /// <exception cref="RequestException">The purchase-status request failed or did not receive a valid response.</exception>
+    /// <remarks>
+    /// The handler verifies purchase completion through OrderApi. It adds the review rating to the tracked product
+    /// before one save commits both changes, then invalidates cached product pages.
+    /// </remarks>
     public async Task<Result<Guid>> Handle(CreateProductReviewCommand request, CancellationToken cancellationToken)
     {
         var product = await productRepository.GetByIdAsync(request.ProductId, cancellationToken);

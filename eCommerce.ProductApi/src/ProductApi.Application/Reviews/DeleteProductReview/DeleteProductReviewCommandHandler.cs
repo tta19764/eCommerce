@@ -19,8 +19,18 @@ public sealed class DeleteProductReviewCommandHandler(
     ILogger<DeleteProductReviewCommandHandler> logger) : ICommandHandler<DeleteProductReviewCommand>
 {
     /// <summary>
-    /// Deletes a review and updates the product rating summary.
+    /// Deletes an authorized review and updates the product rating summary in the same unit of work.
     /// </summary>
+    /// <param name="request">The command that identifies the product, review, caller, and administrative status.</param>
+    /// <param name="cancellationToken">The token that cancels repository, persistence, or cache work.</param>
+    /// <returns>
+    /// A success result, or a failure when the product or review is missing or the caller does not own the review
+    /// and is not an administrator.
+    /// </returns>
+    /// <remarks>
+    /// An empty current-user identifier does not trigger the ownership rejection. The calling endpoint must supply
+    /// trustworthy authorization context. The product rating counters and review deletion are committed together.
+    /// </remarks>
     public async Task<Result> Handle(DeleteProductReviewCommand request, CancellationToken cancellationToken)
     {
         var product = await productRepository.GetByIdAsync(request.ProductId, cancellationToken);

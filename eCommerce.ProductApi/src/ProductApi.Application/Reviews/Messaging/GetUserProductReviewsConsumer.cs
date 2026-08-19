@@ -16,6 +16,7 @@ public sealed class GetUserProductReviewsConsumer(
     /// Handles a user product reviews request.
     /// </summary>
     /// <param name="context">The MassTransit consume context.</param>
+    /// <returns>A task that completes after the matching product-to-review mappings are sent.</returns>
     public async Task Consume(ConsumeContext<GetUserProductReviewsRequest> context)
     {
         var reviews = await productReviewRepository.GetReviewsByUserAndProductsAsync(

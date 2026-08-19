@@ -17,8 +17,14 @@ public sealed class GetProductReviewsPageQueryHandler(
     : IQueryHandler<GetProductReviewsPageQuery, PagedListResponse<ProductReviewResponse>>
 {
     /// <summary>
-    /// Reads a page of reviews for a product.
+    /// Reads a normalized page of reviews for an existing product.
     /// </summary>
+    /// <param name="request">The query that identifies the product and requested page values.</param>
+    /// <param name="cancellationToken">The token that cancels repository operations.</param>
+    /// <returns>
+    /// A successful result containing the review page, or a not-found failure when the product does not exist.
+    /// Page numbers below one become one. Page sizes below one become 10, and sizes above 100 become 100.
+    /// </returns>
     public async Task<Result<PagedListResponse<ProductReviewResponse>>> Handle(
         GetProductReviewsPageQuery request,
         CancellationToken cancellationToken)

@@ -16,6 +16,7 @@ public sealed class GetProductDetailsConsumer(
     /// Handles a product-details request and returns the current product data when it exists.
     /// </summary>
     /// <param name="context">The MassTransit consume context.</param>
+    /// <returns>A task that completes after a product snapshot or not-found response is sent.</returns>
     public async Task Consume(ConsumeContext<GetProductDetailsRequest> context)
     {
         var product = await productRepository.GetByIdAsync(context.Message.ProductId, context.CancellationToken);
