@@ -7,12 +7,17 @@ namespace SharedLibrary.Infrastructure.Authorization;
 /// <summary>
 /// Converts Keycloak realm and client role payloads into standard ASP.NET role claims.
 /// </summary>
+/// <remarks>
+/// The transformation preserves existing role claims and adds each parsed role only once. Malformed Keycloak JSON
+/// claims are ignored so one invalid optional claim does not reject an otherwise valid authenticated principal.
+/// </remarks>
 public sealed class KeycloakRoleClaimsTransformation : IClaimsTransformation
 {
     /// <summary>
-    /// Executes the TransformAsync operation.
+    /// Adds standard role claims parsed from Keycloak realm and resource access claims.
     /// </summary>
-    /// <param name="principal">The principal value.</param>
+    /// <param name="principal">The authenticated principal to enrich. Principals without a mutable claims identity are returned unchanged.</param>
+    /// <returns>A completed task containing the supplied principal after any role claims are added.</returns>
     public Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
     {
         if (principal.Identity is not ClaimsIdentity identity)

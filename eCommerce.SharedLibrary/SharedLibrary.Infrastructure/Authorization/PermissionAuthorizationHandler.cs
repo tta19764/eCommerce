@@ -7,6 +7,10 @@ namespace SharedLibrary.Infrastructure.Authorization;
 /// <summary>
 /// Authorizes permission policies from application roles carried by the access token.
 /// </summary>
+/// <remarks>
+/// Role and permission comparisons are case-insensitive. Unknown roles grant no permissions. Customer and seller
+/// permissions use the local static map, while the administrator role receives every known application permission.
+/// </remarks>
 public sealed class PermissionAuthorizationHandler : AuthorizationHandler<PermissionRequirement>
 {
     private static readonly IReadOnlyDictionary<string, IReadOnlySet<string>> RolePermissions =
@@ -31,6 +35,10 @@ public sealed class PermissionAuthorizationHandler : AuthorizationHandler<Permis
             [ApplicationRoles.Admin] = ApplicationPermissions.All.ToHashSet(StringComparer.OrdinalIgnoreCase)
         };
 
+    /// <summary>Marks the requirement successful when any caller role grants the requested permission.</summary>
+    /// <param name="context">The authorization context containing the caller claims.</param>
+    /// <param name="requirement">The permission requirement being evaluated.</param>
+    /// <returns>A completed task after the requirement is evaluated.</returns>
     protected override Task HandleRequirementAsync(
         AuthorizationHandlerContext context,
         PermissionRequirement requirement)

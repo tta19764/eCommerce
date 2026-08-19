@@ -4,10 +4,18 @@ using SharedLibrary.Application.Abstractions.Caching;
 
 namespace SharedLibrary.Infrastructure.Caching;
 
+/// <summary>
+/// Implements typed cache operations by serializing values as web-default JSON in an <see cref="IDistributedCache"/>.
+/// </summary>
+/// <remarks>
+/// Read-only collection interfaces are deserialized through <see cref="List{T}"/> because interfaces cannot be
+/// instantiated directly. Provider and JSON exceptions intentionally propagate to the caller.
+/// </remarks>
 internal sealed class CacheService(IDistributedCache distributedCache) : ICacheService
 {
     private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web);
 
+    /// <inheritdoc />
     public async Task<T?> GetAsync<T>(string key, CancellationToken cancellationToken = default)
     {
         var json = await distributedCache.GetStringAsync(key, cancellationToken);
@@ -23,6 +31,7 @@ internal sealed class CacheService(IDistributedCache distributedCache) : ICacheS
         return value is null ? default : (T)value;
     }
 
+    /// <inheritdoc />
     public Task SetAsync<T>(
         string key,
         T value,
@@ -41,11 +50,7 @@ internal sealed class CacheService(IDistributedCache distributedCache) : ICacheS
         return distributedCache.SetStringAsync(key, json, options, cancellationToken);
     }
 
-    /// <summary>
-    /// Executes the RemoveAsync operation.
-    /// </summary>
-    /// <param name="key">The key value.</param>
-    /// <param name="cancellationToken">The cancellationToken value.</param>
+    /// <inheritdoc />
     public Task RemoveAsync(string key, CancellationToken cancellationToken = default)
     {
         return distributedCache.RemoveAsync(key, cancellationToken);

@@ -43,6 +43,7 @@ public static class DependencyInjection
     /// <param name="configuration">The application configuration.</param>
     /// <param name="consumerAssemblies">Assemblies that contain MassTransit consumers for the service.</param>
     /// <returns>The configured service collection.</returns>
+    /// <exception cref="ArgumentException">The RabbitMQ connection string is absent.</exception>
     public static IServiceCollection AddSharedMessaging(
         this IServiceCollection services,
         IConfiguration configuration,

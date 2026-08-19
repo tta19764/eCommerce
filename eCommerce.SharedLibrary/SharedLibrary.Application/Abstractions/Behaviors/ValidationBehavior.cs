@@ -20,7 +20,7 @@ public class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TReq
     /// <param name="next">The next handler delegate in the MediatR pipeline.</param>
     /// <param name="cancellationToken">A token used to cancel the asynchronous operation.</param>
     /// <returns>The response returned by the next handler.</returns>
-    /// <exception cref="ValidationException">Thrown when one or more validators fail.</exception>
+    /// <exception cref="Exceptions.ValidationException">Thrown when one or more validators fail.</exception>
     public async Task<TResponse> Handle(
         TRequest request,
         RequestHandlerDelegate<TResponse> next,
